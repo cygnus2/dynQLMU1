@@ -1,0 +1,22 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  Description of development of the ED code    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+1. CODES1: This incorporates
+           a) bit-wise representation of the basis states.
+           b) Fast gauge-invariant state counting, which can avoid a single jam point. 
+              This works easily for 6x6, but becomes slow for 8x6.
+           c) Filters basis states which have no flippable plaquettes. 
+           d) The whole Hamiltonian matrix (for abritrary lambda) is constructed without regard to 
+              symmetry.
+           e) In terms of diagonalization, it can work fast till ~32 spins using the Intel FEAST 
+              routine.
+           f) Computes a local observable, ie, the flippability of individual plaquettes, summed
+              over the volume for all the eigenvectors.
+
+2. CODES2: In addition to the actions in CODES1, this version
+           a) Does not explicitly filter any states.
+           b) Does a winding number decomposition.
+           c) Constructs the Hamiltonian in the specified winding number sector. 
+           d) Calculates the eigenvectors and eigenvalues, still using Intel FEAST. 
+           e) Same as (f).
+ 
