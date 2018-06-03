@@ -260,7 +260,7 @@ int WindNo::scan(std::vector<bool> &newstate){
 
  }
  
-void printmatrix(std::vector<MKL_INT> &rows, std::vector<MKL_INT> &cols, std::vector<double> &val){
+void printmatrix(std::vector<MKL_INT> &rows, std::vector<MKL_INT> &cols, std::vector<double> &vals){
  std::ofstream Outfile;
  int nrows, ncols;
  nrows = rows.size(); ncols = cols.size();
@@ -269,5 +269,6 @@ void printmatrix(std::vector<MKL_INT> &rows, std::vector<MKL_INT> &cols, std::ve
  Outfile.write((char*)&ncols, sizeof(int));
  Outfile.write((char*)&rows[0], rows.size()*sizeof(MKL_INT));
  Outfile.write((char*)&cols[0], cols.size()*sizeof(MKL_INT));
+ Outfile.write((char*)&vals[0], vals.size()*sizeof(double));
  Outfile.close();
 } 

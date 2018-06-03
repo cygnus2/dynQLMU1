@@ -62,10 +62,12 @@
    0.00  -0.45   0.46   0.62  -0.46
   -0.80   0.45   0.17   0.31   0.16
 */
-#include <iostream>
-#include <fstream>
-#include <stdlib.h>
-#include <stdio.h>
+#include<iostream>
+#include<fstream>
+#include<stdlib.h>
+#include<stdio.h>
+#include<vector>
+#include<iterator>
 #include "mkl_lapacke.h"
 
 /* Auxiliary routines prototypes */
@@ -79,6 +81,9 @@ extern void print_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT l
 int main() {
        
     unsigned int k;
+    std::vector<int> rows;
+    std::vector<int> cols;
+    std::vector<double> vals;
     /* read matrix A from a binary file */
     std::ifstream inFile ("sparse_mat.bin", std::ios::in | std::ios::binary); 
     int nrows, ncols;
@@ -86,8 +91,27 @@ int main() {
     inFile.read((char*)&ncols,sizeof(int));
     std::cout<<"No of rows = "<<nrows<<std::endl;
     std::cout<<"No of cols = "<<ncols<<std::endl;
-
+    rows.resize(nrows);
+    cols.resize(ncols);
+    vals.resize(ncols);
+    inFile.read((char*)&rows[0],rows.size()*sizeof(int));
+    inFile.read((char*)&cols[0],cols.size()*sizeof(int));
+    inFile.read((char*)&vals[0],vals.size()*sizeof(double));
     inFile.close();
+    /* print to check if matrix is read in correctly */
+    std::cout<<"rows = ";
+    for(k=0;k<rows.size();k++) std::cout<<rows[k]<<" ";
+    std::cout<<" "<<std::endl;
+    std::cout<<"cols = ";
+    for(k=0;k<cols.size();k++) std::cout<<cols[k]<<" ";
+    std::cout<<" "<<std::endl;
+    std::cout<<"Hamiltonian = ";
+    for(k=0;k<vals.size();k++) std::cout<<vals[k]<<" ";
+    std::cout<<" "<<std::endl;
+
+   
+    /* construct the full matrix */
+    
 	/* Locals */
 	//MKL_INT n = N, lda = LDA, info;
 	/* Local arrays */
