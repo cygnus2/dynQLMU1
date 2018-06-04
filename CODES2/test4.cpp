@@ -73,17 +73,16 @@
 /* Auxiliary routines prototypes */
 extern void print_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda );
 
-/* Parameters */
-//#define N 5
-//#define LDA N
-
 /* Main program */
 int main() {
        
     unsigned int k;
+    unsigned int i,j;
+    unsigned int curr_row, curr_col, n_entries, col_index;
     std::vector<int> rows;
     std::vector<int> cols;
     std::vector<double> vals;
+
     /* read matrix A from a binary file */
     std::ifstream inFile ("sparse_mat.bin", std::ios::in | std::ios::binary); 
     int nrows, ncols;
@@ -98,6 +97,7 @@ int main() {
     inFile.read((char*)&cols[0],cols.size()*sizeof(int));
     inFile.read((char*)&vals[0],vals.size()*sizeof(double));
     inFile.close();
+
     /* print to check if matrix is read in correctly */
     std::cout<<"rows = ";
     for(k=0;k<rows.size();k++) std::cout<<rows[k]<<" ";
@@ -109,34 +109,48 @@ int main() {
     for(k=0;k<vals.size();k++) std::cout<<vals[k]<<" ";
     std::cout<<" "<<std::endl;
 
-   
     /* construct the full matrix */
-    
-	/* Locals */
-	//MKL_INT n = N, lda = LDA, info;
-	/* Local arrays */
-	//double w[N];
-	//double a[LDA*N] = {
-	//    1.96,  0.00,  0.00,  0.00,  0.00,
-	//   -6.49,  3.80,  0.00,  0.00,  0.00,
-	//   -0.47, -6.39,  4.17,  0.00,  0.00,
-	//  -7.20,  1.50, -1.51,  5.70,  0.00,
-	//   -0.65, -6.34,  2.67,  1.80, -7.10
-	//};
-	/* Executable statements */
-	//printf( "LAPACKE_dsyev (column-major, high-level) Example Program Results\n" );
-	/* Solve eigenproblem */
-	//info = LAPACKE_dsyev( LAPACK_COL_MAJOR, 'V', 'U', n, a, lda, w );
-	/* Check for convergence */
-	//if( info > 0 ) {
-	//	printf( "The algorithm failed to compute eigenvalues.\n" );
-	//	exit( 1 );
-	//}
-	/* Print eigenvalues */
-	//print_matrix( "Eigenvalues", 1, n, w, 1 );
-	/* Print eigenvectors */
-	//print_matrix( "Eigenvectors (stored columnwise)", n, n, a, lda );
-	exit( 0 );
+    MKL_INT N, LDA, info;    
+    /* Locals */
+    N = nrows-1;
+    LDA = N;
+    /* Local arrays */
+    double *W, *A;
+    W = (double*)malloc(N*sizeof(double));
+    A = (double*)malloc(N*LDA*sizeof(double));
+    /* initialize the matrix */
+    for(i=0;i<N*LDA;i++) A[i+N*j]=0.0;
+    /* reconstruct the full matrix */
+    col_index = 0;
+    for(i=0;i<N;i++){
+       curr_row  = i;
+       n_entries = rows[i+1]-rows[i];
+       printf("n_entries = %d\n",n_entries);
+       for(j=0;j<n_entries;j++){
+         curr_col = cols[col_index]-1;
+         A[curr_row*N + curr_col] = vals[col_index];
+         col_index++;
+       }
+    }
+    /* print full matrix */
+    print_matrix("Full matrix", N, N, A, LDA);
+
+    /* Executable statements */
+    printf( "LAPACKE_dsyev (column-major, high-level) Example Program Results\n" );
+
+    /* Solve eigenproblem */
+    info = LAPACKE_dsyev( LAPACK_COL_MAJOR, 'V', 'U', N, A, LDA, W );
+    /* Check for convergence */
+    if( info > 0 ) {
+	printf( "The algorithm failed to compute eigenvalues.\n" );
+	exit( 1 );
+    }
+    /* Print eigenvalues */
+    print_matrix( "Eigenvalues", 1, N, W, 1 );
+    /* Print eigenvectors */
+    print_matrix( "Eigenvectors (stored columnwise)", N, N, A, LDA );
+    free(A); free(W);
+    exit( 0 );
 } /* End of LAPACKE_dsyev Example */
 
 /* Auxiliary routine: printing a matrix */
