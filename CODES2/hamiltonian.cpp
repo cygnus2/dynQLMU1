@@ -88,10 +88,10 @@ void constH(int sector){
    //printf("size of cols = %d \n",(int)Wind[sector].cols.size());
    //for(k=0;k<Wind[sector].cols.size();k++) printf("col[%d] = %d \n",k,Wind[sector].cols[k]);
    // diagonalize
-   //diag_matrix(Wind[sector].rows,Wind[sector].cols,Wind[sector].hamil,
-   //  Wind[sector].evals,Wind[sector].evecs,Wind[sector].nBasis);
-   //eigcheck(Wind[sector].evals,Wind[sector].evecs,Wind[sector].nBasis);
-   printmatrix(Wind[sector].rows,Wind[sector].cols,Wind[sector].hamil);
+   diag_matrix(Wind[sector].rows,Wind[sector].cols,Wind[sector].hamil,
+     Wind[sector].evals,Wind[sector].evecs,Wind[sector].nBasis);
+   eigcheck(Wind[sector].evals,Wind[sector].evecs,Wind[sector].nBasis);
+   //printmatrix(Wind[sector].rows,Wind[sector].cols,Wind[sector].hamil);
 }
 
 int WindNo::scan(std::vector<bool> &newstate){

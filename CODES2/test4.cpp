@@ -85,7 +85,7 @@ int main() {
     std::vector<double> vals;
 
     /* read matrix A from a binary file */
-    std::ifstream inFile ("sparse_mat_6x4.bin", std::ios::in | std::ios::binary); 
+    std::ifstream inFile ("sparse_mat_2x2.bin", std::ios::in | std::ios::binary); 
     int nrows, ncols;
     inFile.read((char*)&nrows,sizeof(int));
     inFile.read((char*)&ncols,sizeof(int));
@@ -148,10 +148,10 @@ int main() {
 	exit( 1 );
     }
     /* Print eigenvalues */
-    //print_matrix( "Eigenvalues", 1, N, W, 1 );
-    fileprint_matrix( "Eigenvalues_4x4.dat", 1, N, W, 1 );
+    print_matrix( "Eigenvalues", 1, N, W, 1 );
+    //fileprint_matrix( "Eigenvalues_4x4.dat", 1, N, W, 1 );
     /* Print eigenvectors */
-    //print_matrix( "Eigenvectors (stored columnwise)", N, N, A, LDA );
+    print_matrix( "Eigenvectors (stored columnwise)", N, N, A, LDA );
     free(A); free(W);
     exit( 0 );
 } /* End of LAPACKE_dsyev Example */
@@ -161,7 +161,7 @@ void print_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda ) {
 	MKL_INT i, j;
 	printf( "\n %s\n", desc );
 	for( i = 0; i < m; i++ ) {
-		for( j = 0; j < n; j++ ) printf( " %6.2f", a[i+j*lda] );
+		for( j = 0; j < n; j++ ) printf( " % f", a[i+j*lda] );
 		printf( "\n" );
 	}
 }
