@@ -29,6 +29,8 @@ class WindNo{
   public:
     // labeling the sectors
     int Wx,Wy;
+    // numbering the total (kx,ky) sectors
+    int trans_sectors;
     // basis states
     long int nBasis;
     std::vector<std::vector<bool>> basisVec;
@@ -37,10 +39,19 @@ class WindNo{
     std::vector<long int> Tflag;
     std::vector<int> Tdgen;
 
-    // Hamiltonian in the sector
+    // Hamiltonian in the WindNo sector
     std::vector<MKL_INT> rows,cols;
     std::vector<double> hamil;
-    // eigenvalues and eigenvectors
+    double getH(int,int);
+    // simple routine to check the direct way to extract 
+    // elements from a sparse matrix in the CSC representation
+    void check_getH();
+    // Hamiltonian in a (kx,ky) sector
+    std::vector<std::vector<double>> hamil_kxy;
+    
+    // eigenvalues and eigenvectors in WindNo sector
+    // these are either used for the Hamiltonian in the WindNo sector 
+    // or the translation sector
     std::vector<double> evals;
     std::vector<std::vector<double>> evecs;
 
@@ -54,7 +65,10 @@ class WindNo{
     void TransX(std::vector<bool>&, std::vector<bool>&, int);
     void TransY(std::vector<bool>&, std::vector<bool>&, int);
     void disp_Tprop();
-   
+
+    // Hamiltonian in the (kx,ky)=(0,0) sector
+    std::vector<double> hamil_Trans;
+
     // function to count flippable plaquettes
     void flip_plaq();   
  
@@ -93,5 +107,6 @@ void constH(int);
 void evolve_cartoons(std::vector<double>&, std::vector<std::vector<double>>&);
 void winding_no_decompose(void);
 void trans_decompose(int);
+void trans_Hamil(int);
 void calc_Oflip(int);
 #endif 

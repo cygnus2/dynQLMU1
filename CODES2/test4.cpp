@@ -100,15 +100,15 @@ int main() {
     inFile.close();
 
     /* print to check if matrix is read in correctly */
-    //std::cout<<"rows = ";
-    //for(k=0;k<rows.size();k++) std::cout<<rows[k]<<" ";
-    //std::cout<<" "<<std::endl;
-    //std::cout<<"cols = ";
-    //for(k=0;k<cols.size();k++) std::cout<<cols[k]<<" ";
-    //std::cout<<" "<<std::endl;
-    //std::cout<<"Hamiltonian = ";
-    //for(k=0;k<vals.size();k++) std::cout<<vals[k]<<" ";
-    //std::cout<<" "<<std::endl;
+    std::cout<<"rows = ";
+    for(k=0;k<rows.size();k++) std::cout<<rows[k]<<" ";
+    std::cout<<" "<<std::endl;
+    std::cout<<"cols = ";
+    for(k=0;k<cols.size();k++) std::cout<<cols[k]<<" ";
+    std::cout<<" "<<std::endl;
+    std::cout<<"Hamiltonian = ";
+    for(k=0;k<vals.size();k++) std::cout<<vals[k]<<" ";
+    std::cout<<" "<<std::endl;
 
     /* construct the full matrix */
     MKL_INT N, LDA, info;    
@@ -133,7 +133,7 @@ int main() {
        }
     }
     /* print full matrix */
-    //print_matrix("Full matrix", N, N, A, LDA);
+    print_matrix("Full matrix", N, N, A, LDA);
 
     /* Executable statements */
     printf( "LAPACKE_dsyev (column-major, high-level) Example Program Results\n" );

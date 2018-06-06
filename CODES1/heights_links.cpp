@@ -30,7 +30,7 @@ int main(){
   extern long int constQ02(void);
   
   /* Lattice parameters */ 
-  LX=4; LY=4;
+  LX=2; LY=2;
   VOL  = LX*LY; 
   VOL2 = 2*VOL;
 

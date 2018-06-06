@@ -84,12 +84,15 @@ int main(){
   // get the winding number sector (wx,wy)
   wx = 0; wy = 0;
   sector = lookup[LX/2+wx][LY/2+wy];
+  constH(sector);
 
   /* breakup into translation sectors */
   // presently this only works for (kx,ky)=(0,0)
   trans_decompose(sector); 
+
+  /* Hamiltonian in the (kx,ky)=(0,0) sector */
+  trans_Hamil(sector);
    
-  //constH(sector);
   // calculate the expectation value of Oflip for every eigenstate 
   //calc_Oflip(sector);
 

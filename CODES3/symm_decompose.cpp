@@ -47,7 +47,7 @@
   }
   display_basisNo(Wind,nWind);
   // sorting the basis states in each winding number sector
-  std::cout<<"Sorting the basis in each wind-no sector."<<std::endl;
+  //std::cout<<"Sorting the basis in each wind-no sector."<<std::endl;
   for(i=0; i<nWind; i++){
      Wind[i].sortbasis();
   }
