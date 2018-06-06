@@ -21,7 +21,7 @@ int *nextCHK[2*DIM+1];
 int *chk2lin,*lin2chk;
 int LX,LY,VOL,VOL2;
 double lam,Ti,Tf,dT;
-long int NTOT;
+long int NTOT,NH;
 
 int main(){
   int i,d,p,q;
@@ -56,17 +56,19 @@ int main(){
 
 long int constQ02(){
    extern void Dec2Bin(long int, std::vector<bool>&);
+   extern int checkGL(std::vector<bool>&);
    long int NST,count;
    std::vector<bool> conf;
    conf.resize(VOL2);
 
    NST=pow(2,VOL2);
-   count=0;
+   count=0; NH=0;
    while(count<NST){
       Dec2Bin(count,conf);
+      NH = NH + checkGL(conf);
       count++;
    }
-   return count;
+   return NH;
 }
 
 
@@ -89,6 +91,27 @@ void Dec2Bin(long int inputNum, std::vector<bool> &state){
     //printf("\n");
 }
 
+// check Gauss Law allowed states. For this special case,
+// we consider all sites which have Q_x=0,+2,-2. In addition
+// it has to have a \sum_x Q_x = 0
+int checkGL(std::vector<bool> &state){
+  int i,flag;
+  int Qtot,Qx;
+  int e1,e2,e3,e4;
+  int pp,qx,qy;
+  Qtot=0; 
+  for(i=0;i<VOL;i++){
+    qx=2*next[DIM-1][i]; 
+    qy=2*next[DIM-2][i]+1; 
+    pp=2*i;
+    e1 = (state[pp])? 1:-1; e2 = (state[pp+1])? 1:-1; e3 = (state[qx])? 1:-1; e4 = (state[qy])? 1:-1;
+    Qx=e1+e2-e3-e4; 
+    if((Qx==1)||(Qx==-1)) return 0;
+    Qtot = Qtot + Qx;
+  }
+  if(Qtot==0) return 1;
+  else return 0;
+}
 
 void initneighbor(void){
   int p,x,y,q;
