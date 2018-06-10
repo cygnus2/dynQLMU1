@@ -11,23 +11,41 @@
 #include<algorithm>
 #include "define.h"
 
-// Notation: eigenstate |n> = \sum_k \alpha_k |k>, |k> is a basis state in 
-//           specified winding number (wx,wy) sector.
+// Notation: The eigenvectors in of the translation matrix is denoted as |w_k>. 
+// |w_k> = \sum_l B_l |b_l>, where b_l are the "bag states", ie, states which
+// are labelled with the translation flag. We calculate:
+// <w_k| O_flip |w_k> = \sum_l \sum_m B_l B_m <b_l| O_flip |b_m>
+// |b_l> = \sum_alpha c_alpha |alpha>; alpha are the ice-states (in the given W-no sector)
+// <b_l| O_flip |b_m> = \sum_{l,m} c_alpha c_beta <beta_l| O_flip |alpha_m> 
+//                    = \sum_l |c_alpha|^2 <alpha_l| O_flip |alpha_l> delta_{l,m}
+// Hence, we finall have, for each k,
+// <w_k| O_flip |w_k> = \sum_l |B_l|^2 <b_l| O_flip |b_l>
+
 void calc_Oflip(int sector){
-  int p,q;
+  int k,l,p;
+  unsigned int sizet = Wind[sector].trans_sectors;
+  std::vector<double> oflip(sizet);
   double Oflip_avg;
   FILE *outf;
-  outf = fopen("Oflip.dat","w");
-  fprintf(outf,"# Results of winding number sector (%d,%d) \n",Wind[sector].Wx,Wind[sector].Wy);
-  // scan through all the eigenvalues
+
+  // initialize
+  for(k=0;k<sizet;k++) oflip.push_back(0.0);
+
+  // calculate the matrix element: < b_l | O_flip | b_l >
   for(p=0;p<Wind[sector].nBasis;p++){
-    // calculate the expectation value in each eigenstate
+     oflip[Wind[sector].Tflag[p]-1] += Wind[sector].nflip[p]*Wind[sector].Tdgen[p]/((double)VOL);
+  }
+
+  outf = fopen("Oflip.dat","w");
+  fprintf(outf,"# Results in (Wx,Wy)=(%d,%d), and (kx,ky)=(0,0) \n",Wind[sector].Wx,Wind[sector].Wy);
+  for(k=0;k<sizet;k++){
+    // calculate the expectation value in each eigenstate in translation basis
     Oflip_avg = 0.0;
-    for(q=0;q<Wind[sector].nBasis;q++){
-      Oflip_avg += Wind[sector].evecs[p][q]*Wind[sector].evecs[p][q]*Wind[sector].nflip[q];
+    for(l=0;l<sizet;l++){
+     Oflip_avg += Wind[sector].evecs[k*sizet+l]* Wind[sector].evecs[k*sizet+l]*oflip[l]; 
     }
-    Oflip_avg = Oflip_avg/((double)VOL);
-    fprintf(outf,"%lf %lf\n",Wind[sector].evals[p],Oflip_avg);
+    Oflip_avg /= ((double)VOL);
+    fprintf(outf,"%lf %lf\n",Wind[sector].evals[k],Oflip_avg);
   }
  fclose(outf);
 }

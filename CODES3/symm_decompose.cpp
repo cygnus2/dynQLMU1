@@ -142,7 +142,7 @@ void WindNo::flip_plaq(){
     int count_flip;
     bool pxy,pyz,pzw,pwx;
 
-    printf("In sector (% d, % d); basis states = %ld \n",Wx,Wy,nBasis);
+    //printf("In sector (% d, % d); basis states = %ld \n",Wx,Wy,nBasis);
     // error message for zero basis
     if(!nBasis){ std::cout<<"Total basis state not defined! "<<std::endl; exit(0); }
     for(i=0; i<nBasis; i++){ 

@@ -94,7 +94,7 @@ int main(){
   trans_Hamil(sector);
    
   // calculate the expectation value of Oflip for every eigenstate 
-  //calc_Oflip(sector);
+  calc_Oflip(sector);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }

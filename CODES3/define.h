@@ -47,13 +47,13 @@ class WindNo{
     // elements from a sparse matrix in the CSC representation
     void check_getH();
     // Hamiltonian in a (kx,ky) sector
-    std::vector<std::vector<double>> hamil_kxy;
+    std::vector<std::vector<double>> hamil_Kxy;
+    void allocate_Kxy(); 
     
-    // eigenvalues and eigenvectors in WindNo sector
-    // these are either used for the Hamiltonian in the WindNo sector 
-    // or the translation sector
+    // eigenvalues and eigenvectors; at the moment they are used
+    // for the Hamiltonian in the (kx,ky) basis
     std::vector<double> evals;
-    std::vector<std::vector<double>> evecs;
+    std::vector<double> evecs;
 
     // function to display variables
     void display(){
@@ -65,9 +65,6 @@ class WindNo{
     void TransX(std::vector<bool>&, std::vector<bool>&, int);
     void TransY(std::vector<bool>&, std::vector<bool>&, int);
     void disp_Tprop();
-
-    // Hamiltonian in the (kx,ky)=(0,0) sector
-    std::vector<double> hamil_Trans;
 
     // function to count flippable plaquettes
     void flip_plaq();   

@@ -51,13 +51,13 @@
    flag--;
    Wind[sector].trans_sectors = flag;
    // print and display statement to check, debug etc
-   std::cout<<"No of (kx,ky) sectors="<<Wind[sector].trans_sectors<<std::endl;
-   Wind[sector].disp_Tprop();
+   //std::cout<<"No of (kx,ky) sectors="<<Wind[sector].trans_sectors<<std::endl;
+   //Wind[sector].disp_Tprop();
  }
 
  // the inidividual basis (ice) states in the Winding number sectors are initially labelled with 0
- // the first bag of states labelled by lattice translations is labelled as 1, the second one as 2, and so on. 
- // the total number of bags is the highest counter. 
+ // the first bag of states labelled by lattice translations is labelled as 1, the second one as 2,
+ // and so on. the total number of bags is the highest counter. 
  // the degeneracy is initialized with zero.
  void WindNo::initTflag(){
     int i;
@@ -112,29 +112,46 @@
  }
 
  void trans_Hamil(int sector){
+  extern void diag_LAPACK(int,std::vector<std::vector<double>>&,std::vector<double>&,
+      std::vector<double>&);
   int i,j,k,l;
   double ele;
+
   std::cout<<"========================================================="<<std::endl;
   std::cout<<"Constructing the Hamiltonian in the (kx,ky)=(0,0) sector."<<std::endl;
   std::cout<<"Dimension of matrix = "<<Wind[sector].trans_sectors<<std::endl;
 
-  // initialize the matrix with zeros 
-  for(i=0;i<Wind[sector].trans_sectors;i++){
-  for(j=0;j<Wind[sector].trans_sectors;j++){
-     Wind[sector].hamil_Trans.push_back(0.0);
-  }}
-  
+  // allocate space for hamil_Kxy
+  Wind[sector].allocate_Kxy(); 
+
   // check the extraction of the Hamiltonian
   // for e.g. print out the whole matrix for a 2x2 system
-  Wind[sector].check_getH();
+  //Wind[sector].check_getH();
 
   // construct the hamil_kxy matrix
-  //for(i=0;i<Wind[sector].nBasis;i++){
-  //   k=Wind[sector].Tflag[i];
-  //   for(j=0;j<Wind[sector].nBasis;j++){
-  //     l=Wind[sector].Tflag[j];
-  //     Wind[sector].hamil_Trans[k][l] += Wind[sector].getH(i,j);  
-  // }} 
+  for(i=0;i<Wind[sector].nBasis;i++){
+     k=Wind[sector].Tflag[i]-1; 
+     // though the flags start from 1; the indices start from 0
+     for(j=0;j<Wind[sector].nBasis;j++){
+       l   = Wind[sector].Tflag[j]-1;
+       ele = Wind[sector].getH(i,j);
+       //if(ele==0.0) continue;
+       Wind[sector].hamil_Kxy[k][l] +=  ele*sqrt(Wind[sector].Tdgen[i]*Wind[sector].Tdgen[j])/VOL ;  
+   }
+  }
+
+  // print matrix in translation basis
+  //for(k=0;k<Wind[sector].trans_sectors;k++){
+  //for(l=0;l<Wind[sector].trans_sectors;l++){
+  //    printf("% .4lf ",Wind[sector].hamil_Kxy[k][l]);
+  //  }
+  //  printf("\n");
+  // };
+ 
+  // diagonalize the matrix with a LAPACK routine  
+  diag_LAPACK(Wind[sector].trans_sectors,Wind[sector].hamil_Kxy,
+    Wind[sector].evals,Wind[sector].evecs);
+ 
  }
 
  double WindNo::getH(int p,int q){
@@ -145,7 +162,7 @@
    ele=0.0;
    row1 = rows[p]-1; row2 = rows[p+1]-1;
    for(c=row1;c<row2;c++){
-     if(q==cols[c]) { ele=hamil[c]; break; }
+     if((q+1)==cols[c]) { ele=hamil[c]; break; }
    }
    return ele;
  }
@@ -164,3 +181,18 @@
   }
  }
 
+ void WindNo::allocate_Kxy(){
+  unsigned int i,j;
+  std::vector<double> myvec;
+  if(trans_sectors <= 0){ printf("Error in allocation. \n"); exit(0); }
+  for(i=0; i<trans_sectors; i++){
+  for(j=0; j<trans_sectors; j++){
+     myvec.push_back(0.0);
+   } 
+   hamil_Kxy.push_back(myvec); 
+  }
+  //printf("Successul allocation. \n");
+  //printf("======================\n");
+ }
+
+ 
