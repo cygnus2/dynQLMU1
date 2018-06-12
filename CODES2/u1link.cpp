@@ -85,7 +85,7 @@ int main(){
   sector = lookup[LX/2+wx][LY/2+wy];
   constH(sector);
   // calculate the expectation value of Oflip for every eigenstate 
-  //calc_Oflip(sector);
+  calc_Oflip(sector);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }

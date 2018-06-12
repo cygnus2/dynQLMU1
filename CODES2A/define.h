@@ -37,11 +37,13 @@ class WindNo{
     std::vector<std::vector<bool>> basisVec;
     // no of flippable plaquettes
     std::vector<int> nflip;
-    // index of the basis state
-    std::vector<int> cflip;
+    // flags for CC partner ice states
+    // not really needed once the basis states are sorted 
+    // see note in chconj.cpp
+    //std::vector<unsigned int> Cflag;
     // diagonal part of the Hamiltonian
     std::vector<double> lamH;
-    // Hamiltonian in the sector
+    // Hamiltonian in the Winding sector as a sparse matrix
     std::vector<MKL_INT> rows,cols;
     std::vector<double> hamil;
     double getH(int,int);
@@ -70,6 +72,8 @@ class WindNo{
     int scan(std::vector<bool>&);
     int binscan(std::vector<bool>&);
 
+    // initialize the CC flags
+    //void initCflag();
     // Default constructor
     WindNo(){
       Wx = -LX; Wy = -LY;
@@ -94,5 +98,6 @@ void initneighbor(void);
 void conststates(void);
 void constH(int);
 void winding_no_decompose(void);
+void chconj(int);
 void calc_Oflip(int);
 #endif 

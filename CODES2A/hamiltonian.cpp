@@ -115,7 +115,6 @@ int WindNo::binscan(std::vector<bool> &newstate){
      return m;
 }
 
-
 void printmatrix(std::vector<MKL_INT> &rows, std::vector<MKL_INT> &cols, std::vector<double> &vals){
  std::ofstream Outfile;
  int nrows, ncols;

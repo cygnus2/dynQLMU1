@@ -99,6 +99,9 @@ int main(){
   wx = 0; wy = 0;
   sector = lookup[LX/2+wx][LY/2+wy];
   constH(sector);
+  // calculate the Hamiltonian in the charge conjugate basis
+  // note that this is only possible in the (Wx,Wy)=(0,0) basis
+  chconj(sector); 
   // calculate the expectation value of Oflip for every eigenstate 
   calc_Oflip(sector);
 

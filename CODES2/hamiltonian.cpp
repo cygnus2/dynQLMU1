@@ -90,7 +90,7 @@ void constH(int sector){
    // diagonalize
    diag_matrix(Wind[sector].rows,Wind[sector].cols,Wind[sector].hamil,
      Wind[sector].evals,Wind[sector].evecs,Wind[sector].nBasis);
-   eigcheck(Wind[sector].evals,Wind[sector].evecs,Wind[sector].nBasis);
+   //eigcheck(Wind[sector].evals,Wind[sector].evecs,Wind[sector].nBasis);
    //printmatrix(Wind[sector].rows,Wind[sector].cols,Wind[sector].hamil);
 }
 
