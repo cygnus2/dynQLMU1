@@ -89,7 +89,7 @@ void constH(int sector){
    //for(k=0;k<Wind[sector].cols.size();k++) printf("col[%d] = %d \n",k,Wind[sector].cols[k]);
 
    //diagonalize the Hamiltonian matrix 
-   diag_LAPACK(sector, Wind[sector].hamil, Wind[sector].evals, Wind[sector].evecs);
+   //diag_LAPACK(sector, Wind[sector].hamil, Wind[sector].evals, Wind[sector].evecs);
 }
 
 // standard scan

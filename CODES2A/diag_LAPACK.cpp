@@ -62,7 +62,7 @@ void diag_LAPACK1(MKL_INT N, MKL_INT LDA, MKL_INT info, double *W, double *A){
     unsigned i,j;
     
     /* print full matrix */
-    print_matrix("Full matrix", N, N, A, LDA);
+    //print_matrix("Full matrix", N, N, A, LDA);
 
     /* Executable statements */
     printf( "LAPACKE_dsyev (column-major, high-level) Example Program Results\n" );
@@ -78,9 +78,9 @@ void diag_LAPACK1(MKL_INT N, MKL_INT LDA, MKL_INT info, double *W, double *A){
 
     /* Print eigenvalues */
     //fileprint_matrix( "Eigenvalues.dat", 1, N, W, 1 );
-    print_matrix( "Eigenvalues", 1, N, W, 1 );
+    //print_matrix( "Eigenvalues", 1, N, W, 1 );
     /* Print eigenvectors */
-    print_matrix( "Eigenvectors (stored columnwise)", N, N, A, LDA );
+    //print_matrix( "Eigenvectors (stored columnwise)", N, N, A, LDA );
 }
 
 
