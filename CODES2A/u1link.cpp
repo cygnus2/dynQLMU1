@@ -65,6 +65,7 @@ int main(){
 
   /* Initialize random number generator */
   //rlxd_init(1,SEED);
+  srand(SEED);
 
   /* Initialize nearest neighbours */
   for(i=0;i<=2*DIM;i++){
@@ -98,6 +99,7 @@ int main(){
   // get the winding number sector (wx,wy)
   wx = 0; wy = 0;
   sector = lookup[LX/2+wx][LY/2+wy];
+  std::cout<<"(0,0) sector is = "<<sector<<std::endl;
   constH(sector);
   // calculate the Hamiltonian in the charge conjugate basis
   // note that this is only possible in the (Wx,Wy)=(0,0) basis

@@ -62,14 +62,16 @@
    0.00  -0.45   0.46   0.62  -0.46
   -0.80   0.45   0.17   0.31   0.16
 */
-// this uses divide and conquer 
+// this uses relatively robust representations 
 #include<iostream>
 #include<fstream>
 #include<stdlib.h>
 #include<stdio.h>
 #include<vector>
 #include<iterator>
+#include<math.h>
 #include "mkl_lapacke.h"
+#include "mkl.h"
 
 /* Auxiliary routines prototypes */
 extern void print_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda );
@@ -77,86 +79,74 @@ extern void fileprint_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_I
 
 /* Main program */
 int main() {
-       
     unsigned int k;
     unsigned int i,j;
-    unsigned int curr_row, curr_col, n_entries, col_index;
-    std::vector<int> rows;
-    std::vector<int> cols;
-    std::vector<double> vals;
+    MKL_INT N, NSQ, LDA, LDZ, NSELECT, info;    
+    MKL_INT il, iu, m;
+    double abstol, vl, vu;
 
-    /* read matrix A from a binary file */
-    std::ifstream inFile ("sparse_mat_10x2.bin", std::ios::in | std::ios::binary); 
-    int nrows, ncols;
-    inFile.read((char*)&nrows,sizeof(int));
-    inFile.read((char*)&ncols,sizeof(int));
-    std::cout<<"No of rows = "<<(nrows-1)<<std::endl;
-    std::cout<<"No of cols = "<<ncols<<std::endl;
-    rows.resize(nrows);
-    cols.resize(ncols);
-    vals.resize(ncols);
-    inFile.read((char*)&rows[0],rows.size()*sizeof(int));
-    inFile.read((char*)&cols[0],cols.size()*sizeof(int));
-    inFile.read((char*)&vals[0],vals.size()*sizeof(double));
-    inFile.close();
+    N=10;
+    NSQ=N*N;
 
-    /* print to check if matrix is read in correctly */
-    //std::cout<<"rows = ";
-    //for(k=0;k<rows.size();k++) std::cout<<rows[k]<<" ";
-    //std::cout<<" "<<std::endl;
-    //std::cout<<"cols = ";
-    //for(k=0;k<cols.size();k++) std::cout<<cols[k]<<" ";
-    //std::cout<<" "<<std::endl;
-    //std::cout<<"Hamiltonian = ";
-    //for(k=0;k<vals.size();k++) std::cout<<vals[k]<<" ";
-    //std::cout<<" "<<std::endl;
-
-    /* construct the full matrix */
-    MKL_INT N, LDA, info;    
-    /* Locals */
-    N = nrows-1;
-    LDA = N;
-    /* Local arrays */
-    double *W, *A;
-    W = (double*)malloc(N*sizeof(double));
-    A = (double*)malloc(N*LDA*sizeof(double));
-    /* initialize the matrix */
-    for(i=0;i<N*LDA;i++) A[i+N*j]=0.0;
-    /* reconstruct the full matrix */
-    col_index = 0;
+    /* allocate space for the arrays */
+    std::vector<MKL_INT> isuppz(2*N); 
+    std::vector<double> w(N);
+    std::vector<double> z(NSQ);
+    std::vector<double> a(NSQ,0.0);
+   
+    // make the matrix
     for(i=0;i<N;i++){
-       curr_row  = i;
-       n_entries = rows[i+1]-rows[i];
-       for(j=0;j<n_entries;j++){
-         curr_col = cols[col_index]-1;
-         A[curr_row*N + curr_col] = vals[col_index];
-         col_index++;
-       }
+    for(j=0;j<N;j++){
+     a.at(i*N+j) = 1.0/(i+j+1);
+    }}
+    for(i=0;i<N;i++){
+    for(j=0;j<N;j++){
+     a.at(i*N+j) = a[i*N+j] + a[i+N*j];
+    }}
+    for(i=0;i<N;i++){
+    for(j=0;j<N;j++){
+     printf("%.5lf ",a[i*N+j]);
     }
+    printf("\n");
+    }
+
+    double* A = &a[0];
     /* print full matrix */
-    //print_matrix("Full matrix", N, N, A, LDA);
+    print_matrix("Full matrix", N, N, A, LDA);
 
     /* Executable statements */
-    printf( "LAPACKE_dsyev (column-major, high-level) Example Program Results\n" );
+    printf( "LAPACKE_dsyevr (column-major, high-level) RRR Example Program Results\n" );
 
     /* Solve eigenproblem */
-    //info = LAPACKE_dsyev( LAPACK_COL_MAJOR, 'V', 'U', N, A, LDA, W );
-    info = LAPACKE_dsyevd( LAPACK_COL_MAJOR, 'V', 'U', N, A, LDA, W );
-    printf("Back from the routine and working properly. Info = %d. Eval[0]=%f\n",info,W[0]);
+    //MKL_INT* ISUPPZ = &isuppz[0];
+    //double* W = &w[0];
+    //double* Z = &z[0];
+    //info = LAPACKE_dsyevr( LAPACK_COL_MAJOR, 'V', 'A', 'U', N, A, LDA,
+    //                    vl, vu, il, iu, abstol, &m, W, Z, LDZ, ISUPPZ );
+
+
+    //printf("Back from the routine and working properly. Info = %d. Eval[0]=%f\n",info,W[0]);
  
     /* Check for convergence */
-    if( info > 0 ) {
-	printf( "The algorithm failed to compute eigenvalues.\n" );
-	exit( 1 );
-    }
+    //if( info > 0 ) {
+    //    printf( "The algorithm failed to compute eigenvalues.\n" );
+    //    exit( 1 );
+    //}
     /* Print eigenvalues */
     //print_matrix( "Eigenvalues", 1, N, W, 1 );
-    fileprint_matrix( "Eigenvalues_10x2.dat", 1, N, W, 1 );
+    //fileprint_matrix( "EigenvaluesRRR_test.dat", 1, N, W, 1 );
     /* Print eigenvectors */
     //print_matrix( "Eigenvectors (stored columnwise)", N, N, A, LDA );
-    free(A); free(W);
+
+    isuppz.clear(); 
+    w.clear();
+    z.clear();
+    a.clear();
+
+    
+    
     exit( 0 );
-} /* End of LAPACKE_dsyev Example */
+} /* End of LAPACKE_dsyevr Example */
 
 /* Auxiliary routine: printing a matrix */
 void print_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda ) {

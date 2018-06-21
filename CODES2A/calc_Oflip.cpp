@@ -19,7 +19,7 @@ void calc_Oflip(int sector){
   double Oflip_avg;
   FILE *outf;
   outf = fopen("Oflip.dat","w");
-  fprintf(outf,"# Results of winding number sector (%d,%d) in C=+ sector\n",Wind[sector].Wx,Wind[sector].Wy);
+  //fprintf(outf,"# Results of winding number sector (%d,%d) in C=+ sector\n",Wind[sector].Wx,Wind[sector].Wy);
 
   // scan through all the eigenvalues
   nB    = Wind[sector].nBasis;
@@ -33,6 +33,32 @@ void calc_Oflip(int sector){
       O_q = Wind[sector].nflip[q]; 
       O_l = Wind[sector].nflip[nB-1-q];
       Oflip_avg += 0.5*(v_q*v_q*O_q + v_q*v_q*O_l);
+    }
+    Oflip_avg = Oflip_avg/((double)VOL);
+    fprintf(outf,"%lf %lf\n",Wind[sector].evals[p],Oflip_avg);
+  }
+ fclose(outf);
+}
+
+// Notation: eigenstate |n> = \sum_k \alpha_k |k>, |k> is a basis state in 
+//           specified winding number (wx,wy) sector.
+// this routine calculates the Oflip for the ED done in the whole (Wx,Wy)=(0,0) 
+// sector without using the CC symmetry. Useful to see what to expect when a
+// discrete symmetry is not taken into account
+void calc_Oflip_all(int sector){
+  unsigned int p, q, sizet;
+  double Oflip_avg;
+  FILE *outf;
+  outf = fopen("Oflip_full.dat","w");
+  fprintf(outf,"# Results of winding number sector (%d,%d)\n",Wind[sector].Wx,Wind[sector].Wy);
+
+  // scan through all the eigenvalues
+  sizet  = Wind[sector].nBasis;
+  for(p=0;p<sizet;p++){
+    // calculate the expectation value in each eigenstate
+    Oflip_avg = 0.0;
+    for(q=0;q<sizet;q++){
+      Oflip_avg += Wind[sector].evecs[p*sizet+q]*Wind[sector].evecs[p*sizet+q]*Wind[sector].nflip[q];
     }
     Oflip_avg = Oflip_avg/((double)VOL);
     fprintf(outf,"%lf %lf\n",Wind[sector].evals[p],Oflip_avg);

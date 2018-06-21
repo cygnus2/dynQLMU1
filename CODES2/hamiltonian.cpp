@@ -83,15 +83,15 @@ void constH(int sector){
        else Wind[sector].hamil.push_back(-1.0);
      }
    }
-   //printf("size of rows = %d \n",(int)Wind[sector].rows.size());
+   printf("size of rows = %d \n",(int)Wind[sector].rows.size());
    //for(k=0;k<Wind[sector].rows.size();k++) printf("row[%d] = %d \n",k,Wind[sector].rows[k]);
-   //printf("size of cols = %d \n",(int)Wind[sector].cols.size());
+   printf("size of cols = %d \n",(int)Wind[sector].cols.size());
    //for(k=0;k<Wind[sector].cols.size();k++) printf("col[%d] = %d \n",k,Wind[sector].cols[k]);
    // diagonalize
-   diag_matrix(Wind[sector].rows,Wind[sector].cols,Wind[sector].hamil,
-     Wind[sector].evals,Wind[sector].evecs,Wind[sector].nBasis);
+   //diag_matrix(Wind[sector].rows,Wind[sector].cols,Wind[sector].hamil,
+   //  Wind[sector].evals,Wind[sector].evecs,Wind[sector].nBasis);
    //eigcheck(Wind[sector].evals,Wind[sector].evecs,Wind[sector].nBasis);
-   //printmatrix(Wind[sector].rows,Wind[sector].cols,Wind[sector].hamil);
+   printmatrix(Wind[sector].rows,Wind[sector].cols,Wind[sector].hamil);
 }
 
 int WindNo::scan(std::vector<bool> &newstate){

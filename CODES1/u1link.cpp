@@ -71,11 +71,11 @@ int main(){
   //if(basis[3][4]==true) printf("spin = 1\n");
   //else printf("spin = -1\n");
   /* real-time evolution of cartoon states and Locshmidt Echo */
-  //evolve_cartoons(evals, evecs);
+  evolve_cartoons(evals, evecs);
   //std::cout<<basis[2][3]<<std::endl;
   //std::cout<<basis[3][4]<<std::endl;
   /* calculate the expectation value of Oflip for every eigenstate */
-  calc_Oflip(evals,evecs);
+  //calc_Oflip(evals,evecs);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }

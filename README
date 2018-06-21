@@ -19,4 +19,5 @@
            c) Constructs the Hamiltonian in the specified winding number sector. 
            d) Calculates the eigenvectors and eigenvalues, still using Intel FEAST. 
            e) Same as (f).
- 
+
+3. CODES2A: 

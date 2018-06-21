@@ -18,8 +18,11 @@
 // flag; and an analytic formula can be written to compute the
 // matrix elements in terms of the Hamiltonian in the ice basis
 extern void eig_print(std::vector<double>&,std::vector<double>&,int);
+extern void print2file(MKL_INT,MKL_INT,std::vector<double>&);
+
 void chconj(int sector){
-  void diag_LAPACK1(MKL_INT, MKL_INT, MKL_INT, double*, double*);
+  void diag_LAPACK_RRR(MKL_INT, MKL_INT,std::vector<double>&,std::vector<double>&,std::vector<double>&);
+  
   // check the correct sector
   if((Wind[sector].Wx!=0)&&(Wind[sector].Wy!=0)){
     printf("This routine does not work in this sector. \n");
@@ -27,9 +30,8 @@ void chconj(int sector){
   }
 
   unsigned int i,j,q,count,N2;
-  MKL_INT N, LDA, info;
-  double *W,*A; 
   double ele;
+  MKL_INT N, NSQ, LDA;
   
   // putting flags is not explicitly needed due to sorting
   //std::vector<bool> newstate(2*VOL);
@@ -53,31 +55,42 @@ void chconj(int sector){
   //for(i=0;i<Wind[sector].nBasis;i++) std::cout<<"ice states = "<<i<<"; flag ="<<Wind[sector].Cflag[i]<<std::endl;
 
   // construct the matrix in the charge conjugation basis
+  std::cout<<"Going to construct the matrix in the CC-basis"<<std::endl;
   N2= Wind[sector].nBasis;
   N = Wind[sector].nBasis/2;
-  LDA = N;
+  NSQ = N*N;
+  std::vector<double> a(NSQ,0.0);
+  //std::vector<double> w(N);
+  //std::vector<double> z(NSQ);
   if(N2%2) std::cout<<"Hilbert space in (0,0) sector not even!"<<std::endl;
-  W = (double*)malloc(N*sizeof(double));
-  A = (double*)malloc(N*LDA*sizeof(double));
- 
+  else std::cout<<"Matrix size in C=+ and (0,0) ="<<N<<std::endl;
+
+  //Wind[sector].check_getH();
+  /* initialize the matrix */
   for(i=0;i<N;i++){
   for(j=0;j<N;j++){
-     A[i*N+j] = 0.5*(Wind[sector].getH(i,j) + Wind[sector].getH(i,N2-1-j) + Wind[sector].getH(N2-1-i,j) + Wind[sector].getH(N2-1-i,N2-1-j));
+     ele = 0.5*(Wind[sector].getH(i,j) + Wind[sector].getH(i,N2-1-j) 
+         + Wind[sector].getH(N2-1-i,j) + Wind[sector].getH(N2-1-i,N2-1-j));
+     a.push_back(ele);
+     //a[i*N+j] = ele;
   }}
-  
+  // print as a binary to file
+  //print2file(N,NSQ,a);  
+  // space for eigenvalues and eigenvectors
+  Wind[sector].evals.resize(N,0.0);
+  Wind[sector].evecs.resize(NSQ,0.0); 
+  //std::cout<<"Going to diagonalize with lapack Relatively Robust Representations"<<std::endl;
   // diagonalize matrix
-  diag_LAPACK1(N,LDA,info,W,A);
+  diag_LAPACK_RRR(N,NSQ,a,Wind[sector].evals,Wind[sector].evecs);
 
-  // copy eigenvalues and eigenvectors to main code
-  Wind[sector].evals.insert(Wind[sector].evals.begin(), W, W+N);
-  Wind[sector].evecs.insert(Wind[sector].evecs.begin(), A, A+N*N);
+  //Wind[sector].evals.insert(Wind[sector].evals.begin(), W, W+N);
+  //Wind[sector].evecs.insert(Wind[sector].evecs.begin(), A, A+N*N);
 
   // although these routines seem trivial, they are extremely important to
   // check the allocation of the eigenvectors and eigenvalues (on small lattices)
   // print copied evals and evecs
   //eig_print(Wind[sector].evals,Wind[sector].evecs,N);
-
-  free(A); free(W);  
+    
 }
 
  // label the states which are C-partners with a common flag. 
@@ -86,3 +99,11 @@ void chconj(int sector){
  //   for(unsigned i=0;i<nBasis;i++) Cflag.push_back(0); 
  //}
 
+extern void print2file(MKL_INT N, MKL_INT NSQ, std::vector<double> &hamil){
+  std::ofstream Outfile;
+  Outfile.open("sparse_mat.bin",std::ios::out);
+  Outfile.write((char*)&N, sizeof(MKL_INT));
+  Outfile.write((char*)&NSQ, sizeof(MKL_INT));
+  Outfile.write((char*)&hamil[0], hamil.size()*sizeof(double));
+  Outfile.close();
+}

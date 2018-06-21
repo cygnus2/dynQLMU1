@@ -109,7 +109,7 @@ void constH(std::vector<double> &evals, std::vector<std::vector<double>> &evecs)
  //printf("elements = %d \n",(int)val.size());
  //for(k=0;k<val.size();k++) printf("val[%d] = %f \n",k,val[k]);
  // diagonalize
- //diag_matrix(rows,cols,val,evals,evecs);
+ diag_matrix(rows,cols,val,evals,evecs);
  //eigcheck(evals,evecs);
  //std::ofstream Outfile;
  //int nrows, ncols;
