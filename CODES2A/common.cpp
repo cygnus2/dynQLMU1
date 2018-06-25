@@ -71,22 +71,6 @@ void printconf(bool *conf){
 }
 
 
-/* Prints all the basis; use only for checking */
-void printbasis(){
- FILE *fptr;
- int i,p;
- fptr=fopen("BASIS_FLIP.txt","w");
- fprintf(fptr,"Printing the (flippable) basis states for (Lx,Ly)=(%d,%d) lattice.\n",LX,LY);
- for(i=0;i<NTOT;i++){
-   fprintf(fptr,"basis %d ",i);
-   for(p=0;p<2*VOL;p++){
-    fprintf(fptr,"%d ",(int)basis_flip[i][p]);
-   }
-   fprintf(fptr,"\n");
-  }
- fclose(fptr);
-}
-
 int **allocateint2d(int row, int col){
   int i,j;
   int **mat;

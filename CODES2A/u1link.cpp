@@ -28,8 +28,6 @@ int SEED;
 std::vector<double> lam_loc;
 int NTOT,NH;
 std::vector<std::vector<bool>> basis;
-std::vector<std::vector<bool>> basis_nonflip;
-std::vector<std::vector<bool>> basis_flip;
 
 int main(){
   FILE *fptr;
@@ -105,7 +103,7 @@ int main(){
   // note that this is only possible in the (Wx,Wy)=(0,0) basis
   chconj(sector); 
   // calculate the expectation value of Oflip for every eigenstate 
-  calc_Oflip(sector);
+  //calc_Oflip(sector);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }

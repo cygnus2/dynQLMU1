@@ -35,7 +35,7 @@ void calc_Oflip(int sector){
       Oflip_avg += 0.5*(v_q*v_q*O_q + v_q*v_q*O_l);
     }
     Oflip_avg = Oflip_avg/((double)VOL);
-    fprintf(outf,"%lf %lf\n",Wind[sector].evals[p],Oflip_avg);
+    fprintf(outf,"%.12lf %.12lf\n",Wind[sector].evals[p],Oflip_avg);
   }
  fclose(outf);
 }

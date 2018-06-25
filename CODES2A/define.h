@@ -23,8 +23,6 @@ extern std::vector<double> lam_loc;
 extern int NTOT;
 
 extern std::vector<std::vector<bool>> basis;
-extern std::vector<std::vector<bool>> basis_nonflip;
-extern std::vector<std::vector<bool>> basis_flip;
 
 /* user defined classes */
 class WindNo{
@@ -88,6 +86,7 @@ class WindNo{
        hamil.clear();
        evals.clear();
        evecs.clear();
+       lamH.clear();
      }
 };
 
@@ -100,4 +99,5 @@ void constH(int);
 void winding_no_decompose(void);
 void chconj(int);
 void calc_Oflip(int);
+void calc_Oflip_all(int);
 #endif 

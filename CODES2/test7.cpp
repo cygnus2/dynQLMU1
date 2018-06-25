@@ -79,62 +79,62 @@ extern void fileprint_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_I
 
 /* Main program */
 int main() {
-    unsigned int k;
-    unsigned int i,j;
+    MKL_INT k,pos;
+    MKL_INT i,j;
     MKL_INT N, NSQ, LDA, LDZ, NSELECT, info;    
     MKL_INT il, iu, m;
-    double abstol, vl, vu;
+    long double abstol, vl, vu;
 
-    N=10;
+    N=80000;
     NSQ=N*N;
+    LDA=N;
+    LDZ=N;
 
     /* allocate space for the arrays */
-    std::vector<MKL_INT> isuppz(2*N); 
-    std::vector<double> w(N);
-    std::vector<double> z(NSQ);
+    std::vector<MKL_INT> isuppz(2*N,0); 
+    std::vector<double> w(N,0.0);
+    std::vector<double> z(NSQ,0.0);
     std::vector<double> a(NSQ,0.0);
    
+    std::cout<<"size of vector "<<a.size()<<std::endl;
+    std::cout<<"maximum capacity of vector "<<a.max_size()<<std::endl;
     // make the matrix
-    for(i=0;i<N;i++){
-    for(j=0;j<N;j++){
-     a.at(i*N+j) = 1.0/(i+j+1);
-    }}
-    for(i=0;i<N;i++){
-    for(j=0;j<N;j++){
-     a.at(i*N+j) = a[i*N+j] + a[i+N*j];
-    }}
-    for(i=0;i<N;i++){
-    for(j=0;j<N;j++){
-     printf("%.5lf ",a[i*N+j]);
-    }
-    printf("\n");
-    }
+    for(i=0; i < N; i++){
+      j=i; pos=i*N+j;
+      a.at(pos) = 1.0;
+      j=(i+1)%N; pos = i*N+j;
+      a.at(pos) = -0.5; 
+      j=(i-1+N)%N; pos = i*N+j;
+      a.at(pos) = -0.5; 
+     }
 
     double* A = &a[0];
     /* print full matrix */
-    print_matrix("Full matrix", N, N, A, LDA);
+    //print_matrix("Full matrix", N, N, A, LDA);
 
     /* Executable statements */
     printf( "LAPACKE_dsyevr (column-major, high-level) RRR Example Program Results\n" );
 
     /* Solve eigenproblem */
-    //MKL_INT* ISUPPZ = &isuppz[0];
-    //double* W = &w[0];
-    //double* Z = &z[0];
-    //info = LAPACKE_dsyevr( LAPACK_COL_MAJOR, 'V', 'A', 'U', N, A, LDA,
-    //                    vl, vu, il, iu, abstol, &m, W, Z, LDZ, ISUPPZ );
+    abstol=-1;
+    MKL_INT* ISUPPZ = &isuppz[0];
+    double* W = &w[0];
+    double* Z = &z[0];
+    info = LAPACKE_dsyevr( LAPACK_COL_MAJOR, 'V', 'A', 'U', N, A, LDA,
+                        vl, vu, il, iu, abstol, &m, W, Z, LDZ, ISUPPZ );
+    //info = LAPACKE_dsyevd( LAPACK_COL_MAJOR, 'V', 'U', N, A, LDA, W );
 
-
-    //printf("Back from the routine and working properly. Info = %d. Eval[0]=%f\n",info,W[0]);
+    printf("Back from the routine and working properly. Info = %d. Eval[0]=%e\n",info,W[0]);
+    printf("No of eigenvalues = %d\n",m);
  
     /* Check for convergence */
-    //if( info > 0 ) {
-    //    printf( "The algorithm failed to compute eigenvalues.\n" );
-    //    exit( 1 );
-    //}
+    if( info > 0 ) {
+        printf( "The algorithm failed to compute eigenvalues.\n" );
+        exit( 1 );
+    }
     /* Print eigenvalues */
     //print_matrix( "Eigenvalues", 1, N, W, 1 );
-    //fileprint_matrix( "EigenvaluesRRR_test.dat", 1, N, W, 1 );
+    fileprint_matrix( "EigenvaluesRRR_test.dat", 1, N, W, 1 );
     /* Print eigenvectors */
     //print_matrix( "Eigenvectors (stored columnwise)", N, N, A, LDA );
 
@@ -142,29 +142,27 @@ int main() {
     w.clear();
     z.clear();
     a.clear();
-
-    
     
     exit( 0 );
 } /* End of LAPACKE_dsyevr Example */
 
 /* Auxiliary routine: printing a matrix */
-void print_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda ) {
+void print_matrix( char* desc, MKL_INT m, MKL_INT n, double* aa, MKL_INT lda ) {
 	MKL_INT i, j;
 	printf( "\n %s\n", desc );
 	for( i = 0; i < m; i++ ) {
-		for( j = 0; j < n; j++ ) printf( " % f", a[i+j*lda] );
+		for( j = 0; j < n; j++ ) printf( " % f", aa[i+j*lda] );
 		printf( "\n" );
 	}
 }
 
 /* Auxiliary routine: printing a matrix */
-void fileprint_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda ) {
+void fileprint_matrix( char* desc, MKL_INT m, MKL_INT n, double* aa, MKL_INT lda ) {
 	MKL_INT i, j;
         FILE *outfile;
         outfile = fopen(desc,"w");
 	for( i = 0; i < m; i++ ) {
-		for( j = 0; j < n; j++ ) fprintf(outfile, " %f \n", a[i+j*lda] );
+		for( j = 0; j < n; j++ ) fprintf(outfile, " %le \n", aa[i+j*lda] );
 		fprintf(outfile, "\n" );
 	}
 }
