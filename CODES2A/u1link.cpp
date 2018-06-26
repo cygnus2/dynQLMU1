@@ -62,7 +62,6 @@ int main(){
   VOL2 = VOL/2;
 
   /* Initialize random number generator */
-  //rlxd_init(1,SEED);
   srand(SEED);
 
   /* Initialize nearest neighbours */
