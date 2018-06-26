@@ -11,8 +11,10 @@
 extern void print_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda );
 extern void fileprint_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda );
 extern void eig_print(std::vector<double>&,std::vector<double>&,int);
+extern void check_eigvecs(MKL_INT, std::vector<double>&, std::vector<double>&, std::vector<double>&);
 
-void diag_LAPACK(int sector, std::vector<double>& matrix, std::vector<double>& evals, std::vector<double>& evecs){
+void diag_LAPACK(int sector, std::vector<double>& matrix, std::vector<double>& evals, 
+ std::vector<double>& evecs){
     unsigned int i,j;
     // variabes to pass to LAPACK routine
     MKL_INT N, LDA, info;
@@ -58,6 +60,42 @@ void diag_LAPACK(int sector, std::vector<double>& matrix, std::vector<double>& e
     free(A); free(W);
 }
 
+void diag_LAPACK_RRR(MKL_INT N, MKL_INT NSQ, int sector, std::vector<double>& matrix, std::vector<double>& eval, std::vector<double>& evec){
+
+  MKL_INT LDZ, LDA, NSELECT, info;    
+  MKL_INT il, iu, m;
+  double abstol, vl, vu;
+  std::vector<double> w(N,0.0);
+  std::vector<double> z(NSQ,0.0);
+  std::vector<MKL_INT> isuppz(2*N,0); 
+
+  /* set array sizes */
+  LDZ = N;
+  NSELECT = N;
+  LDA = N;
+  abstol = -1;
+  double* A = &matrix[0];
+  print_matrix("Full matrix", N, N, A, N);
+  MKL_INT* ISUPPZ = &isuppz[0];
+  double* W = &w[0];
+  double* Z = &z[0];
+  printf("Going to RRR routine. \n");
+  info = LAPACKE_dsyevr( LAPACK_COL_MAJOR, 'V', 'A', 'U', N, A, LDA,
+                       0., 0., 0, 0, abstol, &m, W, Z, LDZ, ISUPPZ );
+
+  printf("Back from the routine and working properly. Info = %ld. Eval[0]=%e\n",info,W[0]);
+  fileprint_matrix( "Eigenvalues.dat", 1, N, W, 1 );
+
+  // check the eigenvectors. Be careful this requires an O(N^3) time
+  check_eigvecs(N, matrix, w, z); 
+  
+  // clear memory
+  w.clear();
+  z.clear();
+  isuppz.clear();
+
+ }
+
 // Notes on printing the eigenvalues and eigenvectors: Note that we have chosen a column-major
 // layout, which means that the eigenvectors are arranged column-wsie. This means that the routine
 // to print the matrix must have the form = i + j*N, where i is the index over row, and j is the
@@ -98,3 +136,33 @@ void fileprint_matrix( char* desc, MKL_INT m, MKL_INT n, double* aa, MKL_INT lda
     printf("\n");
    }
  };
+
+extern void check_eigvecs(MKL_INT size, std::vector<double>& matrix, std::vector<double>& evals, std::vector<double>& evecs){
+  MKL_INT i,j;
+  CBLAS_LAYOUT layout;
+  CBLAS_UPLO uplo;
+  double tryeval;
+  double* aa = &matrix[0]; 
+  double *vec1, *vec2;
+  //allocate space for the vector
+  vec1 = (double*)mkl_calloc(size, sizeof(double), 64);  
+  vec2 = (double*)mkl_calloc(size, sizeof(double), 64);  
+  layout = CblasColMajor;
+  uplo   = CblasLower;
+
+  print_matrix("Full matrix", size, size, aa, size);
+
+
+  //for(i=0;i<size;i++){ 
+  // for(j=0;j<size;j++){ vec1[j] = evecs[i*size+j]; vec2[j] = evecs[i*size+j]; }
+   // do matrix multiplication y = alpha*A*x + beta*y; incx=incy=1
+  // cblas_dsymv(layout, uplo, size, 1.0, aa, size, vec1, 1, 0.0, vec1, 1);
+  // std::cout<<vec1[1]<<std::endl;
+  // tryeval = cblas_ddot(size, vec2, 1, vec1, 1);
+  // std::cout<<tryeval<<" "<<evals[i]<<std::endl;
+  //}
+  
+  mkl_free(vec1); mkl_free(vec2);
+
+}
+
