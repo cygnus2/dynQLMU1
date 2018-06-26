@@ -65,17 +65,18 @@ void diag_LAPACK_RRR(MKL_INT N, MKL_INT NSQ, int sector, std::vector<double>& ma
   MKL_INT LDZ, LDA, NSELECT, info;    
   MKL_INT il, iu, m;
   double abstol, vl, vu;
+  std::vector<double> acopy;
   std::vector<double> w(N,0.0);
   std::vector<double> z(NSQ,0.0);
   std::vector<MKL_INT> isuppz(2*N,0); 
 
+  if(CHKDIAG) acopy = matrix; 
   /* set array sizes */
   LDZ = N;
   NSELECT = N;
   LDA = N;
   abstol = -1;
   double* A = &matrix[0];
-  print_matrix("Full matrix", N, N, A, N);
   MKL_INT* ISUPPZ = &isuppz[0];
   double* W = &w[0];
   double* Z = &z[0];
@@ -84,10 +85,11 @@ void diag_LAPACK_RRR(MKL_INT N, MKL_INT NSQ, int sector, std::vector<double>& ma
                        0., 0., 0, 0, abstol, &m, W, Z, LDZ, ISUPPZ );
 
   printf("Back from the routine and working properly. Info = %ld. Eval[0]=%e\n",info,W[0]);
-  fileprint_matrix( "Eigenvalues.dat", 1, N, W, 1 );
+  //fileprint_matrix( "Eigenvalues.dat", 1, N, W, 1 );
+  //eig_print(w,z,N);
 
   // check the eigenvectors. Be careful this requires an O(N^3) time
-  check_eigvecs(N, matrix, w, z); 
+  check_eigvecs(N, acopy, w, z); 
   
   // clear memory
   w.clear();
@@ -137,32 +139,33 @@ void fileprint_matrix( char* desc, MKL_INT m, MKL_INT n, double* aa, MKL_INT lda
    }
  };
 
-extern void check_eigvecs(MKL_INT size, std::vector<double>& matrix, std::vector<double>& evals, std::vector<double>& evecs){
-  MKL_INT i,j;
+extern void check_eigvecs(MKL_INT size, std::vector<double> &matrix, std::vector<double> &evals, std::vector<double> &evecs){
+  MKL_INT i,j,k;
+  FILE *outfile;
+  std::vector<double> vec1(size,0.0);
+  std::vector<double> vec2(size,0.0);
+  double *v1, *v2;
   CBLAS_LAYOUT layout;
   CBLAS_UPLO uplo;
   double tryeval;
-  double* aa = &matrix[0]; 
-  double *vec1, *vec2;
-  //allocate space for the vector
-  vec1 = (double*)mkl_calloc(size, sizeof(double), 64);  
-  vec2 = (double*)mkl_calloc(size, sizeof(double), 64);  
+  double* aa = &matrix[0];
   layout = CblasColMajor;
   uplo   = CblasLower;
 
-  print_matrix("Full matrix", size, size, aa, size);
-
-
-  //for(i=0;i<size;i++){ 
-  // for(j=0;j<size;j++){ vec1[j] = evecs[i*size+j]; vec2[j] = evecs[i*size+j]; }
+  // recalculate the eigenvalues by acting the Hamiltonian on the eigenvectors
+  // check for any deviation
+  outfile = fopen("eigencheck.dat","w");
+  for(i=0;i<size;i++){ 
+   for(j=0;j<size;j++){ k = i*size + j; vec1.at(j) = evecs[k]; }
    // do matrix multiplication y = alpha*A*x + beta*y; incx=incy=1
-  // cblas_dsymv(layout, uplo, size, 1.0, aa, size, vec1, 1, 0.0, vec1, 1);
-  // std::cout<<vec1[1]<<std::endl;
-  // tryeval = cblas_ddot(size, vec2, 1, vec1, 1);
-  // std::cout<<tryeval<<" "<<evals[i]<<std::endl;
-  //}
-  
-  mkl_free(vec1); mkl_free(vec2);
+   v1 = &vec1[0]; v2 = &vec2[0];
+   cblas_dsymv(layout, uplo, size, 1.0, aa, size, v1, 1, 0.0, v2, 1);
+   tryeval = cblas_ddot(size, v2, 1, v1, 1) - evals[i];
+   if(tryeval > 1e-10) fprintf(outfile,"%ld %.12lf\n",i,tryeval);
+  }
+  fclose(outfile);
+  vec1.clear();
+  vec2.clear();  
 
 }
 

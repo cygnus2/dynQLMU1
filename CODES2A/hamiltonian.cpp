@@ -92,7 +92,7 @@ void constH(int sector){
    // this is a special case when one diagonalizes the full Hamiltonian w/o decomposing
    // into charge c sectors to check if the double degeneracy of the eigenstates arise
    // also useful to see the scenario where one expects ETH to fail
-   diag_LAPACK(sector, Wind[sector].hamil, Wind[sector].evals, Wind[sector].evecs);
+   //diag_LAPACK(sector, Wind[sector].hamil, Wind[sector].evals, Wind[sector].evecs);
    //calc_Oflip_all(sector);
    
 }

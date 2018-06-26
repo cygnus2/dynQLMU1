@@ -7,6 +7,7 @@
 #include "mkl_types.h"
 #define DIM 2
 #define PI 2*asin(1.0)
+#define CHKDIAG 1
 
 extern int *next[2*DIM+1];
 extern int *nextCHK[2*DIM+1];
