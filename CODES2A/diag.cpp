@@ -4,6 +4,7 @@
 #include<stdio.h>
 #include<vector>
 #include<iterator>
+#include<cmath>
 #include "mkl_lapacke.h"
 #include "define.h"
 
@@ -95,7 +96,7 @@ void diag_LAPACK_RRR(MKL_INT N, MKL_INT NSQ, int sector, std::vector<double>& ma
   w.clear();
   z.clear();
   isuppz.clear();
-
+  acopy.clear();
  }
 
 // Notes on printing the eigenvalues and eigenvectors: Note that we have chosen a column-major
@@ -141,6 +142,7 @@ void fileprint_matrix( char* desc, MKL_INT m, MKL_INT n, double* aa, MKL_INT lda
 
 extern void check_eigvecs(MKL_INT size, std::vector<double> &matrix, std::vector<double> &evals, std::vector<double> &evecs){
   MKL_INT i,j,k;
+  MKL_INT tryvec;
   FILE *outfile;
   std::vector<double> vec1(size,0.0);
   std::vector<double> vec2(size,0.0);
@@ -154,16 +156,34 @@ extern void check_eigvecs(MKL_INT size, std::vector<double> &matrix, std::vector
 
   // recalculate the eigenvalues by acting the Hamiltonian on the eigenvectors
   // check for any deviation
-  outfile = fopen("eigencheck.dat","w");
-  for(i=0;i<size;i++){ 
-   for(j=0;j<size;j++){ k = i*size + j; vec1.at(j) = evecs[k]; }
-   // do matrix multiplication y = alpha*A*x + beta*y; incx=incy=1
-   v1 = &vec1[0]; v2 = &vec2[0];
-   cblas_dsymv(layout, uplo, size, 1.0, aa, size, v1, 1, 0.0, v2, 1);
-   tryeval = cblas_ddot(size, v2, 1, v1, 1) - evals[i];
-   if(tryeval > 1e-10) fprintf(outfile,"%ld %.12lf\n",i,tryeval);
+  if (CHKDIAG==1){
+     outfile = fopen("eigencheck.dat","w");
+     for(i=0;i<size;i++){ 
+       for(j=0;j<size;j++){ k = i*size + j; vec1.at(j) = evecs[k]; }
+       // do matrix multiplication y = alpha*A*x + beta*y; incx=incy=1
+       v1 = &vec1[0]; v2 = &vec2[0];
+       cblas_dsymv(layout, uplo, size, 1.0, aa, size, v1, 1, 0.0, v2, 1);
+       tryeval = cblas_ddot(size, v2, 1, v1, 1) - evals[i];
+       //if(tryeval > 1e-10) fprintf(outfile,"%ld %.12lf\n",i,tryeval);
+       fprintf(outfile,"%ld %.12lf\n",i,tryeval);
+     }
+     fclose(outfile);
   }
-  fclose(outfile);
+  if(CHKDIAG==2){
+     outfile = fopen("eigencheck.dat","w");
+     for(i=0;i<10;i++){ 
+       tryvec = std::floor((rand()/((double)RAND_MAX))*size);
+       for(j=0;j<size;j++){ k = tryvec*size + j; vec1.at(j) = evecs[k]; }
+       // do matrix multiplication y = alpha*A*x + beta*y; incx=incy=1
+       v1 = &vec1[0]; v2 = &vec2[0];
+       cblas_dsymv(layout, uplo, size, 1.0, aa, size, v1, 1, 0.0, v2, 1);
+       tryeval = cblas_ddot(size, v2, 1, v1, 1) - evals[tryvec];
+       //if(tryeval > 1e-10) fprintf(outfile,"%ld %.12lf\n",i,tryeval);
+       fprintf(outfile,"%ld %.12lf\n",tryvec,tryeval);
+     }
+     fclose(outfile);
+  }
+
   vec1.clear();
   vec2.clear();  
 

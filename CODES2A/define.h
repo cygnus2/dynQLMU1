@@ -7,8 +7,14 @@
 #include "mkl_types.h"
 #define DIM 2
 #define PI 2*asin(1.0)
-#define CHKDIAG 1
 
+// the option CHKDIAG is used to check the eigenvectors by 
+// acting the Hamiltonian with the eigenvectors and comparing
+// this with the eigenvalues. CHKDIAG=0 omits this check.
+// CHKDIAG=1 does this for all eigenvectors. EXPENSIVE!
+// CHKDIAG=2 does this for 10 randomly chosen eigenvectors.
+
+extern int CHKDIAG;
 extern int *next[2*DIM+1];
 extern int *nextCHK[2*DIM+1];
 extern int *chk2lin,*lin2chk;

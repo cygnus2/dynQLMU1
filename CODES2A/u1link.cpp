@@ -2,12 +2,14 @@
 #include<math.h>
 #include<stdlib.h>
 #include "define.h"
-#include<iostream>
+#include <iostream>
+#include <fstream>
 #include<algorithm>
 #include<vector>
 #include<iterator>
 #include "ranlxd.h"
 #include <cstdlib>
+#include <ctime>
 
 /* according to the rules of cpp, the variables are declared here 
  * and also in the header file as extern such that they are avl to
@@ -28,6 +30,7 @@ int SEED;
 std::vector<double> lam_loc;
 int NTOT,NH;
 std::vector<std::vector<bool>> basis;
+int CHKDIAG;
 
 int main(){
   FILE *fptr;
@@ -60,6 +63,15 @@ int main(){
   if(LX<LY) printf("Please make sure LX >= LY. Unforseen errors can occur otherwise. \n");
   VOL = LX*LY;
   VOL2 = VOL/2;
+   
+  // decide whether to check the results of the diagonalization 
+  CHKDIAG=2;
+
+  std::ofstream myfile; 
+  myfile.open("TIMELOG",std::ios::out);
+  std::time_t result = std::time(nullptr);
+  myfile << std::asctime(std::localtime(&result))<< std::endl;
+  myfile.close();
 
   /* Initialize random number generator */
   srand(SEED);
@@ -109,6 +121,11 @@ int main(){
   free(chk2lin); free(lin2chk);
   deallocateint2d(lookup,LX+1,LY+1);
   Wind.clear();
+
+  myfile.open("TIMELOG", std::ios::app);
+  result = std::time(nullptr);
+  myfile << std::asctime(std::localtime(&result))<< std::endl;
+  myfile.close();
 
   return 0;
 }
