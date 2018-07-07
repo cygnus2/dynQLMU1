@@ -89,8 +89,17 @@ void diag_LAPACK_RRR(MKL_INT N, MKL_INT NSQ, int sector, std::vector<double>& ma
   //fileprint_matrix( "Eigenvalues.dat", 1, N, W, 1 );
   //eig_print(w,z,N);
 
+  //copy the eigenvalues and eigenvectors to the main code
+  eval.resize(N);
+  evec.resize(NSQ);
+  eval = w;
+  evec = z;
+  w = std::vector<double>();
+  z = std::vector<double>();
+  
+
   // check the eigenvectors. Be careful this requires an O(N^3) time
-  check_eigvecs(N, acopy, w, z); 
+  check_eigvecs(N, acopy, eval, evec); 
   
   // clear memory
   w.clear();

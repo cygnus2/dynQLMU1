@@ -114,7 +114,7 @@ int main(){
   // note that this is only possible in the (Wx,Wy)=(0,0) basis
   chconj(sector); 
   // calculate the expectation value of Oflip for every eigenstate 
-  //calc_Oflip(sector);
+  calc_Oflip(sector);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }
