@@ -12,6 +12,8 @@
               routine.
            f) Computes a local observable, ie, the flippability of individual plaquettes, summed
               over the volume for all the eigenvectors.
+         **g) It remains to be understood why the time evolution is independent of the sign of the 
+              lambda. 
 
 2. CODES2: In addition to the actions in CODES1, this version
            a) Does not explicitly filter any states.
@@ -20,4 +22,28 @@
            d) Calculates the eigenvectors and eigenvalues, still using Intel FEAST. 
            e) Same as (f).
 
-3. CODES2A: 
+3. CODES2A: This set of codes create the Hamiltonian of a disordered system, by choosing
+            the coupling LAMBDA randomly. It diagonalizes and prints the eigenvalues, and
+            the local operator O_flip for every eigenstate. This operation is performed for
+            a chosen winding number sector. 
+          
+            With the couplings disordered, and the charge conjugation symmetry taken into
+            account, there are no more symmteries on a ladder system of dimensions, L x 2. 
+            Hence the results from this code can be used to check the ETH in gauge theories.
+
+4. CODES3:  This section implements the translation invariance, but not the charge conjugation.
+            The Hamiltonian in the (kx, ky) = (0, 0) is constructed, and also subsequently
+            diagonalized. The operator O_flip is calculated in this sector. 
+
+
+#====================
+# TO-DO
+#====================
+ Fix the ambiguity between ROW_MAJOR vs COL_MAJOR in CODES2 and CODES2A.
+ At the moment, I think it doesn't really matter whether the matrix is
+ supplied in the ROW_MAJOR vs COL_MAJOR since in my codes, I supply the
+ whole matrix. 
+
+ I am fixing this in CODES3; since this is crucial in the SVD. 
+ I think the results in CODES2 and CODES2A should be unchanged; but this
+ should still be checked.

@@ -70,6 +70,58 @@ void printconf(bool *conf){
   }
 }
 
+/* a different version of printconf, which takes the conf as a boolean vector.
+ */
+void printconf1(std::vector<bool> conf){
+  int p,d,x,y;
+  for(p=0;p<VOL;p++){
+   x=p%LX; y=p/LX;
+   if(conf[2*p]==true)         printf("site (x,y)=(%d,%d); link-x=% d \n",x,y,1);
+   else if(conf[2*p]==false)   printf("site (x,y)=(%d,%d); link-x=% d \n",x,y,-1);
+   if(conf[2*p+1]==true)       printf("site (x,y)=(%d,%d); link-y=% d \n",x,y,1);
+   else if(conf[2*p+1]==false) printf("site (x,y)=(%d,%d); link-y=% d \n",x,y,-1);
+  }
+}
+
+/* Print the subsystem configuration 
+ */
+void printconfA(std::vector<std::vector<bool>> cA){
+  int p,i,t,ix,iy;
+  std::vector<bool> conf(2*VOL_A);
+  t = cA.size();
+  for(i=0; i<t; i++){
+    std::cout<<"sub-system A conf "<<i<<std::endl;
+    conf = cA[i];
+    //for(p=0;p<VOL_A;p++){
+    for(iy=0;iy<LY;   iy++){
+    for(ix=0;ix<LEN_A;ix++){
+      p=iy*LEN_A + ix;
+      if(conf[2*p]==true)         printf("site (x,y)=(%d,%d); link-x=% d \n",ix,iy,1);
+      else if(conf[2*p]==false)   printf("site (x,y)=(%d,%d); link-x=% d \n",ix,iy,-1);
+      if(conf[2*p+1]==true)       printf("site (x,y)=(%d,%d); link-y=% d \n",ix,iy,1);
+      else if(conf[2*p+1]==false) printf("site (x,y)=(%d,%d); link-y=% d \n",ix,iy,-1);
+    }}
+  }
+}
+
+void printconfB(std::vector<std::vector<bool>> cB){
+  int p,i,t,ix,iy;
+  std::vector<bool> conf(2*VOL_B);
+  t = cB.size();
+  for(i=0; i<t; i++){
+    std::cout<<"sub-system B conf "<<i<<std::endl;
+    conf = cB[i];
+    //for(p=0;p<VOL_A;p++){
+    for(iy=0;iy<LY;   iy++){
+    for(ix=0;ix<LEN_B;ix++){
+      p=iy*LEN_B + ix;
+      if(conf[2*p]==true)         printf("site (x,y)=(%d,%d); link-x=% d \n",ix,iy,1);
+      else if(conf[2*p]==false)   printf("site (x,y)=(%d,%d); link-x=% d \n",ix,iy,-1);
+      if(conf[2*p+1]==true)       printf("site (x,y)=(%d,%d); link-y=% d \n",ix,iy,1);
+      else if(conf[2*p+1]==false) printf("site (x,y)=(%d,%d); link-y=% d \n",ix,iy,-1);
+    }}
+  }
+}
 
 /* Prints all the basis; use only for checking */
 void printbasis(){

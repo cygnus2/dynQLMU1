@@ -34,7 +34,7 @@ int main(){
   int x,y;
   int wx,wy;
   int sector;
-  WindNo SectorZero;
+  //WindNo SectorZero;
   extern void initneighbor(void);
   extern void conststates(void);
   extern void printbasis(void);
@@ -53,6 +53,8 @@ int main(){
   fscanf(fptr,"%s %lf\n",string,&Ti);
   fscanf(fptr,"%s %lf\n",string,&Tf);
   fscanf(fptr,"%s %lf\n",string,&dT);
+  fscanf(fptr,"%s %d\n",string,&LEN_A);
+  
   fclose(fptr);
   if(( LX%2 != 0 )||( LY%2 !=0 )) { printf("Code does not work with odd LX and/or LY. \n"); exit(0); }
   if(LX<LY) printf("Please make sure LX >= LY. Unforseen errors can occur otherwise. \n");
@@ -75,7 +77,7 @@ int main(){
 
   /* build basis states satisfying Gauss' Law */
   conststates();
-  
+
   /* get number of winding number sectors */
   nWind = calc_WindNo(LX,LY);
   Wind.reserve(nWind); 
@@ -95,6 +97,12 @@ int main(){
    
   // calculate the expectation value of Oflip for every eigenstate 
   calc_Oflip(sector);
+
+  // calculate the Entanglement Entropy for the states
+  entanglementEntropy(sector);
+
+  // calculate the structural entropy
+  structuralEntropy(sector);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }

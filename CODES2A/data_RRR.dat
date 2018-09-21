@@ -1,0 +1,16 @@
+##################################
+# some sample results using RRR  #
+#  in the intel MKL C (2018)     #
+##################################
+# square matrix of size N
+# all eigenvalues + eigenvectors
+# the code builds a NxN matrix 
+# before entering the LAPACK_syevr
+# routine
+##################################
+#  N      memory      runtime
+==================================
+ 1*10^4    1.832G       146m
+ 2*10^4    6.301G       486m
+ 4*10^4    0.024T      1480m 
+ 8*10^4

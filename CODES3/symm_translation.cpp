@@ -51,7 +51,7 @@
    flag--;
    Wind[sector].trans_sectors = flag;
    // print and display statement to check, debug etc
-   //std::cout<<"No of (kx,ky) sectors="<<Wind[sector].trans_sectors<<std::endl;
+   std::cout<<"No of (kx,ky) sectors="<<Wind[sector].trans_sectors<<std::endl;
    //Wind[sector].disp_Tprop();
  }
 
@@ -97,12 +97,27 @@
      std::vector<std::vector<bool>>::iterator it; 
      it = std::lower_bound(basisVec.begin(),basisVec.end(),newstate);
      m  = std::distance(basisVec.begin(),it);
-     //if(it == basisVec.end()){
-     //  std::cout<<"Element not found here! "<<std::endl; 
-     //  return -100;
-     //}
+     if(it == basisVec.end()){
+       std::cout<<"Element not found here! "<<std::endl; 
+       return -100;
+     }
      return m;
  }
+
+ // Alternate implementation of the search. Find where the required element 
+ // exists in the vector with the iterator, then the index.  
+ int WindNo::binscan2(std::vector<bool> &newstate){
+     unsigned int m;
+     std::vector<std::vector<bool>>::iterator it; 
+     it = std::find(basisVec.begin(),basisVec.end(),newstate);
+     if(it == basisVec.end()){
+       //std::cout<<"Element not found here! "<<std::endl; 
+       return -100;
+     }
+     m  = std::distance(basisVec.begin(),it);
+     return m;
+ }
+
 
  void WindNo::disp_Tprop(){
    int i;
@@ -194,5 +209,3 @@
   //printf("Successul allocation. \n");
   //printf("======================\n");
  }
-
- 

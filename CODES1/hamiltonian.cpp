@@ -167,7 +167,7 @@ void constH(std::vector<double> &evals, std::vector<std::vector<double>> &evecs)
   std::cout<<" "<<std::endl;
  }
 
-  /* Matrix val of size N in CSR format. Size N and 3 arrays are used to store matrix in CSR format */
+ /* Matrix val of size N in CSR format. Size N and 3 arrays are used to store matrix in CSR format */
  void diag_matrix(std::vector<MKL_INT> &rows, std::vector<MKL_INT> &cols, std::vector<double> &val, 
     std::vector<double> &evals, std::vector<std::vector<double>> &evecs){
      unsigned int k;

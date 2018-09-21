@@ -19,7 +19,6 @@ extern double lam,Ti,Tf,dT;
 /* NTOT = total no of basis states 
  * NH   = states not killed by H  */
 extern int NTOT;
-
 extern std::vector<std::vector<bool>> basis;
 extern std::vector<std::vector<bool>> basis_nonflip;
 extern std::vector<std::vector<bool>> basis_flip;
@@ -73,10 +72,11 @@ class WindNo{
     void sortbasis();
 
     // function to search a transformed state in the winding number basis
-    // the binary search implemented on the sorted basis states clearly i
+    // the binary search implemented on the sorted basis states clearly 
     // outperforms the linear search
     int scan(std::vector<bool>&);
     int binscan(std::vector<bool>&);
+    int binscan2(std::vector<bool>&);
 
     // Default constructor
     WindNo(){
@@ -97,6 +97,26 @@ class WindNo{
 
 extern std::vector<WindNo> Wind;
 
+// basis for subsystems A and B
+extern std::vector<std::vector<bool>> eA;
+extern std::vector<std::vector<bool>> eB;
+// LEN_A, LEN_B are the sizes of subsystems A and B
+// DA and DB are the respective Hilbert spaces
+extern unsigned int LEN_A,LEN_B,VOL_A,VOL_B;
+extern unsigned int DA, DB;
+
+// Schmidt matrix and decomposed SVD 
+extern double sel_eval;
+extern std::vector<double> sel_evec;
+extern double EE;
+extern double shanonE, IPR, structE;
+
+// functions to create the basis for subsystems A & B
+extern void createBasis(int);
+extern void schmidtDecom(std::vector<double>&, std::vector<std::vector<bool>>&, std::vector<std::vector<bool>>&,int);
+extern void printvec(std::vector<double>&);
+
+
 /* routines */
 void initneighbor(void);
 void conststates(void);
@@ -106,4 +126,6 @@ void winding_no_decompose(void);
 void trans_decompose(int);
 void trans_Hamil(int);
 void calc_Oflip(int);
+void entanglementEntropy(int);
+void structuralEntropy(int);
 #endif 

@@ -91,7 +91,7 @@ void constH(int sector){
    //diag_matrix(Wind[sector].rows,Wind[sector].cols,Wind[sector].hamil,
    //  Wind[sector].evals,Wind[sector].evecs,Wind[sector].nBasis);
    //eigcheck(Wind[sector].evals,Wind[sector].evecs,Wind[sector].nBasis);
-   printmatrix(Wind[sector].rows,Wind[sector].cols,Wind[sector].hamil);
+   //printmatrix(Wind[sector].rows,Wind[sector].cols,Wind[sector].hamil);
 }
 
 int WindNo::scan(std::vector<bool> &newstate){
