@@ -1,6 +1,6 @@
 /* calculate the local operator Oflip */
 /* Oflip calculates the expectation value of the number of flippable
-   plaquettes in a given eigenstate, normalized with the total number 
+   plaquettes in a given eigenstate, normalized with the total number
    of plaquettes   */
 #include<stdio.h>
 #include<stdlib.h>
@@ -22,11 +22,10 @@ void calc_Oflip(std::vector<double> &evals, std::vector<std::vector<double>> &ev
     // calculate the expectation value in each eigenstate
     Oflip_avg = 0.0;
     for(q=0;q<NH;q++){
-      Oflip_avg += evecs[p][q]*evecs[p][q]*Oflip[q]; 
+      Oflip_avg += evecs[p][q]*evecs[p][q]*Oflip[q];
     }
     Oflip_avg = Oflip_avg/((double)VOL);
     fprintf(outf,"%lf %lf\n",evals[p],Oflip_avg);
-  }	
- fclose(outf); 
+  }
+ fclose(outf);
 }
-

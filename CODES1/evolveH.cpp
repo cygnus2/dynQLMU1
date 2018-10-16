@@ -32,13 +32,13 @@ void evolve_cartoons(std::vector<double> &evals, std::vector<std::vector<double>
     }
    }}
    for(p=0;p<NH;p++){
-     q1=scan(cart1); 
+     q1=scan(cart1);
      q2=scan(cart2);
      alpha1.push_back(evecs[p][q1]);
      alpha2.push_back(evecs[p][q2]);
    }
    // check that the coefficients are correctly set
-   //for(p=0;p<NH;p++) std::cout<<alpha1[p]<<" "<<alpha2[p]<<std::endl;
+   for(p=0;p<NH;p++) std::cout<<alpha1[p]<<" "<<alpha2[p]<<std::endl;
    // compute the real-time evolution
    temp1 = 0.0; temp2 = 0.0;
    for(p=0;p<NH;p++){
@@ -64,3 +64,6 @@ void evolve_cartoons(std::vector<double> &evals, std::vector<std::vector<double>
    }
    fclose(outf);
 }
+// Note: I was confused here about a factor of 2 before cos(evals[p]*t)
+// This is simply because I go over the whole set of eigenvalues in
+// calculating the overlap.
