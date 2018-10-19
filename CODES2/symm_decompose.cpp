@@ -62,9 +62,21 @@
     count = lookup[(LX/2)+wx][(LY/2)+wy];
     Wind[count].nBasis++;
     Wind[count].basisVec.push_back(basis[i]);
-    Wind[count].nflip.push_back(count_flip);
   }
   display_basisNo(Wind,nWind);
+
+  // sorting the basis states in each winding number sector
+  //std::cout<<"Sorting the basis in each wind-no sector."<<std::endl;
+  for(i=0; i<nWind; i++){
+     Wind[i].sortbasis();
+  }
+
+  // compute the no of flippable plaquettes in the basis (ice) states
+  // Note that this can only be calculated after sorting the basis!
+  for(i=0; i<nWind; i++){
+     Wind[i].flip_plaq();
+  }
+
  }
 
 /* Compute total number of sectors */
@@ -86,29 +98,23 @@ void init_WindNo(std::vector<WindNo> &Wind,int **lookup, int row, int col){
   count=0;
   /* (Wx,Wy) = (0,0) */
   lookup[LX/2][LY/2]=count;
-  //Wind[count].Wx = 0; Wind[count].Wy = 0; Wind[count].nBasis = 0; count++;
   iWind.Wx = 0; iWind.Wy = 0; iWind.nBasis = 0; Wind.push_back(iWind); count++;
 
   /* (Wx,Wy) = (W,0) */
   for(ix=1;ix<=(LX/2);ix++){
     lookup[(LX/2)+ix][(LY/2)]=count;
-    //Wind[count].Wx = ix; Wind[count].Wy = 0; Wind[count].nBasis = 0; count++;
     iWind.Wx = ix; iWind.Wy = 0; iWind.nBasis = 0; Wind.push_back(iWind); count++;
 
     lookup[(LX/2)-ix][(LY/2)]=count;
-    //Wind[count].Wx =-ix; Wind[count].Wy = 0; Wind[count].nBasis = 0; count++;
     iWind.Wx = -ix; iWind.Wy = 0; iWind.nBasis = 0; Wind.push_back(iWind); count++;
   }
 
   /* (Wx,Wy) = (0,W) */
   for(iy=1;iy<=LY/2;iy++){
     lookup[(LX/2)][(LY/2)+iy]=count;
-    //Wind[count].Wx = 0; Wind[count].Wy = iy; Wind[count].nBasis = 0; count++;
     iWind.Wx = 0; iWind.Wy = iy; iWind.nBasis = 0; Wind.push_back(iWind); count++;
 
-
     lookup[(LX/2)][(LY/2)-iy]=count;
-    //Wind[count].Wx = 0; Wind[count].Wy =-iy; Wind[count].nBasis = 0; count++;
     iWind.Wx = 0; iWind.Wy = -iy; iWind.nBasis = 0; Wind.push_back(iWind); count++;
   }
 
@@ -116,16 +122,12 @@ void init_WindNo(std::vector<WindNo> &Wind,int **lookup, int row, int col){
   for(ix=1;ix<=LX/2;ix++){
   for(iy=1;iy<=LY/2;iy++){
     lookup[(LX/2)+ix][(LY/2)+iy]=count;
-    //Wind[count].Wx = ix; Wind[count].Wy = iy; Wind[count].nBasis = 0; count++;
     iWind.Wx = ix; iWind.Wy = iy; iWind.nBasis = 0; Wind.push_back(iWind); count++;
     lookup[(LX/2)-ix][(LY/2)+iy]=count;
-    //Wind[count].Wx =-ix; Wind[count].Wy = iy; Wind[count].nBasis = 0; count++;
     iWind.Wx = -ix; iWind.Wy = iy; iWind.nBasis = 0; Wind.push_back(iWind); count++;
     lookup[(LX/2)+ix][(LY/2)-iy]=count;
-    //Wind[count].Wx = ix; Wind[count].Wy =-iy; Wind[count].nBasis = 0; count++;
     iWind.Wx = ix; iWind.Wy = -iy; iWind.nBasis = 0; Wind.push_back(iWind); count++;
     lookup[(LX/2)-ix][(LY/2)-iy]=count;
-    //Wind[count].Wx =-ix; Wind[count].Wy =-iy; Wind[count].nBasis = 0; count++;
     iWind.Wx = -ix; iWind.Wy = -iy; iWind.nBasis = 0; Wind.push_back(iWind); count++;
   }}
 }
@@ -148,6 +150,42 @@ void display_basisNo(std::vector<WindNo> &Wind,int size){
     sum = sum + Wind[i].nBasis;
   }
   printf("Total states = %d\n",sum);
+}
 
+// sorts the basis states in a given Winding number sector
+void WindNo::sortbasis(){
+  std::sort(basisVec.begin(),basisVec.end());
+}
+
+
+// calculates the no of flippable plaquettes in each basis state
+void WindNo::flip_plaq(){
+    int i,j,p,p1,p2,p3,p4;
+    int count_flip;
+    bool pxy,pyz,pzw,pwx;
+
+    //printf("In sector (% d, % d); basis states = %ld \n",Wx,Wy,nBasis);
+    // error message for zero basis
+    if(!nBasis){ std::cout<<"Total basis state not defined! "<<std::endl; exit(0); }
+    for(i=0; i<nBasis; i++){
+      // compute the diagonal term in the Hamiltonian
+      /* a single plaquette is arranged as 
+                pzw
+             o-------o
+             |       |
+        pwx  |   p   |  pyz
+             |       |
+             o-------o
+                pxy
+      */
+      count_flip=0;
+      for(j=0;j<VOL;j++){
+          p=chk2lin[j];
+          p1=2*p; p2=2*next[DIM+1][p]+1; p3=2*next[DIM+2][p]; p4=2*p+1;
+          pxy=basisVec[i][p1]; pyz=basisVec[i][p2]; pzw=basisVec[i][p3]; pwx=basisVec[i][p4];
+          if((pxy==pyz)&&(pzw==pwx)&&(pwx!=pxy)) count_flip++;
+      }
+      nflip.push_back(count_flip);
+    }
 }
 

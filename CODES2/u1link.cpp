@@ -11,6 +11,7 @@
  * and also in the header file as extern such that they are avl to
  * the other functions.
  */
+int CHKDIAG;
 int *next[2*DIM+1];
 int *nextCHK[2*DIM+1];
 int *chk2lin,*lin2chk;
@@ -59,6 +60,9 @@ int main(){
   VOL = LX*LY;
   VOL2 = VOL/2;
 
+  // decide whether to check the results of the diagonalization 
+  CHKDIAG=0;
+
   /* Initialize nearest neighbours */
   for(i=0;i<=2*DIM;i++){
     next[i] = (int *)malloc(VOL*sizeof(int)); 
@@ -85,7 +89,7 @@ int main(){
   sector = lookup[LX/2+wx][LY/2+wy];
   constH(sector);
   // calculate the expectation value of Oflip for every eigenstate 
-  //calc_Oflip(sector);
+  calc_Oflip(sector);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }

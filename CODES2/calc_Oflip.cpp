@@ -14,20 +14,25 @@
 // Notation: eigenstate |n> = \sum_k \alpha_k |k>, |k> is a basis state in 
 //           specified winding number (wx,wy) sector.
 void calc_Oflip(int sector){
-  int p,q;
+  MKL_INT p,q,sizet;
+  double v_q, O_q;
   double Oflip_avg;
   FILE *outf;
+
+  sizet = Wind[sector].nBasis;
   outf = fopen("Oflip.dat","w");
   fprintf(outf,"# Results of winding number sector (%d,%d) \n",Wind[sector].Wx,Wind[sector].Wy);
   // scan through all the eigenvalues
-  for(p=0;p<Wind[sector].nBasis;p++){
+  for(p=0;p<sizet;p++){
     // calculate the expectation value in each eigenstate
     Oflip_avg = 0.0;
-    for(q=0;q<Wind[sector].nBasis;q++){
-      Oflip_avg += Wind[sector].evecs[p][q]*Wind[sector].evecs[p][q]*Wind[sector].nflip[q];
+    for(q=0;q<sizet;q++){
+      v_q = Wind[sector].evecs[p*sizet+q]; 
+      O_q = Wind[sector].nflip[q];
+      Oflip_avg += v_q*v_q*O_q; 
     }
     Oflip_avg = Oflip_avg/((double)VOL);
-    fprintf(outf,"%lf %lf\n",Wind[sector].evals[p],Oflip_avg);
+    fprintf(outf,"%.12lf %.12lf\n",Wind[sector].evals[p],Oflip_avg);
   }
  fclose(outf);
 }

@@ -8,6 +8,7 @@
 #define DIM 2
 #define PI 2*asin(1.0)
 
+extern int CHKDIAG;
 extern int *next[2*DIM+1];
 extern int *nextCHK[2*DIM+1];
 extern int *chk2lin,*lin2chk;
@@ -33,21 +34,36 @@ class WindNo{
     long int nBasis;
     std::vector<std::vector<bool>> basisVec;
     std::vector<int> nflip;
-    // Hamiltonian in the sector
+    // Hamiltonian in the sector stored as a sparse matrix
+    // this is the only way of storing the matrix
     std::vector<MKL_INT> rows,cols;
     std::vector<double> hamil;
-    // eigenvalues and eigenvectors
+    double getH(int,int);
+    // simple routine to check the direct way to extract 
+    // elements from a sparse matrix in the CSC representation
+    void check_getH();
+
+    // eigenvalues and eigenvectors in the Winding number object
     std::vector<double> evals;
-    std::vector<std::vector<double>> evecs;
+    std::vector<double> evecs;
 
     // function to display variables
     void display(){
      printf("(Wx,Wy)=(% d,% d) with #-of-states= %ld \n",Wx,Wy,nBasis);
     } 
 
-    // function to calculate the off-diagonal matrix elements of the Hamiltonian
-    // in the winding number basis
+    // function to count flippable plaquettes
+    void flip_plaq(); 
+
+    // function to sort the basis states 
+    void sortbasis();
+
+    // function to search a transformed state in the winding number basis
+    // the binary search implemented on the sorted basis states clearly 
+    // outperforms the linear search
     int scan(std::vector<bool>&);
+    int binscan(std::vector<bool>&);
+    int binscan2(std::vector<bool>&);
 
     // Default constructor
     WindNo(){
