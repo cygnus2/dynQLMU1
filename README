@@ -39,11 +39,5 @@
 #====================
 # TO-DO
 #====================
- Fix the ambiguity between ROW_MAJOR vs COL_MAJOR in CODES2 and CODES2A.
- At the moment, I think it doesn't really matter whether the matrix is
- supplied in the ROW_MAJOR vs COL_MAJOR since in my codes, I supply the
- whole matrix. 
-
- I am fixing this in CODES3; since this is crucial in the SVD. 
- I think the results in CODES2 and CODES2A should be unchanged; but this
- should still be checked.
+ Fix the ambiguity between ROW_MAJOR vs COL_MAJOR in CODES2A.
+ The ones in CODES2 and CODES3 are done!
