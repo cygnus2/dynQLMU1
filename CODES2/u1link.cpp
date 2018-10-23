@@ -93,10 +93,10 @@ int main(){
   calc_Oflip(sector);
 
   // calculate the Entanglement Entropy for the states
-  entanglementEntropy(sector);
+  //entanglementEntropy(sector);
 
-  // calculate the structural entropy
-  //structuralEntropy(sector);
+  // real-time evolution of cartoon states and Locshmidt Echo 
+  evolve_cartoons(sector);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }

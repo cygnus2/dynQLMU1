@@ -107,9 +107,8 @@ extern void printvec(std::vector<double>&);
 void initneighbor(void);
 void conststates(void);
 void constH(int);
-void evolve_cartoons(std::vector<double>&, std::vector<std::vector<double>>&);
 void winding_no_decompose(void);
 void calc_Oflip(int);
 void entanglementEntropy(int);
-void structuralEntropy(int);
+void evolve_cartoons(int);
 #endif 

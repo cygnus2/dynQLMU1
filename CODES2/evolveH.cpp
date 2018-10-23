@@ -9,16 +9,17 @@
 #include "define.h"
 
 // Notation: eigenstate |n> = \sum_k \alpha_k |k>, |k> is a cartoon state
-void evolve_cartoons(std::vector<double> &evals, std::vector<std::vector<double>> &evecs){
-   extern int scan(std::vector<bool>&);
+void evolve_cartoons(int sector){
    int ix,iy,parity,p,q1,q2;
+   int sizet;
    double t;
    double temp1,temp2;
    double ampl1,ampl2,lam1,lam2;
    std::vector<bool> cart1(2*VOL), cart2(2*VOL);
    std::vector<double> alpha1,alpha2;
    FILE *outf;
-   outf = fopen("overlap.dat","w");
+
+   sizet = Wind[sector].nBasis;
    /* construct cartoon state */
    for(iy=0;iy<LY;iy++){
    for(ix=0;ix<LX;ix++){
@@ -31,29 +32,33 @@ void evolve_cartoons(std::vector<double> &evals, std::vector<std::vector<double>
        cart1[p]=true; cart1[p+1]=false; cart2[p]=false;  cart2[p+1]=true;
     }
    }}
-   for(p=0;p<NH;p++){
-     q1=scan(cart1); 
-     q2=scan(cart2);
-     alpha1.push_back(evecs[p][q1]);
-     alpha2.push_back(evecs[p][q2]);
+
+   for(p=0; p<sizet; p++){
+     q1=Wind[sector].binscan(cart1); 
+     q2=Wind[sector].binscan(cart2);
+     alpha1.push_back(Wind[sector].evecs[p*sizet+q1]);
+     alpha2.push_back(Wind[sector].evecs[p*sizet+q2]);
    }
    // check that the coefficients are correctly set
-   //for(p=0;p<NH;p++) std::cout<<alpha1[p]<<" "<<alpha2[p]<<std::endl;
+   for(p=0; p<sizet; p++) std::cout<<alpha1[p]<<" "<<alpha2[p]<<std::endl;
+
+   outf = fopen("overlap.dat","w");
    // compute the real-time evolution
    temp1 = 0.0; temp2 = 0.0;
-   for(p=0;p<NH;p++){
-    if(fabs(evals[p]) < 1e-10){
+   for(p=0; p<sizet; p++){
+    if(fabs(Wind[sector].evals[p]) < 1e-10){
       temp1 = temp1 + alpha1[p]*alpha1[p];
       temp2 = temp2 + alpha2[p]*alpha1[p];
     }
    }
+
    //std::cout<<ampl1<<" "<<ampl2<<std::endl;
    for(t=Ti;t<Tf;t=t+dT){
      ampl1=0.0; ampl2=0.0;
-     for(p=0;p<NH;p++){
-        if(fabs(evals[p]) > 1e-10){
-          ampl1 = ampl1 + alpha1[p]*alpha1[p]*cos(evals[p]*t);
-          ampl2 = ampl2 + alpha2[p]*alpha1[p]*cos(evals[p]*t);
+     for(p=0; p<sizet; p++){
+        if(fabs(Wind[sector].evals[p]) > 1e-10){
+          ampl1 = ampl1 + alpha1[p]*alpha1[p]*cos(Wind[sector].evals[p]*t);
+          ampl2 = ampl2 + alpha2[p]*alpha1[p]*cos(Wind[sector].evals[p]*t);
         } // close if-loop
      } // close for-loop
      ampl1 = ampl1 + temp1; ampl2 = ampl2 + temp2;

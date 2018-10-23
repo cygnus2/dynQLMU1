@@ -1,7 +1,7 @@
 CC=icc
 CXX=icpc
 LIBS=-lgsl -lgslcblas -lm -mkl -lmkl_rt -lmkl_intel_lp64 -lmkl_core 
-OBJS=u1link.o common.o construct.o symm_decompose.o diag.o hamiltonian.o calc_Oflip.o subsystem.o 
+OBJS=u1link.o common.o construct.o symm_decompose.o diag.o hamiltonian.o calc_Oflip.o subsystem.o evolveH.o
 CFLAGS= -std=c99 -Wall
 CXXFLAGS= -std=c++11 -Wall -mcmodel=large -shared-intel -DMKL_ILP64
 
