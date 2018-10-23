@@ -61,6 +61,8 @@ void entanglementEntropy(int sector){
   eB.clear();
 }
 
+// calculate the entanglement entropy of a selected state
+
 // calculate the (gauge-invariant) basis of sub-systems A and B
 void createBasis(int sector){
   int i,source,sink;
