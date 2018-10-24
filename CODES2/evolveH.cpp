@@ -14,7 +14,8 @@ void evolve_cartoons(int sector){
    int sizet;
    double t;
    double temp1,temp2;
-   double ampl1,ampl2,lam1,lam2;
+   double ampl1_RE,ampl1_IM,ampl2_RE,ampl2_IM;
+   double lam1,lam2;
    std::vector<bool> cart1(2*VOL), cart2(2*VOL);
    std::vector<double> alpha1,alpha2;
    FILE *outf;
@@ -40,7 +41,7 @@ void evolve_cartoons(int sector){
      alpha2.push_back(Wind[sector].evecs[p*sizet+q2]);
    }
    // check that the coefficients are correctly set
-   for(p=0; p<sizet; p++) std::cout<<alpha1[p]<<" "<<alpha2[p]<<std::endl;
+   //for(p=0; p<sizet; p++) std::cout<<alpha1[p]<<" "<<alpha2[p]<<std::endl;
 
    outf = fopen("overlap.dat","w");
    // compute the real-time evolution
@@ -54,18 +55,21 @@ void evolve_cartoons(int sector){
 
    //std::cout<<ampl1<<" "<<ampl2<<std::endl;
    for(t=Ti;t<Tf;t=t+dT){
-     ampl1=0.0; ampl2=0.0;
+     ampl1_RE=0.0; ampl2_RE=0.0;
+     ampl1_IM=0.0; ampl2_IM=0.0;
      for(p=0; p<sizet; p++){
         if(fabs(Wind[sector].evals[p]) > 1e-10){
-          ampl1 = ampl1 + alpha1[p]*alpha1[p]*cos(Wind[sector].evals[p]*t);
-          ampl2 = ampl2 + alpha2[p]*alpha1[p]*cos(Wind[sector].evals[p]*t);
+          ampl1_RE = ampl1_RE + alpha1[p]*alpha1[p]*cos(Wind[sector].evals[p]*t);
+          ampl2_RE = ampl2_RE + alpha2[p]*alpha1[p]*cos(Wind[sector].evals[p]*t);
+          ampl1_IM = ampl1_IM + alpha1[p]*alpha1[p]*sin(Wind[sector].evals[p]*t);
+          ampl2_IM = ampl2_IM + alpha2[p]*alpha1[p]*sin(Wind[sector].evals[p]*t);
         } // close if-loop
      } // close for-loop
-     ampl1 = ampl1 + temp1; ampl2 = ampl2 + temp2;
+     ampl1_RE = ampl1_RE + temp1; ampl2_RE = ampl2_RE + temp2;
      //std::cout<<t<<" "<<ampl1<<std::endl;
-     lam1 = -log(ampl1*ampl1)/VOL;
-     lam2 = -log(ampl2*ampl2)/VOL;
-     fprintf(outf,"%.2f % lf % lf % lf % lf\n",t,ampl1,ampl2,lam1,lam2);
+     lam1 = -log(ampl1_RE*ampl1_RE + ampl1_IM*ampl1_IM)/VOL;
+     lam2 = -log(ampl2_RE*ampl2_RE + ampl2_IM*ampl2_IM)/VOL;
+     fprintf(outf,"%.2f % lf % lf % lf % lf % lf % lf\n",t,ampl1_RE,ampl1_IM,ampl2_RE,ampl2_IM,lam1,lam2);
    }
    fclose(outf);
 }
