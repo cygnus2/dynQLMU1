@@ -14,7 +14,8 @@ void evolve_cartoons(std::vector<double> &evals, std::vector<std::vector<double>
    int ix,iy,parity,p,q1,q2;
    double t;
    double temp1,temp2;
-   double ampl1,ampl2,lam1,lam2;
+   double ampl1_RE, ampl1_IM, ampl2_RE, ampl2_IM;
+   double lam1,lam2;
    std::vector<bool> cart1(2*VOL), cart2(2*VOL);
    std::vector<double> alpha1,alpha2;
    FILE *outf;
@@ -38,7 +39,7 @@ void evolve_cartoons(std::vector<double> &evals, std::vector<std::vector<double>
      alpha2.push_back(evecs[p][q2]);
    }
    // check that the coefficients are correctly set
-   for(p=0;p<NH;p++) std::cout<<alpha1[p]<<" "<<alpha2[p]<<std::endl;
+   //for(p=0;p<NH;p++) std::cout<<alpha1[p]<<" "<<alpha2[p]<<std::endl;
    // compute the real-time evolution
    temp1 = 0.0; temp2 = 0.0;
    for(p=0;p<NH;p++){
@@ -49,21 +50,31 @@ void evolve_cartoons(std::vector<double> &evals, std::vector<std::vector<double>
    }
    //std::cout<<ampl1<<" "<<ampl2<<std::endl;
    for(t=Ti;t<Tf;t=t+dT){
-     ampl1=0.0; ampl2=0.0;
+     ampl1_RE=0.0; ampl2_RE=0.0;
+     ampl1_IM=0.0; ampl2_IM=0.0;
      for(p=0;p<NH;p++){
         if(fabs(evals[p]) > 1e-10){
-          ampl1 = ampl1 + alpha1[p]*alpha1[p]*cos(evals[p]*t);
-          ampl2 = ampl2 + alpha2[p]*alpha1[p]*cos(evals[p]*t);
+          ampl1_RE = ampl1_RE + alpha1[p]*alpha1[p]*cos(evals[p]*t);
+          ampl2_RE = ampl2_RE + alpha2[p]*alpha1[p]*cos(evals[p]*t);
+          ampl1_IM = ampl1_IM + alpha1[p]*alpha1[p]*sin(evals[p]*t);
+          ampl2_IM = ampl2_IM + alpha2[p]*alpha1[p]*sin(evals[p]*t);
         } // close if-loop
      } // close for-loop
-     ampl1 = ampl1 + temp1; ampl2 = ampl2 + temp2;
+     ampl1_RE = ampl1_RE + temp1; ampl2_RE = ampl2_RE + temp2;
      //std::cout<<t<<" "<<ampl1<<std::endl;
-     lam1 = -log(ampl1*ampl1)/VOL;
-     lam2 = -log(ampl2*ampl2)/VOL;
-     fprintf(outf,"%.2f % lf % lf % lf % lf\n",t,ampl1,ampl2,lam1,lam2);
+     lam1 = -log(ampl1_RE*ampl1_RE + ampl1_IM*ampl1_IM)/VOL;
+     lam2 = -log(ampl2_RE*ampl2_RE + ampl2_IM*ampl2_IM)/VOL;
+     fprintf(outf,"%.2f % lf % lf % lf % lf % lf % lf\n",t,ampl1_RE,ampl1_IM,ampl2_RE,ampl2_IM,lam1,lam2);
    }
    fclose(outf);
 }
 // Note: I was confused here about a factor of 2 before cos(evals[p]*t)
 // This is simply because I go over the whole set of eigenvalues in
 // calculating the overlap.
+
+// Note2: For lambda=0, the spectrum is symmetric about E=0, and hence
+// the imaginary part is exactly zero. The imaginary part no longer
+// vanishes for lambda!=0, and hence needs to be computed explicitly.
+// As in the paper https://arxiv.org/pdf/1709.07461.pdf, eq (10), 
+// L(t) = |G(t)|^2, and hence has contributions from both the real
+// and the imaginary part. 
