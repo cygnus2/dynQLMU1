@@ -8,7 +8,7 @@
 #define DIM 2
 #define PI 2*asin(1.0)
 
-extern int CHKDIAG;
+extern int CHKDIAG,STORE_SVD;
 extern int *next[2*DIM+1];
 extern int *nextCHK[2*DIM+1];
 extern int *chk2lin,*lin2chk;
@@ -90,14 +90,14 @@ extern std::vector<std::vector<bool>> eB;
 // LEN_A, LEN_B are the sizes of subsystems A and B
 // DA and DB are the respective Hilbert spaces
 extern unsigned int LEN_A,LEN_B,VOL_A,VOL_B;
-extern unsigned int DA, DB;
+extern unsigned int DA, DB, NCHI;
 
 // Schmidt matrix and decomposed SVD 
 extern double sel_eval;
 extern std::vector<double> sel_evec;
-extern double EE;
+extern double EE1,EE2;
 extern double shanonE, IPR, structE;
-
+extern std::vector<double> chiSVD_evec;
 // functions to create the basis for subsystems A & B
 extern void createBasis(int);
 extern void schmidtDecom(std::vector<double>&, std::vector<std::vector<bool>>&, std::vector<std::vector<bool>>&,int);
@@ -111,4 +111,5 @@ void winding_no_decompose(void);
 void calc_Oflip(int);
 void entanglementEntropy(int);
 void evolve_cartoons(int);
+void evolve_Eent(int);
 #endif 

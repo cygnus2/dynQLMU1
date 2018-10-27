@@ -11,7 +11,6 @@
  * and also in the header file as extern such that they are avl to
  * the other functions.
  */
-int CHKDIAG;
 int *next[2*DIM+1];
 int *nextCHK[2*DIM+1];
 int *chk2lin,*lin2chk;
@@ -27,6 +26,8 @@ int NTOT,NH;
 std::vector<std::vector<bool>> basis;
 std::vector<std::vector<bool>> basis_nonflip;
 std::vector<std::vector<bool>> basis_flip;
+int STORE_SVD;
+int CHKDIAG;
 
 int main(){
   FILE *fptr;
@@ -92,11 +93,18 @@ int main(){
   // calculate the expectation value of Oflip for every eigenstate 
   calc_Oflip(sector);
 
-  // calculate the Entanglement Entropy for the states
-  entanglementEntropy(sector);
-
   // real-time evolution of cartoon states and Locshmidt Echo 
-  evolve_cartoons(sector);
+  //evolve_cartoons(sector);
+
+  // real-time evolution of Entanglement Entropy
+  // for this, one needs to store the SVD coefficients
+  STORE_SVD = 1;
+  evolve_Eent(sector);
+
+  // calculate the Entanglement Entropy for the states
+  // to only calculate the 
+  //STORE_SVD = 0;
+  //entanglementEntropy(sector);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }

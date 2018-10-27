@@ -15,8 +15,9 @@ extern void findBasisB(std::vector<std::vector<bool>>&, std::vector<bool>&);
 
 // variables used in this set of functions
 unsigned int LEN_A,LEN_B,VOL_A,VOL_B;
-unsigned int DA,DB;
+unsigned int DA,DB,NCHI;
 double EE;
+
 // basis for subsystems A and B
 std::vector<std::vector<bool>> eA;
 std::vector<std::vector<bool>> eB;
@@ -28,6 +29,7 @@ std::vector<double> sel_evec;
 // corresponding to the cut specified
 void entanglementEntropy(int sector){
   int p,i;
+  int q1,q2;
   FILE *outf;
   MKL_INT sizet;
 
@@ -46,10 +48,13 @@ void entanglementEntropy(int sector){
     // initialize the state and the entropy
     sel_evec.clear(); EE = -100.0;
     sel_eval = Wind[sector].evals[p];
+    // two ways of copying the vector; both give same result
     for(i=0; i<sizet; i++){
        sel_evec.push_back(Wind[sector].evecs[p*sizet+i]);
     }
-    std::cout<<"Going to do Schmidt decompose eigenvector = "<< p << std::endl;
+    //q1 = p*sizet; q2 = (p+1)*sizet; 
+    //sel_evec.insert(sel_evec.begin(), Wind[sector].evecs.begin()+q1, Wind[sector].evecs.begin()+q2);
+    //std::cout<<"Going to do Schmidt decompose eigenvector = "<< p << std::endl;
     //printvec(sel_evec);
     schmidtDecom(sel_evec,eA,eB,sector);
     // write to file
@@ -60,8 +65,6 @@ void entanglementEntropy(int sector){
   eA.clear();
   eB.clear();
 }
-
-// calculate the entanglement entropy of a selected state
 
 // calculate the (gauge-invariant) basis of sub-systems A and B
 void createBasis(int sector){
@@ -102,6 +105,10 @@ void createBasis(int sector){
   DA = eA.size(); DB = eB.size();
   std::cout<<"Basis of subsystem A after sort+delete = "<<DA<<std::endl;
   std::cout<<"Basis of subsystem B after sort+delete = "<<DB<<std::endl;
+  // initialize the number of SVD vectors
+  if(DA < DB) NCHI = DA;
+  else NCHI = DB;
+
   // print subsystem configuration
   //printconfA(eA);
   //printconfB(eB);
@@ -126,6 +133,9 @@ void schmidtDecom(std::vector<double> &vec, std::vector<std::vector<bool>> &eA,
   chi     = (double*)malloc((M*N)*sizeof(double));
   chi_svd = (double*)malloc(dmin*sizeof(double)); 
   superb  = (double*)malloc((dmin-1)*sizeof(double));
+
+  // a simple check; remove it later
+  if(NCHI != dmin) std::cout<<"why does NCHI change from one evec to another?"<<std::endl;
 
   // initialize chi
   for(i=0;i<(DA*DB);i++) chi[i]=0.0;
@@ -172,12 +182,16 @@ void schmidtDecom(std::vector<double> &vec, std::vector<std::vector<bool>> &eA,
   for(i=0;i<dmin; i++) norm += chi_svd[i]*chi_svd[i];
   if( fabs(norm - 1.0) > 1e-6) std::cout<<"Norm of svd ="<<norm<<std::endl;
 
-  EE=0.0;
-  for(i=0; i<dmin; i++){
-   if(chi_svd[i] < 1e-6) continue;
-    EE -= chi_svd[i]*chi_svd[i]*log(chi_svd[i]*chi_svd[i]);
+  // if the coefficients are needed later, store them!
+  if(STORE_SVD==1) chiSVD_evec.insert(chiSVD_evec.end(), chi_svd, chi_svd+dmin);
+  if(STORE_SVD==0){
+     EE=0.0;
+     for(i=0; i<dmin; i++){
+        if(chi_svd[i] < 1e-6) continue;
+        EE -= chi_svd[i]*chi_svd[i]*log(chi_svd[i]*chi_svd[i]);
+     }
+     //std::cout<<"Entanglement Entropy = "<<EE<<std::endl;
   }
-  //std::cout<<"Entanglement Entropy = "<<EE<<std::endl;
 
   // clear memory
   free(chi); free(chi_svd); free(superb);

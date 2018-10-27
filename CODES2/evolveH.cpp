@@ -72,4 +72,7 @@ void evolve_cartoons(int sector){
      fprintf(outf,"%.2f % lf % lf % lf % lf % lf % lf\n",t,ampl1_RE,ampl1_IM,ampl2_RE,ampl2_IM,lam1,lam2);
    }
    fclose(outf);
+
+   alpha1.clear();
+   alpha2.clear();
 }
