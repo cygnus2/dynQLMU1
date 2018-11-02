@@ -150,6 +150,7 @@ void storeconf(bool *conf,int* count){
   (*count)++;
   //printf("%d\n",(*count));
   //printf("current size = %d\n",(int)basis.size());
+  temp.clear();
  }
 
 /* 

@@ -47,6 +47,9 @@ class WindNo{
     std::vector<double> evals;
     std::vector<double> evecs;
 
+    // information about correlation functions
+    std::vector<std::vector<double>> oflip;
+
     // function to display variables
     void display(){
      printf("(Wx,Wy)=(% d,% d) with #-of-states= %ld \n",Wx,Wy,nBasis);
@@ -112,4 +115,5 @@ void calc_Oflip(int);
 void entanglementEntropy(int);
 void evolve_cartoons(int);
 void evolve_Eent(int);
+void evolve_corrf1(int);
 #endif 

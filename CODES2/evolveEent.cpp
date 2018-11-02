@@ -11,6 +11,7 @@
 std::vector<double> chiSVD_evec;
 
 void evolve_Eent(int sector){
+   
    int i,ix,iy,parity,p,q1,q2;
    int sizet,nchi,d;
    double t;
@@ -43,7 +44,6 @@ void evolve_Eent(int sector){
      alpha1.push_back(Wind[sector].evecs[p*sizet+q1]);
      alpha2.push_back(Wind[sector].evecs[p*sizet+q2]);
    }
-  std::cout<<"Size of alphas ="<<alpha1.size()<<" "<<alpha2.size()<<std::endl;
 
   // Construct the spin basis for the sub-systems
   LEN_B = LX - LEN_A;
@@ -54,7 +54,6 @@ void evolve_Eent(int sector){
   chi1RE.reserve(NCHI); chi1IM.reserve(NCHI); chi2RE.reserve(NCHI); chi2IM.reserve(NCHI);
   temp1.reserve(NCHI); temp2.reserve(NCHI);
 
-
   // get the Schmidt coefficients for each eigenstates
   for(p=0; p<sizet; p++){
     sel_evec.clear(); 
@@ -62,14 +61,11 @@ void evolve_Eent(int sector){
     for(i=0; i<sizet; i++){
        sel_evec.push_back(Wind[sector].evecs[p*sizet+i]);
     }
-    std::cout<<"Vector "<<p<<std::endl;
+    //std::cout<<"Vector "<<p<<std::endl;
     schmidtDecom(sel_evec,eA,eB,sector);
   }
 
   // the time independent part of the EE (from the zero eigenvalues)
-  std::cout<<"Here ! NCHI ="<<NCHI<<std::endl;
-  std::cout<<"size of chiSVD_evec = "<<chiSVD_evec.size()<<std::endl;
-
   for(d=0;d<NCHI;d++){
     temp1[d]=0.0; temp2[d]=0.0;
     for(p=0; p<sizet; p++){
@@ -103,7 +99,7 @@ void evolve_Eent(int sector){
         EE1 -= abschi1*log(abschi1);  
         EE2 -= abschi2*log(abschi2);  
      }
-     fprintf(outf,"%.2f % lf % lf\n",t,EE1,EE2);
+     fprintf(outf,"%.4f % lf % lf\n",t,EE1,EE2);
   }
   fclose(outf);
 
@@ -111,3 +107,4 @@ void evolve_Eent(int sector){
   chi1RE.clear(); chi2RE.clear(); chi1IM.clear(); chi2IM.clear();
   temp1.clear(); temp2.clear();
 }
+

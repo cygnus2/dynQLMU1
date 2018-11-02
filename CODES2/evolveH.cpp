@@ -53,7 +53,6 @@ void evolve_cartoons(int sector){
     }
    }
 
-   //std::cout<<ampl1<<" "<<ampl2<<std::endl;
    for(t=Ti;t<Tf;t=t+dT){
      ampl1_RE=0.0; ampl2_RE=0.0;
      ampl1_IM=0.0; ampl2_IM=0.0;
@@ -69,7 +68,7 @@ void evolve_cartoons(int sector){
      //std::cout<<t<<" "<<ampl1<<std::endl;
      lam1 = -log(ampl1_RE*ampl1_RE + ampl1_IM*ampl1_IM)/VOL;
      lam2 = -log(ampl2_RE*ampl2_RE + ampl2_IM*ampl2_IM)/VOL;
-     fprintf(outf,"%.2f % lf % lf % lf % lf % lf % lf\n",t,ampl1_RE,ampl1_IM,ampl2_RE,ampl2_IM,lam1,lam2);
+     fprintf(outf,"%.4f % lf % lf % lf % lf % lf % lf\n",t,ampl1_RE,ampl1_IM,ampl2_RE,ampl2_IM,lam1,lam2);
    }
    fclose(outf);
 

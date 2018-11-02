@@ -94,12 +94,15 @@ int main(){
   calc_Oflip(sector);
 
   // real-time evolution of cartoon states and Locshmidt Echo 
-  //evolve_cartoons(sector);
+  evolve_cartoons(sector);
 
   // real-time evolution of Entanglement Entropy
   // for this, one needs to store the SVD coefficients
   STORE_SVD = 1;
   evolve_Eent(sector);
+
+  // real-time correlation function
+  evolve_corrf1(sector);
 
   // calculate the Entanglement Entropy for the states
   // to only calculate the 
