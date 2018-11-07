@@ -98,12 +98,13 @@ extern unsigned int DA, DB, NCHI;
 // Schmidt matrix and decomposed SVD 
 extern double sel_eval;
 extern std::vector<double> sel_evec;
-extern double EE1,EE2;
 extern double shanonE, IPR, structE;
 extern std::vector<double> chiSVD_evec;
 // functions to create the basis for subsystems A & B
 extern void createBasis(int);
 extern void schmidtDecom(std::vector<double>&, std::vector<std::vector<bool>>&, std::vector<std::vector<bool>>&,int);
+extern double schmidtDecomRT(std::vector<double>&, std::vector<double>&, std::vector<std::vector<bool>>&,
+  std::vector<std::vector<bool>>&,int);
 extern void printvec(std::vector<double>&);
 
 /* routines */

@@ -103,6 +103,9 @@ void diag_LAPACK_RRR(MKL_INT sector, std::vector<double>& matrix, std::vector<do
       A[i+j*N]=Wind[sector].getH(i,j);
   }}
 
+  /* print full matrix */
+  //print_matrix("Full matrix", N, N, A, LDA);
+
   abstol = -1;
   printf("Going to RRR routine. \n");
   info = LAPACKE_dsyevr( LAPACK_COL_MAJOR, 'V', 'A', 'U', N, A, LDA,

@@ -8,103 +8,169 @@
 #include<algorithm>
 #include "define.h"
 
-std::vector<double> chiSVD_evec;
+extern void print_zmatrix( char*, MKL_INT, MKL_INT, MKL_Complex16*, MKL_INT ); 
+extern void patch(std::vector<bool>&, std::vector<bool>&, std::vector<bool>&);
+extern void print_zmatrix( char* , MKL_INT , MKL_INT , MKL_Complex16* , MKL_INT  );
+extern void print_rmatrix( char* , MKL_INT , MKL_INT , double* , MKL_INT  );
+extern int checkGL2(std::vector<bool>&);
 
 void evolve_Eent(int sector){
    
    int i,ix,iy,parity,p,q1,q2;
-   int sizet,nchi,d;
-   double t;
-   std::vector<bool> cart1(2*VOL), cart2(2*VOL);
-   std::vector<double> alpha1,alpha2;
-   // chi1 and chi2 are the SVD time-dependent coefficients for 
-   // the two cartoon states. Note, NCHI is not yet calculated!
-   std::vector<double> chi1RE, chi1IM, chi2RE, chi2IM;
-   std::vector<double> temp1, temp2;
-   FILE *outf;
-   double EE1, EE2, abschi1, abschi2;
-
+   int sizet,nchi,d,k,m;
+   double t,entE;
    sizet = Wind[sector].nBasis;
+   std::vector<bool> cart1(2*VOL);
+   std::vector<double> alpha_real(sizet,0.0);
+   std::vector<double> alpha_imag(sizet,0.0);
+   FILE *outf;
+   double overlap,norm;
+  
+   sizet = Wind[sector].nBasis; 
+
    /* construct cartoon state */
    for(iy=0;iy<LY;iy++){
    for(ix=0;ix<LX;ix++){
     parity=(ix+iy)%2;
     p = 2*(iy*LX+ix);
-    if(parity){
-       cart1[p]=false; cart1[p+1]=true; cart2[p]=true;  cart2[p+1]=false;
-    }
-    else{
-       cart1[p]=true; cart1[p+1]=false; cart2[p]=false;  cart2[p+1]=true;
-    }
+    if(parity){ cart1[p]=false; cart1[p+1]=true; }
+    else{ cart1[p]=true; cart1[p+1]=false; }
    }}
 
-   for(p=0; p<sizet; p++){
-     q1=Wind[sector].binscan(cart1); 
-     q2=Wind[sector].binscan(cart2);
-     alpha1.push_back(Wind[sector].evecs[p*sizet+q1]);
-     alpha2.push_back(Wind[sector].evecs[p*sizet+q2]);
+   q1=Wind[sector].binscan(cart1);
+
+   // Construct the spin basis for the sub-systems
+   LEN_B = LX - LEN_A;
+   VOL_A = LEN_A*LY; VOL_B = LEN_B*LY;
+   createBasis(sector);
+
+   outf = fopen("EENT_tevol.dat","w");
+   // calculate alpha(t)
+   for(t=Ti; t<Tf; t=t+dT){
+      alpha_real.assign(alpha_real.size(), 0.0);
+      alpha_imag.assign(alpha_imag.size(), 0.0);
+      for(k=0; k<sizet; k++){
+      for(m=0; m<sizet; m++){
+          if(fabs(Wind[sector].evals[m]) < 1e-10){
+               alpha_real[k] += Wind[sector].evecs[m*sizet+k]*Wind[sector].evecs[m*sizet+q1];
+          }
+          else{
+               alpha_real[k] += Wind[sector].evecs[m*sizet+k]*Wind[sector].evecs[m*sizet+q1]*cos(Wind[sector].evals[m]*t);
+               alpha_imag[k] += Wind[sector].evecs[m*sizet+k]*Wind[sector].evecs[m*sizet+q1]*sin(Wind[sector].evals[m]*t);
+
+          }
+      }}
+      // check norm
+      //norm=0.0;
+      //for(k=0; k<sizet; k++){ 
+      //  norm += alpha_real[k]*alpha_real[k] + alpha_imag[k]*alpha_imag[k];
+      //};
+      //if( fabs(norm-1.0) >  1e-6) std::cout<<"t = "<<t<<" Norm = "<<norm<<std::endl;
+      entE = schmidtDecomRT(alpha_real,alpha_imag,eA,eB,sector);
+      fprintf(outf,"%lf %lf\n",t,entE);
    }
-
-  // Construct the spin basis for the sub-systems
-  LEN_B = LX - LEN_A;
-  VOL_A = LEN_A*LY; VOL_B = LEN_B*LY;
-  createBasis(sector);
-
-  // now reserve and initialize.
-  chi1RE.reserve(NCHI); chi1IM.reserve(NCHI); chi2RE.reserve(NCHI); chi2IM.reserve(NCHI);
-  temp1.reserve(NCHI); temp2.reserve(NCHI);
-
-  // get the Schmidt coefficients for each eigenstates
-  for(p=0; p<sizet; p++){
-    sel_evec.clear(); 
-    sel_eval = Wind[sector].evals[p];
-    for(i=0; i<sizet; i++){
-       sel_evec.push_back(Wind[sector].evecs[p*sizet+i]);
-    }
-    //std::cout<<"Vector "<<p<<std::endl;
-    schmidtDecom(sel_evec,eA,eB,sector);
-  }
-
-  // the time independent part of the EE (from the zero eigenvalues)
-  for(d=0;d<NCHI;d++){
-    temp1[d]=0.0; temp2[d]=0.0;
-    for(p=0; p<sizet; p++){
-       if(chiSVD_evec[p*NCHI+d] < 1e-10) continue;
-       if(fabs(Wind[sector].evals[p]) < 1e-10){
-         temp1[d] = temp1[d] + alpha1[p]*chiSVD_evec[p*NCHI+d];
-         temp2[d] = temp2[d] + alpha2[p]*chiSVD_evec[p*NCHI+d];
-      }
-    }
-  }
-
-  outf = fopen("EENT_tevol.dat","w");
-  // real-time evolution of the entanglement entropy
-  for(t=Ti;t<Tf;t=t+dT){
-     EE1 = 0.0; EE2 = 0.0;
-     for(d=0;d<NCHI;d++){
-     chi1RE[d]=0.0; chi1IM[d]=0.0; chi2RE[d]=0.0; chi2IM[d]=0.0;   
-     for(p=0; p<sizet; p++){
-       if(chiSVD_evec[p*NCHI+d] < 1e-10) continue;
-       if(fabs(Wind[sector].evals[p]) > 1e-10){
-         chi1RE[d] = chi1RE[d] + alpha1[p]*chiSVD_evec[p*NCHI+d]*cos(Wind[sector].evals[p]*t);
-         chi2RE[d] = chi2RE[d] + alpha2[p]*chiSVD_evec[p*NCHI+d]*cos(Wind[sector].evals[p]*t);
-         chi1IM[d] = chi1IM[d] + alpha1[p]*chiSVD_evec[p*NCHI+d]*sin(Wind[sector].evals[p]*t);
-         chi2IM[d] = chi2IM[d] + alpha2[p]*chiSVD_evec[p*NCHI+d]*sin(Wind[sector].evals[p]*t);
-        }
-     }} // close loops for p,d
-     // get the Ent Entropy
-     for(d=0;d<NCHI;d++){
-        abschi1 = (chi1RE[d]+temp1[d])*(chi1RE[d]+temp1[d]) + chi1IM[d]*chi1IM[d]; 
-        abschi2 = (chi2RE[d]+temp2[d])*(chi2RE[d]+temp2[d]) + chi2IM[d]*chi2IM[d];
-        EE1 -= abschi1*log(abschi1);  
-        EE2 -= abschi2*log(abschi2);  
-     }
-     fprintf(outf,"%.4f % lf % lf\n",t,EE1,EE2);
-  }
-  fclose(outf);
-
-  chiSVD_evec.clear();
-  chi1RE.clear(); chi2RE.clear(); chi1IM.clear(); chi2IM.clear();
-  temp1.clear(); temp2.clear();
+   fclose(outf);
 }
 
+double schmidtDecomRT(std::vector<double> &alpha_real, std::vector<double> &alpha_imag, 
+  std::vector<std::vector<bool>> &eA, std::vector<std::vector<bool>> &eB, int sector){
+
+  int i,j,p,k;
+  int flagGI,count;
+  double norm,EE;
+  std::vector<bool> cA(2*VOL_A),cB(2*VOL_B),conf(2*VOL);
+  MKL_Complex16 *chi, *u, *vt;
+  double *chi_svd, *superb;
+  MKL_INT M, N, LDA, info;
+  MKL_INT dmin;
+  MKL_INT ldu, ldvt;
+  M = DA; N = DB;
+  ldu = M; ldvt = N;
+  if(DA < DB) dmin = DA;
+  else dmin = DB;
+  chi     = (MKL_Complex16*)malloc((M*N)*sizeof(MKL_Complex16));
+  //u       = (MKL_Complex16*)malloc((ldu*M)*sizeof(MKL_Complex16));
+  //vt      = (MKL_Complex16*)malloc((ldvt*N)*sizeof(MKL_Complex16));
+  chi_svd = (double*)malloc(dmin*sizeof(double)); 
+  superb  = (double*)malloc((dmin-1)*sizeof(double));
+  // initialize chi
+  for(i=0;i<(DA*DB);i++) { chi[i].real=0.0; chi[i].imag=0.0; }
+
+  // calculate chi
+  // for future save the i*DB+j <----> p into an array
+  count=0;
+  for(i=0; i<DA; i++){
+  for(j=0; j<DB; j++){
+      cA = eA[i]; cB = eB[j];
+      patch(conf,cA,cB);
+      // if Gauss Law not satisfied, skip the patching
+      flagGI = checkGL2(conf);
+      if(flagGI==0) continue;
+      count++;
+      // match with the corresponding basis state in the winding number sector
+      p = Wind[sector].binscan2(conf);
+      if(p == -100) continue;
+      // note that this is ROW_MAJOR_REPRESENTATION in contrast to the representations
+      // used in the diagonalization routines. 
+      chi[i*DB+j] = {alpha_real[p], alpha_imag[p]};
+  }}
+  // std::cout<<"total no of GI states by patching "<<count<<std::endl;
+  // check norm
+  norm = 0.0;
+  for(i=0;i<(DA*DB);i++) norm += (chi[i].real*chi[i].real + chi[i].imag*chi[i].imag);
+  if( fabs(norm-1.0) >  1e-6) std::cout<<"Norm = "<<norm<<std::endl;
+
+  //printf( "LAPACKE_dgesvd (row-major, high-level) Example Program Results\n" );
+  /* Compute SVD */
+  info = LAPACKE_zgesvd( LAPACK_ROW_MAJOR, 'N', 'N', DA, DB, chi, DB,
+                  chi_svd, u, ldu, vt, ldvt, superb );
+  /* Check for convergence */
+  if( info > 0 ) {
+         printf( "The algorithm computing SVD failed to converge.\n" );
+         exit( 1 );
+  } 
+  /* Print singular values */
+  //print_rmatrix( "Singular values", 1, dmin, chi_svd, 1 );
+  /* Print left singular vectors */
+  //print_zmatrix( "Left singular vectors (stored columnwise)", M, M, u, ldu );
+  /* Print right singular vectors */
+  //print_zmatrix( "Right singular vectors (stored rowwise)", M, N, vt, ldvt );
+
+  // check norm
+  norm = 0;
+  for(i=0;i<dmin; i++) norm += chi_svd[i]*chi_svd[i];
+  if( fabs(norm - 1.0) > 1e-6) std::cout<<"Norm of svd ="<<norm<<std::endl;
+
+  EE=0.0;
+  for(i=0; i<dmin; i++){
+      if(chi_svd[i] < 1e-6) continue;
+      EE -= chi_svd[i]*chi_svd[i]*log(chi_svd[i]*chi_svd[i]);
+  }
+  //std::cout<<"Entanglement Entropy = "<<EE<<std::endl;
+
+  // clear memory
+  free(chi); free(chi_svd); free(superb);
+  //free(u); free(vt);
+  return EE;
+}
+
+/* Auxiliary routine: printing a complex matrix */
+void print_zmatrix( char* desc, MKL_INT m, MKL_INT n, MKL_Complex16* a, MKL_INT lda ) {
+        MKL_INT i, j;
+        printf( "\n %s\n", desc );
+        for( i = 0; i < m; i++ ) {
+                for( j = 0; j < n; j++ )
+                        printf( " (%6.2f,%6.2f)", a[i*lda+j].real, a[i*lda+j].imag );
+                printf( "\n" );
+        }
+}
+
+/* Auxiliary routine: printing a real matrix */
+void print_rmatrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda ) {
+        MKL_INT i, j;
+        printf( "\n %s\n", desc );
+        for( i = 0; i < m; i++ ) {
+                for( j = 0; j < n; j++ ) printf( " %6.2f", a[i*lda+j] );
+                printf( "\n" );
+        }
+}

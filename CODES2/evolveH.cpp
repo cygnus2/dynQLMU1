@@ -34,9 +34,9 @@ void evolve_cartoons(int sector){
     }
    }}
 
+   q1=Wind[sector].binscan(cart1); 
+   q2=Wind[sector].binscan(cart2);
    for(p=0; p<sizet; p++){
-     q1=Wind[sector].binscan(cart1); 
-     q2=Wind[sector].binscan(cart2);
      alpha1.push_back(Wind[sector].evecs[p*sizet+q1]);
      alpha2.push_back(Wind[sector].evecs[p*sizet+q2]);
    }

@@ -135,7 +135,7 @@ void schmidtDecom(std::vector<double> &vec, std::vector<std::vector<bool>> &eA,
   superb  = (double*)malloc((dmin-1)*sizeof(double));
 
   // a simple check; remove it later
-  if(NCHI != dmin) std::cout<<"why does NCHI change from one evec to another?"<<std::endl;
+  //if(NCHI != dmin) std::cout<<"why does NCHI change from one evec to another?"<<std::endl;
 
   // initialize chi
   for(i=0;i<(DA*DB);i++) chi[i]=0.0;
@@ -163,7 +163,7 @@ void schmidtDecom(std::vector<double> &vec, std::vector<std::vector<bool>> &eA,
   for(i=0;i<(DA*DB);i++) norm += chi[i]*chi[i];
   if( fabs(norm-1.0) >  1e-6) std::cout<<"Norm = "<<norm<<std::endl;
 
-  //print_matrix("Density matrix", DA, DB, chi, DA);
+  print_matrix("Density matrix", DA, DB, chi, DA);
   //printf( "LAPACKE_dgesvd (row-major, high-level) Example Program Results\n" );
   /* Compute SVD */
   //info = LAPACKE_dgesvd( LAPACK_ROW_MAJOR, 'A', 'A', DA, DB, chi, DB,
@@ -176,22 +176,18 @@ void schmidtDecom(std::vector<double> &vec, std::vector<std::vector<bool>> &eA,
          exit( 1 );
   } 
   /* Print singular values */
-  //print_matrix( "Singular values", 1, dmin, chi_svd, 1 );
+  print_matrix( "Singular values", 1, dmin, chi_svd, 1 );
   // check norm
   norm = 0;
   for(i=0;i<dmin; i++) norm += chi_svd[i]*chi_svd[i];
   if( fabs(norm - 1.0) > 1e-6) std::cout<<"Norm of svd ="<<norm<<std::endl;
 
-  // if the coefficients are needed later, store them!
-  if(STORE_SVD==1) chiSVD_evec.insert(chiSVD_evec.end(), chi_svd, chi_svd+dmin);
-  if(STORE_SVD==0){
-     EE=0.0;
-     for(i=0; i<dmin; i++){
-        if(chi_svd[i] < 1e-6) continue;
-        EE -= chi_svd[i]*chi_svd[i]*log(chi_svd[i]*chi_svd[i]);
-     }
-     //std::cout<<"Entanglement Entropy = "<<EE<<std::endl;
+  EE=0.0;
+  for(i=0; i<dmin; i++){
+      if(chi_svd[i] < 1e-6) continue;
+      EE -= chi_svd[i]*chi_svd[i]*log(chi_svd[i]*chi_svd[i]);
   }
+  //std::cout<<"Entanglement Entropy = "<<EE<<std::endl;
 
   // clear memory
   free(chi); free(chi_svd); free(superb);

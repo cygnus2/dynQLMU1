@@ -186,7 +186,7 @@ void WindNo::flip_plaq(){
           if((pxy==pyz)&&(pzw==pwx)&&(pwx!=pxy)) count_flip++;
       }
       nflip.push_back(count_flip);
-      std::cout<<"Basis state "<<i<<" = "<<count_flip<<std::endl;
+      //std::cout<<"Basis state "<<i<<" = "<<count_flip<<std::endl;
     }
 }
 

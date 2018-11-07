@@ -63,7 +63,7 @@ int main(){
   VOL2 = VOL/2;
 
   // decide whether to check the results of the diagonalization 
-  CHKDIAG=0;
+  CHKDIAG=1;
 
   /* Initialize nearest neighbours */
   for(i=0;i<=2*DIM;i++){
@@ -98,15 +98,13 @@ int main(){
 
   // real-time evolution of Entanglement Entropy
   // for this, one needs to store the SVD coefficients
-  STORE_SVD = 1;
   evolve_Eent(sector);
 
   // real-time correlation function
-  evolve_corrf1(sector);
+  //evolve_corrf1(sector);
 
   // calculate the Entanglement Entropy for the states
   // to only calculate the 
-  //STORE_SVD = 0;
   //entanglementEntropy(sector);
 
   /* Clear memory */
