@@ -63,7 +63,7 @@ int main(){
   VOL2 = VOL/2;
 
   // decide whether to check the results of the diagonalization 
-  CHKDIAG=1;
+  CHKDIAG=2;
 
   /* Initialize nearest neighbours */
   for(i=0;i<=2*DIM;i++){

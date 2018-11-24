@@ -104,7 +104,7 @@ extern std::vector<double> chiSVD_evec;
 extern void createBasis(int);
 extern void schmidtDecom(std::vector<double>&, std::vector<std::vector<bool>>&, std::vector<std::vector<bool>>&,int);
 extern double schmidtDecomRT(std::vector<double>&, std::vector<double>&, std::vector<std::vector<bool>>&,
-  std::vector<std::vector<bool>>&,int);
+  std::vector<std::vector<bool>>&,int, std::vector<MKL_INT>&);
 extern void printvec(std::vector<double>&);
 
 /* routines */
