@@ -20,6 +20,7 @@ void evolve_Eent(int sector){
    int i,ix,iy,parity,p,q1,q2;
    int sizet,nchi,d,k,m;
    double t,entE;
+   double initE;
    sizet = Wind[sector].nBasis;
    std::vector<bool> cart1(2*VOL);
    std::vector<double> alpha_real(sizet,0.0);
@@ -40,6 +41,11 @@ void evolve_Eent(int sector){
    }}
 
    q1=Wind[sector].binscan(cart1);
+   // calculate the average energy of the initial state
+   initE=0.0;
+   for(k=0; k<sizet; k++){
+     initE += Wind[sector].evals[k]*Wind[sector].evecs[k*sizet+q1]*Wind[sector].evecs[k*sizet+q1]; 
+   }
 
    // Construct the spin basis for the sub-systems
    LEN_B = LX - LEN_A;
@@ -49,6 +55,7 @@ void evolve_Eent(int sector){
    createLookupTable(sector,DA,DB,sub2main);
 
    outf = fopen("EENT_tevol.dat","w");
+   fprintf(outf,"# avg energy of initial state = %.8lf\n",initE);
    // calculate alpha(t)
    for(t=Ti; t<Tf; t=t+dT){
       alpha_real.assign(alpha_real.size(), 0.0);
