@@ -89,7 +89,7 @@ int main(){
   // get the winding number sector (wx,wy)
   wx = 0; wy = 0;
   sector = lookup[LX/2+wx][LY/2+wy];
-  Wind[sector].nKry = 20;
+  Wind[sector].nKry = 4;
   constH(sector);
 
 

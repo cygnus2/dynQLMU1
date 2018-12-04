@@ -14,39 +14,37 @@
 
 void constH(int sector){
 
-   //extern void eigcheck(std::vector<double>&, std::vector<std::vector<double>>&,int); 
-   //extern void diag_LAPACK_RRR(MKL_INT, std::vector<double>&, std::vector<double>&, std::vector<double>&);
-   //extern void diag_LAPACK(MKL_INT, std::vector<double>&, std::vector<double>&, std::vector<double>&);
+   extern void diag_triD(MKL_INT, std::vector<double>&, std::vector<double>&, std::vector<double>&, std::vector<double>&);
    extern void printmatrix(std::vector<MKL_INT>&,std::vector<MKL_INT>&,std::vector<double>&);
    extern void actH(int, std::vector<double>&, std::vector<double>&);
+   extern void print_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda );
+
    MKL_INT i,j,k;
    int nK = Wind[sector].nKry;
    std::vector<double> alpha(nK, 0.0);
-   std::vector<double> beta(nK, 0.0);
+   std::vector<double> beta(nK-1, 0.0);
    std::cout<<"Krylov space = "<<nK<<std::endl;
    // workspace variables to construct the tridiagonal matrix in Krylov space
    MKL_INT nB = Wind[sector].nBasis;
    // to store the coefficients
-   std::vector<double> init(nB,0.0);
    std::vector<double> v0(nB,0.0);
    std::vector<double> v1(nB,0.0);
    std::vector<double> v2(nB,0.0);
 
    /* initialize the starting vector */
-   init[2]=1.0;
-   std::cout<<"Starting state"<<std::endl;
-   for(i=0; i<nB; i++){ std::cout<<init[i]<<" "; }
-   std::cout<<std::endl;
+   v0[2]=1.0;
+   //std::cout<<"Starting state"<<std::endl;
+   //for(i=0; i<nB; i++){ std::cout<<init[i]<<" "; }
+   //std::cout<<std::endl;
 
-   v0 = init; 
    // act the Hamiltonian on the initial state
    actH(sector, v0, v1);
-   std::cout<<"Vector after action with the Hamiltonian"<<std::endl;
-   for(i=0; i<nB; i++){
-     std::cout<<v1[i]<<" ";
-   }
-   std::cout<<std::endl;
-   alpha[0] = std::inner_product(v0.begin(), v0.end(), v1.begin(), 0.0);
+   //std::cout<<"Vector after action with the Hamiltonian"<<std::endl;
+   //for(i=0; i<nB; i++){
+   //  std::cout<<v1[i]<<" ";
+   //}
+   //std::cout<<std::endl;
+   alpha[0] = std::inner_product(v1.begin(), v1.end(), v0.begin(), 0.0);
    //std::cout<<alpha[0]<<std::endl;
    for(i=0; i<nB; i++){
       v2[i]=v1[i]-alpha[0]*v0[i];
@@ -55,11 +53,11 @@ void constH(int sector){
    // start the Lanczos loop
    for(j=1; j<nK; j++){
       v0 = v1;
-      beta[j] = std::inner_product(v2.begin(), v2.end(), v2.begin(), 0.0);
-      if(beta[j] < 1e-12) std::cout<<"Norm too small"<<std::endl;
-      else{  beta[j] = std::sqrt(beta[j]);
+      beta[j-1] = std::inner_product(v2.begin(), v2.end(), v2.begin(), 0.0);
+      if(beta[j-1] < 1e-12) std::cout<<"Norm too small"<<std::endl;
+      else{  beta[j-1] = std::sqrt(beta[j-1]);
              for(k=0; k<nB; k++){
-                v1[k] = v2[k]/beta[j];
+                v1[k] = v2[k]/beta[j-1];
              }
       }
       actH(sector, v1, v2);
@@ -69,7 +67,9 @@ void constH(int sector){
       }
       std::cout<<j<<"  "<<beta[j]<<" "<<alpha[j-1]<<" "<<std::endl;
    }
-
+   // diagonalize the tridiagonal matrix
+   diag_triD(nK, alpha, beta, Wind[sector].evals, Wind[sector].evecs);
+   
    
 }
 
@@ -129,5 +129,30 @@ void actH(int sector, std::vector<double> &v0, std::vector<double> &v1){
       }
       v1[i] += lam*Wind[sector].nflip[i]; 
    }
-
 }
+
+void diag_triD(MKL_INT nSize, std::vector<double> &alpha, std::vector<double> &beta, 
+     std::vector<double> &eval, std::vector<double> &evec){
+
+  extern void print_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda );
+  MKL_INT info,LDZ;
+  double *d,*e;
+  double *z;
+  z = (double*)(calloc(nSize*nSize,sizeof(double)));
+  
+  // d and e are the diagonal and off-diagonal elements
+  d = &alpha[0];
+  e = &beta[0];
+
+  LDZ = nSize;
+  info = LAPACKE_dstev( LAPACK_COL_MAJOR, 'V', nSize, d, e, z, LDZ);
+  printf("Back from the routine and working properly. Info = %ld. Eval[0]=%f\n",info,d[0]);
+  /* Check for convergence */
+  if( info > 0 ) {
+        printf( "The algorithm failed to compute eigenvalues.\n" );
+        exit( 1 );
+  }
+  print_matrix( "Eigenvalues", 1, nSize, d, 1 );
+  free(z);
+}
+

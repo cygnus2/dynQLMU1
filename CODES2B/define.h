@@ -40,6 +40,7 @@ class WindNo{
 
     std::vector<double> evals;
     std::vector<double> evecs;
+    std::vector<double> kryvecs;
 
     // function to display variables
     void display(){
