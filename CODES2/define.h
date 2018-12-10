@@ -20,6 +20,11 @@ extern double lam,Ti,Tf,dT;
 /* NTOT = total no of basis states 
  * NH   = states not killed by H  */
 extern int NTOT;
+extern int WX, WY, LR;
+// initial state is specified by WX, WY and LR
+// WX = (1/Lx)*SUM_(x,y=0) E_{x,y}. 
+// WY = (1/Ly)*SUM_(x=0,y) E_{x,y}.
+// LR=0 flux to the left (subsystem LA), LR=1 flux to the right (subsystem LB).
 
 extern std::vector<std::vector<bool>> basis;
 extern std::vector<std::vector<bool>> basis_nonflip;
@@ -115,6 +120,6 @@ void winding_no_decompose(void);
 void calc_Oflip(int);
 void entanglementEntropy(int);
 void evolve_cartoons(int);
-void evolve_Eent(int);
+void evolve_Eent(int,int,int);
 void evolve_corrf1(int);
 #endif 

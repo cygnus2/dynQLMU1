@@ -9,7 +9,7 @@
 #include<iterator>
 
 int main(){
- int Nstate = 282;
+ int Nstate = 17906;
  double one,two,beta;
  double meanE,Z;
  int i;

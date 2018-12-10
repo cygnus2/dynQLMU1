@@ -28,13 +28,16 @@ std::vector<std::vector<bool>> basis_nonflip;
 std::vector<std::vector<bool>> basis_flip;
 int STORE_SVD;
 int CHKDIAG;
+// initial state is specified by W and LR
+// W is the amount of y-flux=Wy. 
+// LR=0 flux to the left (subsystem LA), LR=1 flux to the right (subsystem LB).
+int WX, WY, LR;
 
 int main(){
   FILE *fptr;
   char string[50];
   int i,d,p,q;
   int x,y;
-  int wx,wy;
   int sector;
   WindNo SectorZero;
   extern void initneighbor(void);
@@ -56,6 +59,9 @@ int main(){
   fscanf(fptr,"%s %lf\n",string,&Tf);
   fscanf(fptr,"%s %lf\n",string,&dT);
   fscanf(fptr,"%s %d\n",string,&LEN_A);
+  fscanf(fptr,"%s %d\n",string,&WX);
+  fscanf(fptr,"%s %d\n",string,&WY);
+  fscanf(fptr,"%s %d\n",string,&LR);
   fclose(fptr);
   if(( LX%2 != 0 )||( LY%2 !=0 )) { printf("Code does not work with odd LX and/or LY. \n"); exit(0); }
   if(LX<LY) printf("Please make sure LX >= LY. Unforseen errors can occur otherwise. \n");
@@ -86,25 +92,23 @@ int main(){
   nWind = calc_WindNo(LX,LY);
   Wind.reserve(nWind); 
   winding_no_decompose();
-  // get the winding number sector (wx,wy)
-  wx = 0; wy = 0;
-  sector = lookup[LX/2+wx][LY/2+wy];
+ 
+  printf("Chosen (Wx,Wy) sector = (%d,%d)\n",WX,WY); 
+  sector = lookup[LX/2+WX][LY/2+WY];
   constH(sector);
   // calculate the expectation value of Oflip for every eigenstate 
   calc_Oflip(sector);
 
-  // real-time evolution of cartoon states and Locshmidt Echo 
-  evolve_cartoons(sector);
+  // real-time evolution of cartoon states and Locshmidt Echo in (wx,wy)=(0,0) 
+  // if((WX==0)&&(WY==0)) evolve_cartoons(sector);
 
-  // real-time evolution of Entanglement Entropy
-  // for this, one needs to store the SVD coefficients
-  evolve_Eent(sector);
+  // real-time evolution of Entanglement Entropy (storing the SVD coefficients)
+  evolve_Eent(sector, WX, WY);
 
   // real-time correlation function
   //evolve_corrf1(sector);
 
   // calculate the Entanglement Entropy for the states
-  // to only calculate the 
   //entanglementEntropy(sector);
 
   /* Clear memory */

@@ -14,8 +14,9 @@ extern void print_zmatrix( char* , MKL_INT , MKL_INT , MKL_Complex16* , MKL_INT 
 extern void print_rmatrix( char* , MKL_INT , MKL_INT , double* , MKL_INT  );
 extern int checkGL2(std::vector<bool>&);
 extern void createLookupTable(int, MKL_INT, MKL_INT, std::vector<MKL_INT>&);
+extern void cartoonState(int, int, std::vector<bool>& );
 
-void evolve_Eent(int sector){
+void evolve_Eent(int sector, int wx, int wy){
    
    int i,ix,iy,parity,p,q1,q2;
    int sizet,nchi,d,k,m;
@@ -29,16 +30,10 @@ void evolve_Eent(int sector){
    std::vector<MKL_INT> sub2main;
    FILE *outf;
    double overlap,norm;
-  
+   printf("In evolve Ent \n"); 
    sizet = Wind[sector].nBasis; 
    /* construct cartoon state */
-   for(iy=0;iy<LY;iy++){
-   for(ix=0;ix<LX;ix++){
-    parity=(ix+iy)%2;
-    p = 2*(iy*LX+ix);
-    if(parity){ cart1[p]=false; cart1[p+1]=true; }
-    else{ cart1[p]=true; cart1[p+1]=false; }
-   }}
+   cartoonState(wx, wy, cart1);
 
    q1=Wind[sector].binscan(cart1);
    // calculate the average energy of the initial state
@@ -190,3 +185,112 @@ void createLookupTable(int sector, MKL_INT DA, MKL_INT DB, std::vector<MKL_INT> 
       else sub2main[i*DB+j] = p;
    }}
 }
+
+void cartoonState(int wx, int wy, std::vector<bool> &cart){
+  int ix,iy,parity,p;
+  int W,sign;
+  W = std::abs(wx); 
+  if(wy!=0){ printf("The option with Wy != 0 is not yet supported. \n"); exit(0); }
+  
+  if((wx==0)&&(wy==0)){
+      /* cartoon state in (Wx,Wy)=(0,0) */
+      for(iy=0;iy<LY;iy++){
+      for(ix=0;ix<LX;ix++){
+         parity=(ix+iy)%2;
+         p = 2*(iy*LX+ix);
+         if(parity){ cart[p]=false; cart[p+1]=true; }
+         else{       cart[p]=true;  cart[p+1]=false; }
+      }}
+  }
+  else if((W>0)&&(wy==0)){
+      if(wx>0) sign=1; 
+      else if(wx<0) sign=-1;
+      else{ printf("Logic error. \n"); exit(0);}
+      /* cartoon state in (Wx,Wy)=(WX,0) */
+      if(LR==0){
+        // the flux is in the right end (LB)
+        for(iy=0;iy<LY;iy++){
+           for(ix=0;ix<(LX-2*W);ix++){
+             parity=(ix+iy)%2;
+             p = 2*(iy*LX+ix);
+             if(parity){ cart[p]=false; cart[p+1]=true; }
+             else{       cart[p]=true;  cart[p+1]=false; }
+           }
+           for(ix=(LX-2*W);ix<LX;ix++){
+             parity=(iy)%2;
+             p = 2*(iy*LX+ix);
+             if(sign==1){ 
+                 if(parity){ cart[p]=false; cart[p+1]=true; }
+                 else{       cart[p]=true;  cart[p+1]=true; }
+             }
+             else if(sign==-1){ 
+                 if(parity){ cart[p]=false; cart[p+1]=false; }
+                 else{       cart[p]=true;  cart[p+1]=false; }
+             }
+           }
+        }
+      }
+      else if(LR==1){
+        // flux is in the left end (LA)
+        for(iy=0;iy<LY;iy++){
+           for(ix=2*W;ix<LX;ix++){
+              parity=(ix+iy)%2;
+              p = 2*(iy*LX+ix);
+              if(parity){ cart[p]=false; cart[p+1]=true; }
+              else{       cart[p]=true;  cart[p+1]=false; }
+           }
+           for(ix=0;ix<2*W;ix++){
+              parity=(iy)%2;
+              p = 2*(iy*LX+ix);
+              if(sign==1){
+                    if(parity){ cart[p]=false; cart[p+1]=true; }
+                    else{       cart[p]=true;  cart[p+1]=true; }
+              }
+              else if(sign==-1){
+                    if(parity){ cart[p]=false; cart[p+1]=false; }
+                    else{       cart[p]=true;  cart[p+1]=false; }
+              }
+           }
+        }// close iy
+      }// close LR
+  }
+  //else if((wx==-1)&&(wy==0)){
+  //    /* cartoon state in (Wx,Wy)=(-1,0) */
+  //    for(iy=0;iy<LY;iy++){
+  //    for(ix=0;ix<(LX-2);ix++){
+  //       parity=(ix+iy)%2;
+  //       p = 2*(iy*LX+ix);
+  //       if(parity){ cart[p]=false; cart[p+1]=true; }
+  //       else{       cart[p]=true;  cart[p+1]=false; }
+  //    }
+  //    for(ix=(LX-2);ix<LX;ix++){
+  //       parity=(iy)%2;
+  //       p = 2*(iy*LX+ix);
+  //       if(parity){ cart[p]=false; cart[p+1]=false; }
+  //       else{       cart[p]=true;  cart[p+1]=false; }
+  //    }
+  //    }
+  //}
+  //else if((wx==2)&&(wy==0)){
+  //    /* cartoon state in (Wx,Wy)=(2,0) */
+  //    for(iy=0;iy<LY;iy++){
+  //    for(ix=0;ix<(LX-4);ix++){
+  //       parity=(ix+iy)%2;
+  //       p = 2*(iy*LX+ix);
+  //       if(parity){ cart[p]=false; cart[p+1]=true; }
+  //       else{       cart[p]=true;  cart[p+1]=false; }
+  //    }
+  //    for(ix=(LX-4);ix<LX;ix++){
+  //       parity=(iy)%2;
+  //       p = 2*(iy*LX+ix);
+  //       if(parity){ cart[p]=false; cart[p+1]=true; }
+  //       else{       cart[p]=true;  cart[p+1]=true; }
+  //    }
+  //    }
+  //}
+  //else{
+  //  std::cout<<"Cartoon state in the winding sector "<<wx<<" , "<<wy<<" not supported. Exiting!"<<std::endl;
+  //  exit(0);
+  //}
+}
+

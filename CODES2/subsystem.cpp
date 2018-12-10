@@ -159,11 +159,12 @@ void schmidtDecom(std::vector<double> &vec, std::vector<std::vector<bool>> &eA,
   }}
   // std::cout<<"total no of GI states by patching "<<count<<std::endl;
   // check norm
-  norm = 0.0;
+  /*norm = 0.0;
   for(i=0;i<(DA*DB);i++) norm += chi[i]*chi[i];
   if( fabs(norm-1.0) >  1e-6) std::cout<<"Norm = "<<norm<<std::endl;
+  */
 
-  print_matrix("Density matrix", DA, DB, chi, DA);
+  //print_matrix("Density matrix", DA, DB, chi, DA);
   //printf( "LAPACKE_dgesvd (row-major, high-level) Example Program Results\n" );
   /* Compute SVD */
   //info = LAPACKE_dgesvd( LAPACK_ROW_MAJOR, 'A', 'A', DA, DB, chi, DB,
@@ -176,11 +177,12 @@ void schmidtDecom(std::vector<double> &vec, std::vector<std::vector<bool>> &eA,
          exit( 1 );
   } 
   /* Print singular values */
-  print_matrix( "Singular values", 1, dmin, chi_svd, 1 );
+  //print_matrix( "Singular values", 1, dmin, chi_svd, 1 );
   // check norm
-  norm = 0;
+  /*norm = 0;
   for(i=0;i<dmin; i++) norm += chi_svd[i]*chi_svd[i];
   if( fabs(norm - 1.0) > 1e-6) std::cout<<"Norm of svd ="<<norm<<std::endl;
+  */
 
   EE=0.0;
   for(i=0; i<dmin; i++){
