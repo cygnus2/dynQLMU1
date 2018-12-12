@@ -12,14 +12,13 @@
               routine.
            f) Computes a local observable, ie, the flippability of individual plaquettes, summed
               over the volume for all the eigenvectors.
-         **g) It remains to be understood why the time evolution is independent of the sign of the 
-              lambda. 
 
 2. CODES2: In addition to the actions in CODES1, this version
            a) Does not explicitly filter any states.
            b) Does a winding number decomposition.
            c) Constructs the Hamiltonian in the specified winding number sector. 
-           d) Calculates the eigenvectors and eigenvalues, still using Intel FEAST. 
+           d) Calculates the eigenvectors and eigenvalues, still using Intel Lapack routines.
+           f) Computes the entanglement entropy, also in non-zero winding number sectors. 
            e) Same as (f).
 
 3. CODES2A: This set of codes create the Hamiltonian of a disordered system, by choosing
