@@ -254,43 +254,5 @@ void cartoonState(int wx, int wy, std::vector<bool> &cart){
         }// close iy
       }// close LR
   }
-  //else if((wx==-1)&&(wy==0)){
-  //    /* cartoon state in (Wx,Wy)=(-1,0) */
-  //    for(iy=0;iy<LY;iy++){
-  //    for(ix=0;ix<(LX-2);ix++){
-  //       parity=(ix+iy)%2;
-  //       p = 2*(iy*LX+ix);
-  //       if(parity){ cart[p]=false; cart[p+1]=true; }
-  //       else{       cart[p]=true;  cart[p+1]=false; }
-  //    }
-  //    for(ix=(LX-2);ix<LX;ix++){
-  //       parity=(iy)%2;
-  //       p = 2*(iy*LX+ix);
-  //       if(parity){ cart[p]=false; cart[p+1]=false; }
-  //       else{       cart[p]=true;  cart[p+1]=false; }
-  //    }
-  //    }
-  //}
-  //else if((wx==2)&&(wy==0)){
-  //    /* cartoon state in (Wx,Wy)=(2,0) */
-  //    for(iy=0;iy<LY;iy++){
-  //    for(ix=0;ix<(LX-4);ix++){
-  //       parity=(ix+iy)%2;
-  //       p = 2*(iy*LX+ix);
-  //       if(parity){ cart[p]=false; cart[p+1]=true; }
-  //       else{       cart[p]=true;  cart[p+1]=false; }
-  //    }
-  //    for(ix=(LX-4);ix<LX;ix++){
-  //       parity=(iy)%2;
-  //       p = 2*(iy*LX+ix);
-  //       if(parity){ cart[p]=false; cart[p+1]=true; }
-  //       else{       cart[p]=true;  cart[p+1]=true; }
-  //    }
-  //    }
-  //}
-  //else{
-  //  std::cout<<"Cartoon state in the winding sector "<<wx<<" , "<<wy<<" not supported. Exiting!"<<std::endl;
-  //  exit(0);
-  //}
 }
 
