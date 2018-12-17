@@ -30,7 +30,6 @@ void evolve_Eent(int sector, int wx, int wy){
    std::vector<MKL_INT> sub2main;
    FILE *outf;
    double overlap,norm;
-   printf("In evolve Ent \n"); 
    sizet = Wind[sector].nBasis; 
    /* construct cartoon state */
    cartoonState(wx, wy, cart1);

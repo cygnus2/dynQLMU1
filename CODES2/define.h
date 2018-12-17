@@ -121,5 +121,6 @@ void calc_Oflip(int);
 void entanglementEntropy(int);
 void evolve_cartoons(int);
 void evolve_Eent(int,int,int);
+void calc_Oflipt(int,int,int);
 void evolve_corrf1(int);
 #endif 

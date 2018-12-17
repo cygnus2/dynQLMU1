@@ -96,8 +96,12 @@ int main(){
   printf("Chosen (Wx,Wy) sector = (%d,%d)\n",WX,WY); 
   sector = lookup[LX/2+WX][LY/2+WY];
   constH(sector);
-  // calculate the expectation value of Oflip for every eigenstate 
+  // calculate the <psi_n| O_flip |psi_n>, for every eigenstate psi_n
   calc_Oflip(sector);
+
+  // real time evolution of <PHI| O_flip(t) |PHI>, 
+  //  where |PHI> is an initial cartoon state
+  calc_Oflipt(sector, WX, WY);
 
   // real-time evolution of cartoon states and Locshmidt Echo in (wx,wy)=(0,0) 
   // if((WX==0)&&(WY==0)) evolve_cartoons(sector);

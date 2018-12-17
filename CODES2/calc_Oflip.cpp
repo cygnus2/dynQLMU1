@@ -11,7 +11,7 @@
 #include<algorithm>
 #include "define.h"
 
-// Notation: eigenstate |n> = \sum_k \alpha_k |k>, |k> is a basis state in 
+// Notation: eigenstate |psi_n> = \sum_k \alpha_k |k>, |k> is a basis state in 
 //           specified winding number (wx,wy) sector.
 void calc_Oflip(int sector){
   MKL_INT p,q,sizet;
