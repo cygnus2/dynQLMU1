@@ -2,6 +2,7 @@
 #include <vector> 
 #include <algorithm> 
 #include <iterator>
+#include <math.h>
 #include "define.h"
 
 extern void printconf1(std::vector<bool>);

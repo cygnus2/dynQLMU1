@@ -69,7 +69,7 @@ int main(){
   VOL2 = VOL/2;
 
   // decide whether to check the results of the diagonalization 
-  CHKDIAG=2;
+  CHKDIAG=0;
 
   /* Initialize nearest neighbours */
   for(i=0;i<=2*DIM;i++){
@@ -96,8 +96,10 @@ int main(){
   printf("Chosen (Wx,Wy) sector = (%d,%d)\n",WX,WY); 
   sector = lookup[LX/2+WX][LY/2+WY];
   constH(sector);
+
   // calculate the <psi_n| O_flip |psi_n>, for every eigenstate psi_n
-  calc_Oflip(sector);
+  // this calculation in done in the next routine
+  //calc_Oflip(sector);
 
   // real time evolution of <PHI| O_flip(t) |PHI>, 
   //  where |PHI> is an initial cartoon state
@@ -107,7 +109,7 @@ int main(){
   // if((WX==0)&&(WY==0)) evolve_cartoons(sector);
 
   // real-time evolution of Entanglement Entropy (storing the SVD coefficients)
-  evolve_Eent(sector, WX, WY);
+  //evolve_Eent(sector, WX, WY);
 
   // real-time correlation function
   //evolve_corrf1(sector);

@@ -17,6 +17,7 @@ extern int nWindSector;
 extern unsigned int nWind;
 extern int **lookup;
 extern double lam,Ti,Tf,dT;
+extern int LOG;
 /* NTOT = total no of basis states 
  * NH   = states not killed by H  */
 extern int NTOT;
