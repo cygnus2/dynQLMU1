@@ -101,18 +101,17 @@ int main(){
   // this calculation in done in the next routine
   //calc_Oflip(sector);
 
-  // real time evolution of <PHI| O_flip(t) |PHI>, 
-  //  where |PHI> is an initial cartoon state
-  calc_Oflipt(sector, WX, WY);
+  // real time evolution of <PHI(t)| O_flip |PHI(t)> and <PHI(t)| Cflip |PHI(t)>, 
+  //calc_Oflipt(sector, WX, WY);
+
+  // real time evolution of <PHI(t)| O_kin |PHI(t)>, 
+  //calc_Okint(sector, WX, WY);
 
   // real-time evolution of cartoon states and Locshmidt Echo in (wx,wy)=(0,0) 
   // if((WX==0)&&(WY==0)) evolve_cartoons(sector);
 
   // real-time evolution of Entanglement Entropy (storing the SVD coefficients)
   //evolve_Eent(sector, WX, WY);
-
-  // real-time correlation function
-  //evolve_corrf1(sector);
 
   // calculate the Entanglement Entropy for the states
   //entanglementEntropy(sector);

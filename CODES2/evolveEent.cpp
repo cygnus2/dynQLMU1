@@ -62,7 +62,6 @@ void evolve_Eent(int sector, int wx, int wy){
           else{
                alpha_real[k] += Wind[sector].evecs[m*sizet+k]*Wind[sector].evecs[m*sizet+q1]*cos(-Wind[sector].evals[m]*t);
                alpha_imag[k] += Wind[sector].evecs[m*sizet+k]*Wind[sector].evecs[m*sizet+q1]*sin(-Wind[sector].evals[m]*t);
-
           }
       }}
       // check norm

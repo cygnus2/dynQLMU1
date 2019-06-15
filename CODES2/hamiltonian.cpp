@@ -35,7 +35,7 @@ void constH(int sector){
    // basis state = VOL. In addition, the lambda counts the number of flippable terms in the state.
 
    // note that corrf1(0) corresponds to the corrf at distance 1,..., corrf(LX/2-1) is the maximally
-   // separated one. At distance 0, the correlation function has no meaning.
+   // separated one. At distance 0, the correlation function is just the same as oflip.
    std::vector<double> corrf1(LX/2);
    int x,y;
    bool f1,f2;
@@ -99,7 +99,7 @@ void constH(int sector){
    
      // normalize and store the correlation function
      for(r=0;r<(LX/2);r++) corrf1[r] /= VOL;
-     Wind[sector].oflip.push_back(corrf1);
+     Wind[sector].cflip.push_back(corrf1);
 
      // continue making the Hamiltonian
      //store the diagonal location
@@ -120,16 +120,16 @@ void constH(int sector){
      }
    }
    //printf("size of rows = %d \n",(int)Wind[sector].rows.size());
-   //for(k=0;k<Wind[sector].rows.size();k++) printf("row[%d] = %d \n",k,Wind[sector].rows[k]);
+   //for(k=0;k<Wind[sector].rows.size();k++) printf("row[%d] = %ld \n",k,Wind[sector].rows[k]);
    //printf("size of cols = %d \n",(int)Wind[sector].cols.size());
-   //for(k=0;k<Wind[sector].cols.size();k++) printf("col[%d] = %d \n",k,Wind[sector].cols[k]);
+   //for(k=0;k<Wind[sector].cols.size();k++) printf("col[%d] = %ld; ham[%d] = %lf\n",k, Wind[sector].cols[k],k,Wind[sector].hamil[k]);
 
    //test print the correlation functions
-   //for(i=0;i<Wind[sector].nBasis;i++){
-   //  std::cout<<"Basis state ="<<i<<std::endl;
-   //  for(r=0;r<(LX/2);r++) std::cout<<Wind[sector].oflip[i][r]<<" ";
-   //  std::cout<<std::endl;
-   //}   
+   for(i=0;i<Wind[sector].nBasis;i++){
+     std::cout<<"Basis state ="<<i<<std::endl;
+     for(r=0;r<(LX/2);r++) std::cout<<Wind[sector].cflip[i][r]<<" ";
+     std::cout<<std::endl;
+   }   
 
    // diagonalize: use RELATIVELY ROBUST REPRESENTATIONS
    //diag_LAPACK(sector, Wind[sector].hamil, Wind[sector].evals, Wind[sector].evecs);
