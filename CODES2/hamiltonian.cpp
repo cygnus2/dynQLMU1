@@ -125,11 +125,11 @@ void constH(int sector){
    //for(k=0;k<Wind[sector].cols.size();k++) printf("col[%d] = %ld; ham[%d] = %lf\n",k, Wind[sector].cols[k],k,Wind[sector].hamil[k]);
 
    //test print the correlation functions
-   for(i=0;i<Wind[sector].nBasis;i++){
-     std::cout<<"Basis state ="<<i<<std::endl;
-     for(r=0;r<(LX/2);r++) std::cout<<Wind[sector].cflip[i][r]<<" ";
-     std::cout<<std::endl;
-   }   
+   //for(i=0;i<Wind[sector].nBasis;i++){
+   //  std::cout<<"Basis state ="<<i<<std::endl;
+   //  for(r=0;r<(LX/2);r++) std::cout<<Wind[sector].cflip[i][r]<<" ";
+   //  std::cout<<std::endl;
+   //}   
 
    // diagonalize: use RELATIVELY ROBUST REPRESENTATIONS
    //diag_LAPACK(sector, Wind[sector].hamil, Wind[sector].evals, Wind[sector].evecs);

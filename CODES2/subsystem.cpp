@@ -1,4 +1,6 @@
 /* set of routines to calculate the entanglement entropy */
+/* the code is slightly modified to compute the entanglement
+ * in the diagonal ensemble corresponding to the starting state */
 #include <vector> 
 #include <algorithm> 
 #include <iterator>
@@ -13,6 +15,8 @@ extern int checkGL2(std::vector<bool>&);
 extern void print_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda );
 extern void findBasisA(std::vector<std::vector<bool>>&, std::vector<bool>&);
 extern void findBasisB(std::vector<std::vector<bool>>&, std::vector<bool>&);
+extern void cartoonState(int, int, std::vector<bool>& );
+
 
 // variables used in this set of functions
 unsigned int LEN_A,LEN_B,VOL_A,VOL_B;
@@ -28,11 +32,14 @@ std::vector<double> sel_evec;
 
 // calculate the EE for all the states in a chosen sector
 // corresponding to the cut specified
-void entanglementEntropy(int sector){
+void entanglementEntropy(int sector, int wx, int wy){
   int p,i;
   int q1,q2;
   FILE *outf;
   MKL_INT sizet;
+  std::vector<bool> cart1(2*VOL);
+  std::vector<double> alpha;
+  double EENT_diag;
 
   sizet = Wind[sector].nBasis;
   // Construct the spin basis for the sub-systems
@@ -40,11 +47,19 @@ void entanglementEntropy(int sector){
   VOL_A = LEN_A*LY; VOL_B = LEN_B*LY;
   createBasis(sector);
 
-  outf = fopen("EntE.dat","w");
-  fprintf(outf,"# Entropy of Entanglement as a function of the eigenvalues for LA = %d\n",LEN_A);
-  fprintf(outf,"# Eigenvalues  Entanglement Entropy \n");
+  /* construct cartoon state and calculate the overlap with the eigenstates */
+  cartoonState(wx, wy, cart1);
+  q1=Wind[sector].binscan(cart1);
+  for(p=0; p<sizet; p++){
+     alpha.push_back(Wind[sector].evecs[p*sizet+q1]);
+  }
+
+  //outf = fopen("EntE.dat","w");
+  //fprintf(outf,"# Entropy of Entanglement as a function of the eigenvalues for LA = %d\n",LEN_A);
+  //fprintf(outf,"# Eigenvalues  Entanglement Entropy \n");
  
   // Calculate the EE for each of the eigenstates 
+  EENT_diag = 0.0;
   for(p=0; p<sizet; p++){
     // initialize the state and the entropy
     sel_evec.clear(); EE = -100.0;
@@ -58,11 +73,13 @@ void entanglementEntropy(int sector){
     //std::cout<<"Going to do Schmidt decompose eigenvector = "<< p << std::endl;
     //printvec(sel_evec);
     schmidtDecom(sel_evec,eA,eB,sector);
+    EENT_diag += alpha[p]*alpha[p]*EE;
     // write to file
-    fprintf(outf,"%lf %lf\n",sel_eval,EE);
+    //fprintf(outf,"%lf %lf\n",sel_eval,EE);
   }
-  fclose(outf);
+  //fclose(outf);
   // free memory from the spin basis
+  printf("EE in the diagonal ensemble = %.8lf\n",EENT_diag);
   eA.clear();
   eB.clear();
 }

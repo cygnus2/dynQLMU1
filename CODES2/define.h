@@ -119,7 +119,7 @@ void conststates(void);
 void constH(int);
 void winding_no_decompose(void);
 void calc_Oflip(int);
-void entanglementEntropy(int);
+void entanglementEntropy(int,int,int);
 void evolve_cartoons(int);
 void evolve_Eent(int,int,int);
 void calc_Oflipt(int,int,int);

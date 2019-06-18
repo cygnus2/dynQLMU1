@@ -114,7 +114,7 @@ int main(){
   //evolve_Eent(sector, WX, WY);
 
   // calculate the Entanglement Entropy for the states
-  //entanglementEntropy(sector);
+  entanglementEntropy(sector, WX, WY);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }
