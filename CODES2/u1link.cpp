@@ -108,13 +108,16 @@ int main(){
   //calc_Okint(sector, WX, WY);
 
   // real-time evolution of cartoon states and Locshmidt Echo in (wx,wy)=(0,0) 
-  // if((WX==0)&&(WY==0)) evolve_cartoons(sector);
+  if((WX==0)&&(WY==0)){
+  	  evolve_cartoons(sector);
+  	  evolve_approx(sector);
+  }
 
   // real-time evolution of Entanglement Entropy (storing the SVD coefficients)
   //evolve_Eent(sector, WX, WY);
 
   // calculate the Entanglement Entropy for the states
-  entanglementEntropy(sector, WX, WY);
+  //entanglementEntropy(sector, WX, WY);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }

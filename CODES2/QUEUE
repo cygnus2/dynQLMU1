@@ -1,9 +1,9 @@
-Lx 6
+Lx 8
 Ly 2
-lam -10.0
+lam -5.0
 Ti 0.0
-Tf 5.0 
-dT 0.1
+Tf 10.0 
+dT 0.01
 LA 2
 WX 0
 WY 0

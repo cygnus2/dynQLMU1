@@ -121,6 +121,7 @@ void winding_no_decompose(void);
 void calc_Oflip(int);
 void entanglementEntropy(int,int,int);
 void evolve_cartoons(int);
+void evolve_approx(int);
 void evolve_Eent(int,int,int);
 void calc_Oflipt(int,int,int);
 void calc_Oflipt2(int,int,int);
