@@ -72,8 +72,8 @@ void calc_Oflipt(int sector, int wx, int wy){
      for(k=0; k<sizet; k++){
        phiRE = 0.0; phiIM = 0.0;
        for(m=0; m<sizet; m++){
-         phiRE += alpha[m]*Wind[sector].evecs[sizet*m+k]*cos(Wind[sector].evals[m]*t);
-         phiIM += alpha[m]*Wind[sector].evecs[sizet*m+k]*sin(Wind[sector].evals[m]*t);
+         phiRE += alpha[m]*Wind[sector].evecs[sizet*m+k]*cos(-Wind[sector].evals[m]*t);
+         phiIM += alpha[m]*Wind[sector].evecs[sizet*m+k]*sin(-Wind[sector].evals[m]*t);
        }  
        oflipt += (phiRE*phiRE +  phiIM*phiIM)*Wind[sector].nflip[k];
        for(r=0;r<(LX/2);r++) CR[r] += (phiRE*phiRE +  phiIM*phiIM)*Wind[sector].cflip[k][r];

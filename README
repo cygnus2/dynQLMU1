@@ -33,8 +33,11 @@
 4. CODES2B: This is a new directory where I am trying to implement the Lanczos algorithm,
             first to find the ground states, and eventually to the real-time dynamics.
 
+5. CODES2C: This is a new directory where I am trying to implement the ED with fixed boundary
+            conditions which can be compared with a DMRG code. 
 
-4. CODES3:  This section implements the translation invariance, but not the charge conjugation.
+
+6. CODES3:  This section implements the translation invariance, but not the charge conjugation.
             The Hamiltonian in the (kx, ky) = (0, 0) is constructed, and also subsequently
             diagonalized. The operator O_flip is calculated in this sector. 
 

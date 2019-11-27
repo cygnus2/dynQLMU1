@@ -18,6 +18,7 @@ extern unsigned int nWind;
 extern int **lookup;
 extern double lam,Ti,Tf,dT;
 extern int LOG;
+extern int INIT;
 /* NTOT = total no of basis states 
  * NH   = states not killed by H  */
 extern int NTOT;
@@ -55,6 +56,9 @@ class WindNo{
 
     // information about correlation functions
     std::vector<std::vector<double>> cflip;
+
+    // information about the flip(x)
+    std::vector<std::vector<bool>> xflip;
 
     // function to display variables
     void display(){
@@ -121,7 +125,9 @@ void winding_no_decompose(void);
 void calc_Oflip(int);
 void entanglementEntropy(int,int,int);
 void evolve_cartoons(int);
-void evolve_approx(int);
+void evolveH_ov1(int);
+void evolveH_ov2(int);
+void flipped_hist(int);
 void evolve_Eent(int,int,int);
 void calc_Oflipt(int,int,int);
 void calc_Oflipt2(int,int,int);

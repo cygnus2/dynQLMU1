@@ -15,6 +15,7 @@ int *next[2*DIM+1];
 int *nextCHK[2*DIM+1];
 int *chk2lin,*lin2chk;
 int LX,LY,VOL,VOL2;
+int INIT;
 // Labels the winding number sectors
 // lookup[LX/2+wx][LY/2+wy] refers to the (wx,wy) winding number sector
 int nWindSector;
@@ -62,6 +63,7 @@ int main(){
   fscanf(fptr,"%s %d\n",string,&WX);
   fscanf(fptr,"%s %d\n",string,&WY);
   fscanf(fptr,"%s %d\n",string,&LR);
+  fscanf(fptr,"%s %d\n",string,&INIT);
   fclose(fptr);
   if(( LX%2 != 0 )||( LY%2 !=0 )) { printf("Code does not work with odd LX and/or LY. \n"); exit(0); }
   if(LX<LY) printf("Please make sure LX >= LY. Unforseen errors can occur otherwise. \n");
@@ -108,9 +110,11 @@ int main(){
   //calc_Okint(sector, WX, WY);
 
   // real-time evolution of cartoon states and Locshmidt Echo in (wx,wy)=(0,0) 
+  // functions in evolveH_ov2 and evolveH_prof can have different initial states
   if((WX==0)&&(WY==0)){
-  	  evolve_cartoons(sector);
-  	  evolve_approx(sector);
+  	  //evolve_cartoons(sector);
+  	  //evolveH_ov1(sector);
+  	  evolveH_ov2(sector);
   }
 
   // real-time evolution of Entanglement Entropy (storing the SVD coefficients)

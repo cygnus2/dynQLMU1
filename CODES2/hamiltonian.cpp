@@ -37,6 +37,10 @@ void constH(int sector){
    // note that corrf1(0) corresponds to the corrf at distance 1,..., corrf(LX/2-1) is the maximally
    // separated one. At distance 0, the correlation function is just the same as oflip.
    std::vector<double> corrf1(LX/2);
+
+   // flip(x)=true (false) if the plaq x is flippable (non-flippable) for the k-th basis state
+   std::vector<bool> xfl(VOL);
+
    int x,y;
    bool f1,f2;
   
@@ -63,7 +67,8 @@ void constH(int sector){
       for(j=0;j<=VOL;j++) rowscan[j]=NTOT;
       stateq = 0;
       for(p=0;p<VOL;p++){
-       f1=false; //f1 stores the flippability
+       f1    =false; //f1 stores the flippability
+       xfl[p]=false; // initially assume it is not flippable
        // Find if a single plaquette is flippable 
        p1=2*p; p2=2*next[DIM+1][p]+1; p3=2*next[DIM+2][p]; p4=2*p+1;
        pxy=newstate[p1]; pyz=newstate[p2]; pzw=newstate[p3]; pwx=newstate[p4];
@@ -82,7 +87,8 @@ void constH(int sector){
          newstate[p3]=!newstate[p3]; newstate[p4]=!newstate[p4];
          //if(newstate!=basis_flip[i]) std::cout<<"state mismatch"<<std::endl;
 
-         f1=true;
+         f1    =true;
+	 xfl[p]=true; // reset flippability info
        }
 
        // calculate the corrF in the basis state
@@ -100,6 +106,9 @@ void constH(int sector){
      // normalize and store the correlation function
      for(r=0;r<(LX/2);r++) corrf1[r] /= VOL;
      Wind[sector].cflip.push_back(corrf1);
+
+     // store the info about the flippability of the basis state
+     Wind[sector].xflip.push_back(xfl);
 
      // continue making the Hamiltonian
      //store the diagonal location

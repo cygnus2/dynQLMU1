@@ -58,10 +58,10 @@ void evolve_cartoons(int sector){
      ampl1_IM=0.0; ampl2_IM=0.0;
      for(p=0; p<sizet; p++){
         if(fabs(Wind[sector].evals[p]) > 1e-10){
-          ampl1_RE = ampl1_RE + alpha1[p]*alpha1[p]*cos(Wind[sector].evals[p]*t);
-          ampl2_RE = ampl2_RE + alpha2[p]*alpha1[p]*cos(Wind[sector].evals[p]*t);
-          ampl1_IM = ampl1_IM + alpha1[p]*alpha1[p]*sin(Wind[sector].evals[p]*t);
-          ampl2_IM = ampl2_IM + alpha2[p]*alpha1[p]*sin(Wind[sector].evals[p]*t);
+          ampl1_RE = ampl1_RE + alpha1[p]*alpha1[p]*cos(-Wind[sector].evals[p]*t);
+          ampl2_RE = ampl2_RE + alpha2[p]*alpha1[p]*cos(-Wind[sector].evals[p]*t);
+          ampl1_IM = ampl1_IM + alpha1[p]*alpha1[p]*sin(-Wind[sector].evals[p]*t);
+          ampl2_IM = ampl2_IM + alpha2[p]*alpha1[p]*sin(-Wind[sector].evals[p]*t);
         } // close if-loop
      } // close for-loop
      ampl1_RE = ampl1_RE + temp1; ampl2_RE = ampl2_RE + temp2;
