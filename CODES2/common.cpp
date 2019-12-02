@@ -87,6 +87,30 @@ void printbasis(){
  fclose(fptr);
 }
 
+void FilePrintBasis(int sector){
+ FILE *fptr;
+ int i,j,p,p1,p2,p3,p4;
+ bool pxy,pyz,pzw,pwx;
+ int sizet;
+
+ sizet = Wind[sector].nBasis;
+ fptr=fopen("BASISFL.dat","w");
+ for(i=0;i<sizet;i++){
+   for(j=0;j<VOL;j++){
+      //p=chk2lin[j];
+      p=j;
+      p1=2*p; p2=2*next[DIM+1][p]+1; p3=2*next[DIM+2][p]; p4=2*p+1;
+      pxy=Wind[sector].basisVec[i][p1]; pyz=Wind[sector].basisVec[i][p2]; 
+      pzw=Wind[sector].basisVec[i][p3]; pwx=Wind[sector].basisVec[i][p4];
+      if((pxy==pyz)&&(pzw==pwx)&&(pwx!=pxy)) fprintf(fptr,"%d ", 1);
+      else                                   fprintf(fptr,"%d ", 0);
+   }
+   fprintf(fptr,"\n");
+  }
+ fclose(fptr);
+}
+
+
 int **allocateint2d(int row, int col){
   int i,j;
   int **mat;

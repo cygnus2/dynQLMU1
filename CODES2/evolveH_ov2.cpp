@@ -18,6 +18,8 @@ void evolveH_ov2(int sector){
     int nFlip[VOL+1]; 
     int ch1, ch2; // allow the choice of a different cartoon initial
     int cx1, cx2; // state, i.e., with domain walls placed elsewhere
+    int p1,p2,p3,p4;
+    bool s1,s2,s3,s4;
     double specWT[VOL+1];
     double t;
     double betaR,betaI,betaM,betaTot;
@@ -36,6 +38,7 @@ void evolveH_ov2(int sector){
 	  nFlip[p]++;
     }
 
+    q=0;
     /* define the initial cartoon state */
     if(INIT==0){   // symmetry broken cartoon state
       for(iy=0;iy<LY;iy++){
@@ -66,38 +69,62 @@ void evolveH_ov2(int sector){
         initC.push_back(Wind[sector].evecs[p*sizet+q]);
       }
    }
-   else if(INIT==2){ // 2 domain wall initial cartoon state
-       ch2 = 3; cx2 = 0;	   
+   else if(INIT==2){ // 2 domain wall cartoon state, even separation
+       r = (LX/2);
+       if(r%2==1) r=r-1;
        for(k=0; k<sizet; k++){
 	    if(Wind[sector].nflip[k]==(VOL-4)){
-                if(cx2 == ch2){ q = k; break; }
-		cx2++;
-	    }   
+		    ix=0;   iy=0; p1=iy*LX+ix;  s1=Wind[sector].xflip[k][p1];
+		    ix=1;   iy=1; p2=iy*LX+ix;  s2=Wind[sector].xflip[k][p2];
+		    ix=r;   iy=0; p3=iy*LX+ix;  s3=Wind[sector].xflip[k][p3];
+		    ix=r+1; iy=1; p4=iy*LX+ix;  s4=Wind[sector].xflip[k][p4];
+		    if((!s1) && (!s2) && (!s3) && (!s4)){ q = k; break;}
+	    }  
        }
        std::cout<<"Starting state is basis state = "<<q<<std::endl;
       /* store the overlap of the initial state with the eigenvectors */
       for(p=0; p<sizet; p++){
         initC.push_back(Wind[sector].evecs[p*sizet+q]);
       }
-    }
-    
-    /* find the relevant cartoon states with the specified number of flippable plaquettes */
-    if((LX == 2) && (LY == 2)){
-       std::cout<<"This routine does not include the case LX=2 and LY=2"<<std::endl; exit(0);}
-    if(LY > 2){ std::cout<<"This routine does not work for LY>2"<<std::endl; exit(0); }
-
-    /* now compute the overlap in each sector */
-    fptr = fopen("spectral_WT.dat","w");
-    fptr1= fopen("state_Prof.dat","w");
-    for(t=Ti; t<Tf; t=t+dT){
-
-       /* initialize spectral weights */
-       for(k=VOL;k>=0;k--) specWT[k]=0.0;
-
-       /* initialize flux profile */
-       for(k=0;k<VOL;k++) fprof[k]=0.0; 
-
+   }
+   else if(INIT==3){ // 2 domain wall cartoon state, odd separation
+       r = (LX/2);
+       if(r%2==1) r=r+1;       
        for(k=0; k<sizet; k++){
+	    if(Wind[sector].nflip[k]==(VOL-4)){
+		    ix=0;     iy=0; p1=iy*LX+ix;  s1=Wind[sector].xflip[k][p1];
+		    ix=1;     iy=1; p2=iy*LX+ix;  s2=Wind[sector].xflip[k][p2];
+		    ix=r-1;   iy=1; p3=iy*LX+ix;  s3=Wind[sector].xflip[k][p3];
+		    ix=r;     iy=0; p4=iy*LX+ix;  s4=Wind[sector].xflip[k][p4];
+		    if( (!s1) && (!s2) && (!s3) && (!s4)){ q = k; break;}
+	    }   
+       }
+       if(k==sizet) std::cout<<"maximal state reached "<<std::endl;
+       std::cout<<"Starting state is basis state = "<<q<<std::endl;
+      /* store the overlap of the initial state with the eigenvectors */
+      for(p=0; p<sizet; p++){
+        initC.push_back(Wind[sector].evecs[p*sizet+q]);
+      }
+   }
+
+    
+   /* find the relevant cartoon states with the specified number of flippable plaquettes */
+   if((LX == 2) && (LY == 2)){
+      std::cout<<"This routine does not include the case LX=2 and LY=2"<<std::endl; exit(0);}
+   if(LY > 2){ std::cout<<"This routine does not work for LY>2"<<std::endl; exit(0); }
+
+   /* now compute the overlap in each sector */
+   fptr = fopen("spectral_WT.dat","w");
+   fptr1= fopen("state_Prof.dat","w");
+   for(t=Ti; t<Tf; t=t+dT){
+
+      /* initialize spectral weights */
+      for(k=VOL;k>=0;k--) specWT[k]=0.0;
+
+      /* initialize flux profile */
+      for(k=0;k<VOL;k++) fprof[k]=0.0; 
+
+      for(k=0; k<sizet; k++){
           p = Wind[sector].nflip[k];
           betaR = 0.0; betaI = 0.0;
           for(m=0; m<sizet; m++){
@@ -111,19 +138,19 @@ void evolveH_ov2(int sector){
           for(r=0;r<VOL;r++){
 	  	  if(Wind[sector].xflip[k][r]) fprof[r] += betaM; 	  
 	  }
-       } // close loop over basis states
-       betaTot = 0.0;
-       /* print the spectral weights, starting from maximal flippable plaquettes,
-	* increasing with the number of non-flippable plaquettes */
-       fprintf(fptr,"%lf ",t);
-       for(k=VOL; k>=0; k--){
+      } // close loop over basis states
+      betaTot = 0.0;
+      /* print the spectral weights, starting from maximal flippable plaquettes,
+       * increasing with the number of non-flippable plaquettes */
+      fprintf(fptr,"%lf ",t);
+      for(k=VOL; k>=0; k--){
 	  fprintf(fptr,"%lf ",specWT[k]);
           betaTot += specWT[k];	  
-       }
-       fprintf(fptr,"%lf \n",betaTot);
-       /* print the flippability profile at each times */
-       fprintf(fptr1,"%lf ",t);
-       for(k=0;k<VOL;k++){ fprintf(fptr1,"%lf ",fprof[k]); }
+      }
+      fprintf(fptr,"%lf \n",betaTot);
+      /* print the flippability profile at each times */
+      fprintf(fptr1,"%lf ",t);
+      for(k=0;k<VOL;k++){ fprintf(fptr1,"%lf ",fprof[k]); }
        fprintf(fptr1,"\n");
     }
     fclose(fptr);

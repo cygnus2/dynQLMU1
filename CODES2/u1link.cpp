@@ -108,6 +108,8 @@ int main(){
 
   // real time evolution of <PHI(t)| O_kin |PHI(t)>, 
   //calc_Okint(sector, WX, WY);
+  
+  FilePrintBasis(sector);
 
   // real-time evolution of cartoon states and Locshmidt Echo in (wx,wy)=(0,0) 
   // functions in evolveH_ov2 and evolveH_prof can have different initial states

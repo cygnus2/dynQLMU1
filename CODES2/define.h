@@ -133,4 +133,5 @@ void calc_Oflipt(int,int,int);
 void calc_Oflipt2(int,int,int);
 void calc_Okint(int,int,int);
 void evolve_corrf1(int);
+void FilePrintBasis(int);
 #endif 
