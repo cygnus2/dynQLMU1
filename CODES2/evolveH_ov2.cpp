@@ -26,6 +26,11 @@ void evolveH_ov2(int sector){
     double fprof[VOL];
     int sizet, nTot;
     FILE *fptr,*fptr1; 
+
+    /* find the relevant cartoon states with the specified number of flippable plaquettes */
+    if((LX == 2) && (LY == 2)){
+      std::cout<<"This routine does not include the case LX=2 and LY=2"<<std::endl; exit(0);}
+    if(LY > 2){ std::cout<<"This routine does not work for LY>2"<<std::endl; exit(0); }
     
     sizet = Wind[sector].nBasis;
 
@@ -68,8 +73,8 @@ void evolveH_ov2(int sector){
       for(p=0; p<sizet; p++){
         initC.push_back(Wind[sector].evecs[p*sizet+q]);
       }
-   }
-   else if(INIT==2){ // 2 domain wall cartoon state, even separation
+    }
+    else if(INIT==2){ // 2 domain wall cartoon state, even separation
        r = (LX/2);
        if(r%2==1) r=r-1;
        for(k=0; k<sizet; k++){
@@ -86,8 +91,8 @@ void evolveH_ov2(int sector){
       for(p=0; p<sizet; p++){
         initC.push_back(Wind[sector].evecs[p*sizet+q]);
       }
-   }
-   else if(INIT==3){ // 2 domain wall cartoon state, odd separation
+    }
+    else if(INIT==3){ // 2 domain wall cartoon state, odd separation
        r = (LX/2);
        if(r%2==1) r=r+1;       
        for(k=0; k<sizet; k++){
@@ -105,18 +110,12 @@ void evolveH_ov2(int sector){
       for(p=0; p<sizet; p++){
         initC.push_back(Wind[sector].evecs[p*sizet+q]);
       }
-   }
+    }
 
-    
-   /* find the relevant cartoon states with the specified number of flippable plaquettes */
-   if((LX == 2) && (LY == 2)){
-      std::cout<<"This routine does not include the case LX=2 and LY=2"<<std::endl; exit(0);}
-   if(LY > 2){ std::cout<<"This routine does not work for LY>2"<<std::endl; exit(0); }
-
-   /* now compute the overlap in each sector */
-   fptr = fopen("spectral_WT.dat","w");
-   fptr1= fopen("state_Prof.dat","w");
-   for(t=Ti; t<Tf; t=t+dT){
+    /* now compute the overlap in each sector */
+    fptr = fopen("spectral_WT.dat","w");
+    fptr1= fopen("state_Prof.dat","w");
+    for(t=Ti; t<Tf; t=t+dT){
 
       /* initialize spectral weights */
       for(k=VOL;k>=0;k--) specWT[k]=0.0;

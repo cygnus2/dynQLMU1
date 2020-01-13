@@ -207,6 +207,7 @@ void cartoonState(int wx, int wy, std::vector<bool> &cart){
       /* cartoon state in (Wx,Wy)=(WX,0) */
       if(LR==0){
         // the flux is in the right end (LB)
+        std::cout<<"Putting strings on the right end"<<std::endl;
         for(iy=0;iy<LY;iy++){
            for(ix=0;ix<(LX-2*W);ix++){
              parity=(ix+iy)%2;
@@ -230,6 +231,7 @@ void cartoonState(int wx, int wy, std::vector<bool> &cart){
       }
       else if(LR==1){
         // flux is in the left end (LA)
+        std::cout<<"Putting strings on the left end"<<std::endl;
         for(iy=0;iy<LY;iy++){
            for(ix=2*W;ix<LX;ix++){
               parity=(ix+iy)%2;

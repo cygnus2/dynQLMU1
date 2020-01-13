@@ -54,9 +54,9 @@ void entanglementEntropy(int sector, int wx, int wy){
      alpha.push_back(Wind[sector].evecs[p*sizet+q1]);
   }
 
-  //outf = fopen("EntE.dat","w");
-  //fprintf(outf,"# Entropy of Entanglement as a function of the eigenvalues for LA = %d\n",LEN_A);
-  //fprintf(outf,"# Eigenvalues  Entanglement Entropy \n");
+  outf = fopen("EntE.dat","w");
+  fprintf(outf,"# Entropy of Entanglement as a function of the eigenvalues for LA = %d\n",LEN_A);
+  fprintf(outf,"# Eigenvalues  Entanglement Entropy \n");
  
   // Calculate the EE for each of the eigenstates 
   EENT_diag = 0.0;
@@ -75,9 +75,9 @@ void entanglementEntropy(int sector, int wx, int wy){
     schmidtDecom(sel_evec,eA,eB,sector);
     EENT_diag += alpha[p]*alpha[p]*EE;
     // write to file
-    //fprintf(outf,"%lf %lf\n",sel_eval,EE);
+    fprintf(outf,"%lf %lf\n",sel_eval,EE);
   }
-  //fclose(outf);
+  fclose(outf);
   // free memory from the spin basis
   printf("EE in the diagonal ensemble = %.8lf\n",EENT_diag);
   eA.clear();

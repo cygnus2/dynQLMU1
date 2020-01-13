@@ -100,30 +100,31 @@ int main(){
   constH(sector);
 
   // calculate the <psi_n| O_flip |psi_n>, for every eigenstate psi_n
-  // this calculation in done in the next routine
-  //calc_Oflip(sector);
+  calc_Oflip(sector);
 
-  // real time evolution of <PHI(t)| O_flip |PHI(t)> and <PHI(t)| Cflip |PHI(t)>, 
-  //calc_Oflipt(sector, WX, WY);
+  // real time evolution of <PHI(t)| O_flip |PHI(t)> and <PHI(t)| Cflip |PHI(t)>
+  // starting from specified initial states in each sector (see notes)
+  // note that recalculates the same as the previous routine, so don't use both!
+  calc_Oflipt(sector, WX, WY);
 
   // real time evolution of <PHI(t)| O_kin |PHI(t)>, 
-  //calc_Okint(sector, WX, WY);
+  calc_Okint(sector, WX, WY);
   
-  FilePrintBasis(sector);
+  //FilePrintBasis(sector);
 
   // real-time evolution of cartoon states and Locshmidt Echo in (wx,wy)=(0,0) 
-  // functions in evolveH_ov2 and evolveH_prof can have different initial states
-  if((WX==0)&&(WY==0)){
+  // functions in evolveH_ov2 can have different initial states
+  //if((WX==0)&&(WY==0)){
   	  //evolve_cartoons(sector);
   	  //evolveH_ov1(sector);
-  	  evolveH_ov2(sector);
-  }
+  	  //evolveH_ov2(sector);
+  //}
 
   // real-time evolution of Entanglement Entropy (storing the SVD coefficients)
-  //evolve_Eent(sector, WX, WY);
+  evolve_Eent(sector, WX, WY);
 
   // calculate the Entanglement Entropy for the states
-  //entanglementEntropy(sector, WX, WY);
+  entanglementEntropy(sector, WX, WY);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }
