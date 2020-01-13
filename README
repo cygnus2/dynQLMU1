@@ -13,13 +13,16 @@
            f) Computes a local observable, ie, the flippability of individual plaquettes, summed
               over the volume for all the eigenvectors.
 
+1A. CODES1A: All the features as in CODES1, but the compiler is replaced by gcc instead
+             of icc.
+
 2. CODES2: In addition to the actions in CODES1, this version
            a) Does not explicitly filter any states.
            b) Does a winding number decomposition.
            c) Constructs the Hamiltonian in the specified winding number sector. 
            d) Calculates the eigenvectors and eigenvalues, still using Intel Lapack routines.
            f) Computes the entanglement entropy, also in non-zero winding number sectors. 
-           e) Same as (f).
+           e) Computes the spectral weight in each sector with fixed flippable sectors.
 
 3. CODES2A: This set of codes create the Hamiltonian of a disordered system, by choosing
             the coupling LAMBDA randomly. It diagonalizes and prints the eigenvalues, and
@@ -33,8 +36,8 @@
 4. CODES2B: This is a new directory where I am trying to implement the Lanczos algorithm,
             first to find the ground states, and eventually to the real-time dynamics.
 
-5. CODES2C: This is a new directory where I am trying to implement the ED with fixed boundary
-            conditions which can be compared with a DMRG code. 
+5. CODES2C: This is a new directory where I have implemented the ED with fixed boundary
+            conditions to be compared with a DMRG code. 
 
 
 6. CODES3:  This section implements the translation invariance, but not the charge conjugation.
