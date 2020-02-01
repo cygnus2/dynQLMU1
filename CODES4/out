@@ -1,0 +1,85 @@
+Q = 1, placed at (0,0); checkerboard site = 0
+Q = -1, placed at (1,1); checkerboard site = 2
+NST = 36
+i=0, j=0, states=0
+state=A0E4
+state=A1E4
+state=A3E0
+state=A3E1
+i=0, j=1, states=4
+state=A0E4
+state=A1E4
+state=A3E0
+state=A3E1
+i=0, j=2, states=8
+state=A0E4
+state=A1E4
+state=A3E0
+state=A3E1
+i=0, j=3, states=12
+state=A0E4
+state=A1E4
+state=A3E0
+state=A3E1
+i=1, j=0, states=16
+state=B0F4
+state=B1F4
+state=B3F0
+state=B3F1
+i=1, j=1, states=20
+state=B0F4
+state=B1F4
+state=B3F0
+state=B3F1
+i=1, j=2, states=24
+state=B0F4
+state=B1F4
+state=B3F0
+state=B3F1
+i=1, j=3, states=28
+state=B0F4
+state=B1F4
+state=B3F0
+state=B3F1
+i=2, j=0, states=32
+i=2, j=1, states=32
+i=2, j=2, states=32
+i=2, j=3, states=32
+i=3, j=0, states=32
+i=3, j=1, states=32
+i=3, j=2, states=32
+i=3, j=3, states=32
+No of gauge invariant states: 32, 32
+Basis sorted.
+ state =0 #-flippable plaquettes=2
+ state =1 #-flippable plaquettes=2
+ state =2 #-flippable plaquettes=2
+ state =3 #-flippable plaquettes=2
+ state =4 #-flippable plaquettes=3
+ state =5 #-flippable plaquettes=3
+ state =6 #-flippable plaquettes=3
+ state =7 #-flippable plaquettes=3
+ state =8 #-flippable plaquettes=3
+ state =9 #-flippable plaquettes=3
+ state =10 #-flippable plaquettes=3
+ state =11 #-flippable plaquettes=3
+ state =12 #-flippable plaquettes=2
+ state =13 #-flippable plaquettes=2
+ state =14 #-flippable plaquettes=2
+ state =15 #-flippable plaquettes=2
+ state =16 #-flippable plaquettes=3
+ state =17 #-flippable plaquettes=3
+ state =18 #-flippable plaquettes=3
+ state =19 #-flippable plaquettes=3
+ state =20 #-flippable plaquettes=2
+ state =21 #-flippable plaquettes=2
+ state =22 #-flippable plaquettes=2
+ state =23 #-flippable plaquettes=2
+ state =24 #-flippable plaquettes=2
+ state =25 #-flippable plaquettes=2
+ state =26 #-flippable plaquettes=2
+ state =27 #-flippable plaquettes=2
+ state =28 #-flippable plaquettes=3
+ state =29 #-flippable plaquettes=3
+ state =30 #-flippable plaquettes=3
+ state =31 #-flippable plaquettes=3
