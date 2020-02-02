@@ -7,7 +7,7 @@
 #include<vector>
 #include<iterator>
 
-/* according to the rules of cpp, the variables are declared here 
+/* according to the rules of cpp, the variables are declared here
  * and also in the header file as extern such that they are avl to
  * the other functions.
  */
@@ -58,15 +58,15 @@ int main(){
   fclose(fptr);
   if(( LX%2 != 0 )||( LY%2 !=0 )) { printf("Code does not work with odd LX and/or LY. \n"); exit(0); }
   if(LX<LY) printf("Please make sure LX >= LY. Unforseen errors can occur otherwise. \n");
-  VOL = LX*LY;
+  VOL  = LX*LY;
   VOL2 = VOL/2;
 
-  // decide whether to check the results of the diagonalization 
+  // decide whether to check the results of the diagonalization
   CHKDIAG=1;
 
   /* Initialize nearest neighbours */
   for(i=0;i<=2*DIM;i++){
-    next[i] = (int *)malloc(VOL*sizeof(int)); 
+    next[i]    = (int *)malloc(VOL*sizeof(int));
     nextCHK[i] = (int *)malloc(VOL*sizeof(int));
   }
 
@@ -74,15 +74,15 @@ int main(){
   lin2chk = (int *)malloc(VOL*sizeof(int));
   chk2lin = (int *)malloc(VOL*sizeof(int));
   initneighbor();
-  
+
   // get the lattice co-ordinates for positive and negative charges
-  locQP = lin2chk[LYP*LX + LXP]; 
+  locQP = lin2chk[LYP*LX + LXP];
   locQM = lin2chk[LYM*LX + LXM];
   if(locQP>=VOL2){ printf("+Q is not on the right sublattice \n"); exit(0); }
   if(locQM>=VOL2){ printf("-Q is not on the right sublattice \n"); exit(0); }
-  printf("Q = %d, placed at (%d,%d); checkerboard site = %d\n",QTOT,LXP,LYP,locQP); 
-  printf("Q = %d, placed at (%d,%d); checkerboard site = %d\n",-QTOT,LXM,LYM,locQM); 
-  
+  printf("Q = %d, placed at (%d,%d); checkerboard site = %d\n", QTOT,LXP,LYP,locQP);
+  printf("Q = %d, placed at (%d,%d); checkerboard site = %d\n",-QTOT,LXM,LYM,locQM);
+
   /* build basis states satisfying Gauss' Law */
   if(QTOT==1)       conststates_Q1();
   else if(QTOT==2)  conststates_Q2();
@@ -90,29 +90,17 @@ int main(){
 
   //select the winding number (0,0)
   select_winding();
-  
+
   constH();
 
   // calculate the <psi_n| O_flip |psi_n>, for every eigenstate psi_n
   calc_Oflip();
 
-  // real time evolution of <PHI(t)| O_flip |PHI(t)> with initial states 
-  // with least number of non-flippable plaquettes 
+  // real time evolution of <PHI(t)| O_flip |PHI(t)> with initial states
+  // with maximum number of flippable plaquettes
   calc_Oflipt();
 
-  // real time evolution of <PHI(t)| O_kin |PHI(t)>, 
-  //calc_Okint(sector, WX, WY);
-  
   //FilePrintBasis(sector);
-
-  // real-time evolution of cartoon states and Locshmidt Echo in (wx,wy)=(0,0) 
-  // functions in evolveH_ov2 can have different initial states
-  //if((WX==0)&&(WY==0)){
-  	  //evolve_cartoons(sector);
-  	  //evolveH_ov1(sector);
-  	  //evolveH_ov2(sector);
-  //}
-
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }

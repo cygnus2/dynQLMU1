@@ -16,7 +16,7 @@ extern int LX,LY,VOL,VOL2;
 extern int QTOT,LXP,LYP,LXM,LYM;
 extern int locQP,locQM;
 extern double lam,Ti,Tf,dT;
-/* NTOT = total no of basis states 
+/* NTOT = total no of basis states
  * NH   = states not killed by H  */
 extern int NTOT;
 
@@ -33,14 +33,14 @@ class WindNo{
     long int nBasis;
     std::vector<std::vector<bool>> basisVec;
     std::vector<int> nflip;
-    // maximum number of flippable plaqs in a basis state
-    int nflipMax; 
+    // maximum number of flippable plaqs possible
+    int nflipMax;
     // Hamiltonian in the sector stored as a sparse matrix
     // this is the only way of storing the matrix
     std::vector<MKL_INT> rows,cols;
     std::vector<double> hamil;
     double getH(int,int);
-    // simple routine to check the direct way to extract 
+    // simple routine to check the direct way to extract
     // elements from a sparse matrix in the CSC representation
     void check_getH();
 
@@ -57,16 +57,16 @@ class WindNo{
     // function to display variables
     void display(){
      printf("(Wx,Wy)=(% d,% d) with #-of-states= %ld \n",Wx,Wy,nBasis);
-    } 
+    }
 
     // function to count flippable plaquettes
-    void flip_plaq(); 
+    void flip_plaq();
 
-    // function to sort the basis states 
+    // function to sort the basis states
     void sortbasis();
 
     // function to search a transformed state in the winding number basis
-    // the binary search implemented on the sorted basis states clearly 
+    // the binary search implemented on the sorted basis states clearly
     // outperforms the linear search
     int scan(std::vector<bool>&);
     int binscan(std::vector<bool>&);
@@ -78,8 +78,8 @@ class WindNo{
       nBasis = 0;
       nflipMax = -1;
     }
-   
-    // Destructor 
+
+    // Destructor
     ~WindNo(){
        basisVec.clear();
        rows.clear();
@@ -103,7 +103,6 @@ void select_winding(void);
 void calc_Oflip();
 
 //void calc_Oflipt(int,int,int);
-//void entanglementEntropy(int,int,int);
 //void evolve_cartoons(int);
 //void evolveH_ov1(int);
 //void evolveH_ov2(int);
@@ -111,4 +110,4 @@ void calc_Oflip();
 //void calc_Oflipt2(int,int,int);
 //void calc_Okint(int,int,int);
 //void evolve_corrf1(int);
-#endif 
+#endif

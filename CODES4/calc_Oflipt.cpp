@@ -8,125 +8,74 @@
 #include<algorithm>
 #include "define.h"
 
-extern void cartoonState(int, int, std::vector<bool>& );
-
-// Notation: eigenstate |psi_n> = \sum_k \alpha_k |k>, |k> is a basis state in 
-//           specified winding number (wx,wy) sector.
+// Notation: eigenstate |psi_n> = \sum_k \alpha_k |k>
 void calc_Oflipt(){
   MKL_INT p,q,r,sizet,q1,k,m;
   MKL_INT sizesp;
   double t;
-  sizet =  Wind[sector].nBasis;
-  std::vector<bool> cart1(2*VOL);
-  std::vector<double> alpha;
-  std::vector<double> CR(LX/2), CR_diag(LX/2);
-  std::vector<double> temp(LX/2);
-  double phiRE, phiIM, oflipt; 
-  double Oflip_diag;
+  sizet =  Wind.nBasis;
+  double phiRE, phiIM, phiT, oflipt;
   double v_q, O_q;
-  double Oflip_avg;
-  FILE *outf;
-  
-  /* construct cartoon state */
-  cartoonState(wx, wy, cart1);
-  q1=Wind[sector].binscan(cart1);
+  FILE *fptr,*fptr1;
+  std::vector<double> initC;
+  double fprof[VOL];
+
+  // choosing different values of ch and cx allows choice of different
+  // initial states with the same number of flippable plaquettes
+  int ch, cx;
+
+  /* initialize state in maximal flippable state */
+  cx = 0; ch = 0; //choose the first state which has nflipMax plaquettes
+  for(k=0; k<sizet; k++){
+	    if( Wind.nflip[k] == Wind.nflipMax ){
+         if(cx == ch){ q = k; break; }
+		     cx++;
+	    }
+  }
+  std::cout<<"Starting state is basis state = "<<q<<std::endl;
+  /* store the overlap of the initial state with the eigenvectors */
   for(p=0; p<sizet; p++){
-     alpha.push_back(Wind[sector].evecs[p*sizet+q1]);
+   initC.push_back(Wind.evecs[p*sizet+q]);
   }
 
-  // Compute <PSI_M| O_flip|PSI_M> & <PSI_M| C_flip |PSI_M> for all PSI_M 
-  outf = fopen("Oflip.dat","w"); 
-  fprintf(outf,"# Results of winding number sector (%d,%d) \n",Wind[sector].Wx,Wind[sector].Wy);
-  Oflip_diag = 0.0;
-  for(r=0;r<(LX/2);r++) CR_diag[r]=0.0;
-  // scan through all the eigenvalues
-  for(p=0;p<sizet;p++){
-    // calculate the expectation value in each eigenstate
-    Oflip_avg = 0.0;
-    for(r=0;r<(LX/2);r++) temp[r]=0.0;
-    for(q=0;q<sizet;q++){
-      v_q = Wind[sector].evecs[p*sizet+q];
-      O_q = Wind[sector].nflip[q];
-      Oflip_avg += v_q*v_q*O_q;
-      for(r=0;r<(LX/2);r++) temp[r] += v_q*v_q*Wind[sector].cflip[q][r];
-    }
-    Oflip_diag += Oflip_avg*alpha[p]*alpha[p];
-    Oflip_avg = Oflip_avg/((double)VOL);
-    for(r=0;r<(LX/2);r++) CR_diag[r] += temp[r]*alpha[p]*alpha[p];
-    fprintf(outf,"%.12lf %.12lf\n",Wind[sector].evals[p],Oflip_avg);
-  }
- fclose(outf);
+  // open file to write
+  fptr = fopen("OflipT.dat","w");
+  fptr1= fopen("Fprof.dat","w");
 
- // diagonal ensemble results
- for(r=0;r<(LX/2);r++) CR_diag[r] = CR_diag[r]/((double)VOL);
- Oflip_diag = Oflip_diag/((double)VOL);
- outf = fopen("OflipT.dat","w");
- fprintf(outf,"# value in the diagonal observable = %f ",Oflip_diag);
- for(r=0;r<(LX/2);r++) fprintf(outf, " %lf ",CR_diag[r]);
- fprintf(outf,"\n");
+  // the time-evolution
+  for(t=Ti;t<Tf;t=t+dT){
 
- // the time-evolution 
- for(t=Ti;t<Tf;t=t+dT){
+     /* initialize flux profile and total flux */
+     for(k=0;k<VOL;k++) fprof[k]=0.0;
      oflipt = 0.0;
-     for(r=0;r<(LX/2);r++) CR[r]=0.0;
+
      for(k=0; k<sizet; k++){
        phiRE = 0.0; phiIM = 0.0;
        for(m=0; m<sizet; m++){
-         phiRE += alpha[m]*Wind[sector].evecs[sizet*m+k]*cos(-Wind[sector].evals[m]*t);
-         phiIM += alpha[m]*Wind[sector].evecs[sizet*m+k]*sin(-Wind[sector].evals[m]*t);
-       }  
-       oflipt += (phiRE*phiRE +  phiIM*phiIM)*Wind[sector].nflip[k];
-       for(r=0;r<(LX/2);r++) CR[r] += (phiRE*phiRE +  phiIM*phiIM)*Wind[sector].cflip[k][r];
-     }
+         phiRE += initC[m]*Wind.evecs[sizet*m+k]*cos(Wind.evals[m]*t);
+         phiIM += initC[m]*Wind.evecs[sizet*m+k]*sin(Wind.evals[m]*t);
+       }
+       phiT = phiRE*phiRE + phiIM*phiIM;
+       oflipt += phiT*Wind.nflip[k];
+       /* get the flippability profile at time t */
+       for(r=0;r<VOL;r++){
+         if(Wind.xflip[k][r]) fprof[r] += phiT;
+       }
+     } // close the loop over basis states
+
      oflipt = oflipt/((double)VOL);
-     for(r=0;r<(LX/2);r++) CR[r] = CR[r]/((double)VOL);
-     fprintf(outf,"%.4lf %.12lf ",t,oflipt);
-     for(r=0;r<(LX/2);r++) fprintf(outf," %.8lf ",CR[r]);
-     fprintf(outf,"\n");
+     fprintf(fptr,"%.4lf %.12lf \n",t,oflipt);
+
+     // print the profile
+     fprintf(fptr1,"%.4lf ",t);
+     for(r=0; r<VOL; r++) fprintf(fptr1, "  %.6lf  ", fprof[r]);
+     fprintf(fptr1,"\n");
+
  }
- fclose(outf);
+ fclose(fptr);
+ fclose(fptr1);
+
  /* clear memory */
- cart1.clear();
- alpha.clear();
- CR.clear(); CR_diag.clear(); temp.clear();
+ initC.clear();
 
 }
-
-// This routine serves as a check of the calculation of the real-time
-// evolution done in the first routine. It takes much longer (as explained
-// in the notes) and also checked in actual run-time.
-void calc_Oflipt2(int sector, int wx, int wy){
-  MKL_INT p,q,sizet,q1,k,l,m,n;
-  double t;
-  sizet =  Wind[sector].nBasis;
-  std::vector<bool> cart1(2*VOL);
-  std::vector<double> alpha;
-  double Omn,oflipt; 
-  FILE *outf;
-
-  /* construct cartoon state */
-  cartoonState(wx, wy, cart1);
-  q1=Wind[sector].binscan(cart1);
-  for(p=0; p<sizet; p++){
-     alpha.push_back(Wind[sector].evecs[p*sizet+q1]);
-  }
-  outf = fopen("Evol_Oflip2.dat","w");
-
-  for(t=Ti;t<Tf;t=t+dT){
-     oflipt = 0.0;
-     for(m=0; m<sizet; m++){
-     for(n=0; n<sizet; n++){
-       Omn = 0.0;
-       for(k=0; k<sizet; k++){
-         Omn += Wind[sector].evecs[sizet*m+k]*Wind[sector].evecs[sizet*n+k]*Wind[sector].nflip[k];
-       }  
-       oflipt += alpha[m]*alpha[n]*Omn*cos((Wind[sector].evals[m] - Wind[sector].evals[n])*t);
-     } }
-     fprintf(outf,"%.4lf %.12lf\n",t,oflipt);
-  }
-  fclose(outf);
-  /* clear memory */
-  cart1.clear();
-  alpha.clear();
-}
-
