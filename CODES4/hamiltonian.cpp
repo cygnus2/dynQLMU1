@@ -14,12 +14,12 @@
 
 void constH(){
 
-   extern void eigcheck(std::vector<double>&, std::vector<std::vector<double>>&,int); 
+   extern void eigcheck(std::vector<double>&, std::vector<std::vector<double>>&,int);
    extern void diag_LAPACK_RRR(std::vector<double>&, std::vector<double>&, std::vector<double>&);
    extern void diag_LAPACK(std::vector<double>&, std::vector<double>&, std::vector<double>&);
    extern void printmatrix(std::vector<MKL_INT>&,std::vector<MKL_INT>&,std::vector<double>&);
 
-   // workspace variables to construct the Hamiltonian  
+   // workspace variables to construct the Hamiltonian
    int i,j,k,p,q,r;
    int p1,p2,p3,p4;
    int q1,q2,q3,q4;
@@ -35,13 +35,13 @@ void constH(){
    // basis state = nflipMax. We already count the maximal number of flippable plaquette in any
    // basis state, and store it in nflipMax. In addition, there is the entry for the diagonal
    // coupling, lambda, to count the number of flippable terms in the state.
-   
+
    // flip(x)=true (false) if the plaq x is flippable (non-flippable) for the k-th basis state
    std::vector<bool> xfl(VOL);
 
    int x,y;
    bool f1,f2;
- 
+
    printf("Construct Hamiltonian\n");
    curr_index=1;
    Wind.rows.push_back(curr_index);
@@ -50,7 +50,7 @@ void constH(){
       newstate = Wind.basisVec[i];
 
       /* act on the basis state with the Hamiltonian */
-      /* a single plaquette is arranged as 
+      /* a single plaquette is arranged as
                 pzw
              o-------o
              |       |
@@ -63,27 +63,27 @@ void constH(){
       stateq = 0;
       for(p=0;p<VOL;p++){
        xfl[p]=false; // initially assume it is not flippable
-       // Find if a single plaquette is flippable 
+       // Find if a single plaquette is flippable
        p1=2*p; p2=2*next[DIM+1][p]+1; p3=2*next[DIM+2][p]; p4=2*p+1;
        pxy=newstate[p1]; pyz=newstate[p2]; pzw=newstate[p3]; pwx=newstate[p4];
        if((pxy==pyz)&&(pzw==pwx)&&(pwx!=pxy)){
-         // If flippable, act with the Hamiltonian 
+         // If flippable, act with the Hamiltonian
          newstate[p1]=!newstate[p1]; newstate[p2]=!newstate[p2];
          newstate[p3]=!newstate[p3]; newstate[p4]=!newstate[p4];
          // check which state it is by scanning other states in the same sector
          // use the bin search if the basis states are sorted; it is much faster
          //q=Wind.scan(newstate);
-         q=Wind.binscan2(newstate);
-         // store the position matrix element (i,stateq) 
+         q=Wind.binscan(newstate);
+         // store the position matrix element (i,stateq)
          rowscan[stateq]=q; stateq++;
          //flip back the plq
          newstate[p1]=!newstate[p1]; newstate[p2]=!newstate[p2];
          newstate[p3]=!newstate[p3]; newstate[p4]=!newstate[p4];
 
-	 xfl[p]=true; // reset flippability info
+	       xfl[p]=true; // reset flippability info
        }
      }
-   
+
      // store the info about the flippability of the basis state
      Wind.xflip.push_back(xfl);
 
@@ -95,7 +95,7 @@ void constH(){
      // check
      if(stateq > (Wind.nflipMax+1)){ printf("Error in bound.\n"); }
      // sort the matrix columns
-     std::sort (rowscan.begin(), rowscan.end()); 
+     std::sort (rowscan.begin(), rowscan.end());
      // construct the matrix in CSC format
      curr_index = curr_index + stateq;
      Wind.rows.push_back(curr_index);
@@ -125,7 +125,7 @@ int WindNo::scan(std::vector<bool> &newstate){
 
 int WindNo::binscan(std::vector<bool> &newstate){
      unsigned int m;
-     // binary search of the sorted array  
+     // binary search of the sorted array
      std::vector<std::vector<bool>>::iterator it;
      it = std::lower_bound(basisVec.begin(),basisVec.end(),newstate);
      m  = std::distance(basisVec.begin(),it);
@@ -136,14 +136,14 @@ int WindNo::binscan(std::vector<bool> &newstate){
      return m;
 }
 
-// Alternate implementation of the search. Find where the required element 
-// exists in the vector with the iterator, then the index.  
+// Alternate implementation of the search. Find where the required element
+// exists in the vector with the iterator, then the index.
 int WindNo::binscan2(std::vector<bool> &newstate){
      unsigned int m;
      std::vector<std::vector<bool>>::iterator it;
      it = std::find(basisVec.begin(),basisVec.end(),newstate);
      if(it == basisVec.end()){
-       std::cout<<"Element not found here! "<<std::endl; 
+       std::cout<<"Element not found here! "<<std::endl;
        return -100;
      }
      m  = std::distance(basisVec.begin(),it);

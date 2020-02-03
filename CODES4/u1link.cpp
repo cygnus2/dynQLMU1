@@ -100,11 +100,25 @@ int main(){
   // with maximum number of flippable plaquettes
   calc_Oflipt();
 
-  //FilePrintBasis(sector);
+  FilePrintPlaq();
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }
   free(chk2lin); free(lin2chk);
 
   return 0;
+}
+
+void FilePrintPlaq(){
+ FILE *fptr;
+ int i,p;
+ fptr=fopen("BASIS_QQBAR.dat","w");
+ for(i=0;i<Wind.nBasis;i++){
+   for(p=0;p<VOL;p++){
+    if(Wind.xflip[i][p]) fprintf(fptr, " 1 ");
+    else                 fprintf(fptr, " 0 ");
+   }
+   fprintf(fptr,"\n");
+  }
+ fclose(fptr);
 }

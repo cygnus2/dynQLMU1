@@ -9,7 +9,7 @@
 
 /* Select the sector with zero winding */
 void select_winding(){
-  extern void fileprintBasis(); 
+  extern void fileprintBasis();
   unsigned int i,j,count,p,q,p1,p2,p3,p4;
   int ix,iy;
   bool pxy,pyz,pzw,pwx;
@@ -28,6 +28,7 @@ void select_winding(){
   // compute the no of flippable plaquettes in the basis (ice) states
   Wind.flip_plaq();
 
+  // print the basis states, this is only for checking
   fileprintBasis();
 }
 
@@ -50,7 +51,7 @@ void WindNo::flip_plaq(){
     if(!nBasis){ std::cout<<"Total basis state not defined! "<<std::endl; exit(0); }
     for(i=0; i<nBasis; i++){
       // compute the diagonal term in the Hamiltonian
-      /* a single plaquette is arranged as 
+      /* a single plaquette is arranged as
                 pzw
              o-------o
              |       |
@@ -61,8 +62,8 @@ void WindNo::flip_plaq(){
       */
       count_flip=0;
       for(j=0;j<VOL;j++){
-          //p=chk2lin[j]; 
-	  p=j;
+          //p=chk2lin[j];
+	        p=j;
           p1=2*p; p2=2*next[DIM+1][p]+1; p3=2*next[DIM+2][p]; p4=2*p+1;
           pxy=basisVec[i][p1]; pyz=basisVec[i][p2]; pzw=basisVec[i][p3]; pwx=basisVec[i][p4];
           if((pxy==pyz)&&(pzw==pwx)&&(pwx!=pxy)) count_flip++;
@@ -81,7 +82,7 @@ void WindNo::flip_plaq(){
 void fileprintBasis(){
  FILE *fptr;
  int i,p;
- fptr=fopen("BASISW00.txt","w");
+ fptr=fopen("BASISW00.dat","w");
  fprintf(fptr,"Printing the (flippable) basis states for (Lx,Ly)=(%d,%d) lattice.\n",LX,LY);
  for(i=0;i<Wind.nBasis;i++){
    fprintf(fptr,"basis %d ",i);
@@ -99,8 +100,8 @@ void fileprintBasis(){
   *    Note that winding number cannot be defined in the presence
   *    of charges. To see this, consider the simple topological
   *    argument: The flux from a charge can either directly go
-  *    the anti-charge using the shortest route. Equivalently, 
+  *    the anti-charge using the shortest route. Equivalently,
   *    it can also wind around several times and then reach the
-  *    anti-charge. This is equivalent to different winding 
+  *    anti-charge. This is equivalent to different winding
   *    number sectors.
-  */ 
+  */
