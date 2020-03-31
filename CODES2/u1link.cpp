@@ -34,7 +34,7 @@ int CHKDIAG;
 // INIT=0, symm broken states with all flippable plaquettes
 // INIT=1, C1-C2-C1 domain wall states with fused domain walls
 // INIT=2,3 domain wall states with inter-dw distance ~ LX/2
-// For winding number states INIT > 10
+// For winding number states INIT has a value 10+WX.
 int WX, WY, LR;
 int INIT;
 
@@ -73,6 +73,10 @@ int main(){
   if(LX<LY) printf("Please make sure LX >= LY. Unforseen errors can occur otherwise. \n");
   VOL = LX*LY;
   VOL2 = VOL/2;
+
+  if(INIT!=10+std::abs(WX)){ 
+     std::cout<<"Please specify INIT = 10 + abs(WX)"<<std::endl; exit(0);
+  }
 
   // decide whether to check the results of the diagonalization 
   CHKDIAG=0;
