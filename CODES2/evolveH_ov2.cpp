@@ -8,18 +8,16 @@
 #include<algorithm>
 #include "define.h"
 
+extern void initState(int, int, int*);
+extern void flippedHist(int, int, int*);
+
 // Notation: eigenstate |n> = \sum_k \alpha_k |k>, |k> is a cartoon state
 void evolveH_ov2(int sector){
     extern void printconf(bool*);
     std::vector<double> initC;
-    std::vector<bool> cart(2*VOL);    
-    int i,ix,iy,p,q,parity;
+    int i,ix,iy,p,q;
     int m,k,j,r;
     int nFlip[VOL+1]; 
-    int ch1, ch2; // allow the choice of a different cartoon initial
-    int cx1, cx2; // state, i.e., with domain walls placed elsewhere
-    int p1,p2,p3,p4;
-    bool s1,s2,s3,s4;
     double specWT[VOL+1];
     double t;
     double betaR,betaI,betaM,betaTot;
@@ -35,77 +33,23 @@ void evolveH_ov2(int sector){
     sizet = Wind[sector].nBasis;
 
     /* initialize */
-    for(k=0;k<=VOL;k++) nFlip[k]=0; 
+    //for(k=0;k<=VOL;k++) nFlip[k]=0; 
+
+    flippedHist(sector, VOL+1, nFlip);
     
     /* compute #-basis states with k-flippable plaquettes */
-    for(k=0; k<sizet; k++){
-	  p = Wind[sector].nflip[k];
-	  nFlip[p]++;
-    }
+    //for(k=0; k<sizet; k++){
+    //	  p = Wind[sector].nflip[k];
+    //	  nFlip[p]++;
+    //}
 
+    /* obtain the initial starting state */
     q=0;
-    /* define the initial cartoon state */
-    if(INIT==0){   // symmetry broken cartoon state
-      for(iy=0;iy<LY;iy++){
-      for(ix=0;ix<LX;ix++){
-         parity=(ix+iy)%2;
-         p = 2*(iy*LX+ix);
-         if(parity){ cart[p]=false; cart[p+1]=true;  }
-         else      { cart[p]=true;  cart[p+1]=false; }
-      }}
-      q=Wind[sector].binscan(cart); 
+    initState(sector,INIT,&q);
+    if(q<0){ 
+      std::cout<<"Initial state not found!"<<std::endl; exit(0); }
+    else{
       std::cout<<"Starting state is basis state = "<<q<<std::endl;
-      /* store the overlap of the initial state with the eigenvectors */
-      for(p=0; p<sizet; p++){
-        initC.push_back(Wind[sector].evecs[p*sizet+q]);
-      }
-    }
-    else if(INIT==1){ // 1-plaquette flipped cartoon state
-       ch1 = 2; cx1 = 0;
-       for(k=0; k<sizet; k++){
-	    if(Wind[sector].nflip[k]==(VOL-3)){
-                if(cx1 == ch1){ q = k; break; }
-		cx1++;
-	    }   
-       }
-       std::cout<<"Starting state is basis state = "<<q<<std::endl;
-      /* store the overlap of the initial state with the eigenvectors */
-      for(p=0; p<sizet; p++){
-        initC.push_back(Wind[sector].evecs[p*sizet+q]);
-      }
-    }
-    else if(INIT==2){ // 2 domain wall cartoon state, even separation
-       r = (LX/2);
-       if(r%2==1) r=r-1;
-       for(k=0; k<sizet; k++){
-	    if(Wind[sector].nflip[k]==(VOL-4)){
-		    ix=0;   iy=0; p1=iy*LX+ix;  s1=Wind[sector].xflip[k][p1];
-		    ix=1;   iy=1; p2=iy*LX+ix;  s2=Wind[sector].xflip[k][p2];
-		    ix=r;   iy=0; p3=iy*LX+ix;  s3=Wind[sector].xflip[k][p3];
-		    ix=r+1; iy=1; p4=iy*LX+ix;  s4=Wind[sector].xflip[k][p4];
-		    if((!s1) && (!s2) && (!s3) && (!s4)){ q = k; break;}
-	    }  
-       }
-       std::cout<<"Starting state is basis state = "<<q<<std::endl;
-      /* store the overlap of the initial state with the eigenvectors */
-      for(p=0; p<sizet; p++){
-        initC.push_back(Wind[sector].evecs[p*sizet+q]);
-      }
-    }
-    else if(INIT==3){ // 2 domain wall cartoon state, odd separation
-       r = (LX/2);
-       if(r%2==1) r=r+1;       
-       for(k=0; k<sizet; k++){
-	    if(Wind[sector].nflip[k]==(VOL-4)){
-		    ix=0;     iy=0; p1=iy*LX+ix;  s1=Wind[sector].xflip[k][p1];
-		    ix=1;     iy=1; p2=iy*LX+ix;  s2=Wind[sector].xflip[k][p2];
-		    ix=r-1;   iy=1; p3=iy*LX+ix;  s3=Wind[sector].xflip[k][p3];
-		    ix=r;     iy=0; p4=iy*LX+ix;  s4=Wind[sector].xflip[k][p4];
-		    if( (!s1) && (!s2) && (!s3) && (!s4)){ q = k; break;}
-	    }   
-       }
-       if(k==sizet) std::cout<<"maximal state reached "<<std::endl;
-       std::cout<<"Starting state is basis state = "<<q<<std::endl;
       /* store the overlap of the initial state with the eigenvectors */
       for(p=0; p<sizet; p++){
         initC.push_back(Wind[sector].evecs[p*sizet+q]);
@@ -159,3 +103,25 @@ void evolveH_ov2(int sector){
     initC.clear();
 }
 
+void flippedHist(int sector, int T, int *nFlip){ 
+  int k,p,sizet,tot; 
+  FILE *flipH;
+  if(T!=(VOL+1)) std::cout<<"Mismatch in the routine flipped_hist. Check!"<<std::endl;
+  sizet = Wind[sector].nBasis;
+  /* initialize */
+  for(k=0;k<=VOL;k++) nFlip[k]=0;
+  /* compute #-basis states with k-flippable plaquettes */
+  for(k=0; k<sizet; k++){
+	  p = Wind[sector].nflip[k];
+	  nFlip[p]++;
+  }
+  /* print histogram */
+  tot=0;
+  flipH = fopen("flipH.dat","w");
+  for(k=0;k<=VOL;k++){
+    tot = tot + nFlip[k];
+    fprintf(flipH,"%d %d\n",k,nFlip[k]);
+  }
+  fclose(flipH);
+  if(tot != sizet) std::cout<<"Size mismatch: sizet="<<sizet<<" tot="<<tot<<std::endl;	
+}

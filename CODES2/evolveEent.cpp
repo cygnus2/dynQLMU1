@@ -14,16 +14,15 @@ extern void print_zmatrix( char* , MKL_INT , MKL_INT , MKL_Complex16* , MKL_INT 
 extern void print_rmatrix( char* , MKL_INT , MKL_INT , double* , MKL_INT  );
 extern int checkGL2(std::vector<bool>&);
 extern void createLookupTable(int, MKL_INT, MKL_INT, std::vector<MKL_INT>&);
-extern void cartoonState(int, int, std::vector<bool>& );
+extern void initState(int, int, int* );
 
-void evolve_Eent(int sector, int wx, int wy){
+void evolve_Eent(int sector){
    
    int i,ix,iy,parity,p,q1,q2;
    int sizet,nchi,d,k,m;
    double t,entE;
    double initE;
    sizet = Wind[sector].nBasis;
-   std::vector<bool> cart1(2*VOL);
    std::vector<double> alpha_real(sizet,0.0);
    std::vector<double> alpha_imag(sizet,0.0);
    // this stores which subsystem states map to states of the full system
@@ -31,10 +30,10 @@ void evolve_Eent(int sector, int wx, int wy){
    FILE *outf;
    double overlap,norm;
    sizet = Wind[sector].nBasis; 
-   /* construct cartoon state */
-   cartoonState(wx, wy, cart1);
 
-   q1=Wind[sector].binscan(cart1);
+   /* construct cartoon state */
+   initState(sector, INIT, &q1);
+   std::cout<<"In routine evolve_Eent. Starting state is basis state = "<<q1<<std::endl;
    // calculate the average energy of the initial state
    initE=0.0;
    for(k=0; k<sizet; k++){
@@ -182,77 +181,5 @@ void createLookupTable(int sector, MKL_INT DA, MKL_INT DB, std::vector<MKL_INT> 
       if(p == -100) continue;
       else sub2main[i*DB+j] = p;
    }}
-}
-
-void cartoonState(int wx, int wy, std::vector<bool> &cart){
-  int ix,iy,parity,p;
-  int W,sign;
-  W = std::abs(wx); 
-  if(wy!=0){ printf("The option with Wy != 0 is not yet supported. \n"); exit(0); }
-  
-  if((wx==0)&&(wy==0)){
-      /* cartoon state in (Wx,Wy)=(0,0) */
-      for(iy=0;iy<LY;iy++){
-      for(ix=0;ix<LX;ix++){
-         parity=(ix+iy)%2;
-         p = 2*(iy*LX+ix);
-         if(parity){ cart[p]=false; cart[p+1]=true; }
-         else{       cart[p]=true;  cart[p+1]=false; }
-      }}
-  }
-  else if((W>0)&&(wy==0)){
-      if(wx>0) sign=1; 
-      else if(wx<0) sign=-1;
-      else{ printf("Logic error. \n"); exit(0);}
-      /* cartoon state in (Wx,Wy)=(WX,0) */
-      if(LR==0){
-        // the flux is in the right end (LB)
-        std::cout<<"Putting strings on the right end"<<std::endl;
-        for(iy=0;iy<LY;iy++){
-           for(ix=0;ix<(LX-2*W);ix++){
-             parity=(ix+iy)%2;
-             p = 2*(iy*LX+ix);
-             if(parity){ cart[p]=false; cart[p+1]=true; }
-             else{       cart[p]=true;  cart[p+1]=false; }
-           }
-           for(ix=(LX-2*W);ix<LX;ix++){
-             parity=(iy)%2;
-             p = 2*(iy*LX+ix);
-             if(sign==1){ 
-                 if(parity){ cart[p]=false; cart[p+1]=true; }
-                 else{       cart[p]=true;  cart[p+1]=true; }
-             }
-             else if(sign==-1){ 
-                 if(parity){ cart[p]=false; cart[p+1]=false; }
-                 else{       cart[p]=true;  cart[p+1]=false; }
-             }
-           }
-        }
-      }
-      else if(LR==1){
-        // flux is in the left end (LA)
-        std::cout<<"Putting strings on the left end"<<std::endl;
-        for(iy=0;iy<LY;iy++){
-           for(ix=2*W;ix<LX;ix++){
-              parity=(ix+iy)%2;
-              p = 2*(iy*LX+ix);
-              if(parity){ cart[p]=false; cart[p+1]=true; }
-              else{       cart[p]=true;  cart[p+1]=false; }
-           }
-           for(ix=0;ix<2*W;ix++){
-              parity=(iy)%2;
-              p = 2*(iy*LX+ix);
-              if(sign==1){
-                    if(parity){ cart[p]=false; cart[p+1]=true; }
-                    else{       cart[p]=true;  cart[p+1]=true; }
-              }
-              else if(sign==-1){
-                    if(parity){ cart[p]=false; cart[p+1]=false; }
-                    else{       cart[p]=true;  cart[p+1]=false; }
-              }
-           }
-        }// close iy
-      }// close LR
-  }
 }
 

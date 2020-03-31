@@ -120,18 +120,19 @@ extern void printvec(std::vector<double>&);
 /* routines */
 void initneighbor(void);
 void conststates(void);
+void initState(int, int, int*);
 void constH(int);
 void winding_no_decompose(void);
 void calc_Oflip(int);
-void entanglementEntropy(int,int,int);
-void evolve_cartoons(int);
+void entanglementEntropy(int);
+void Lecho(int);
 void evolveH_ov1(int);
 void evolveH_ov2(int);
 void flipped_hist(int);
-void evolve_Eent(int,int,int);
-void calc_Oflipt(int,int,int);
-void calc_Oflipt2(int,int,int);
-void calc_Okint(int,int,int);
+void evolve_Eent(int);
+void calc_Oflipt(int);
+void calc_Oflipt2(int);
+void calc_Okint(int);
 void evolve_corrf1(int);
 void FilePrintBasis(int);
 #endif 

@@ -15,7 +15,7 @@ extern int checkGL2(std::vector<bool>&);
 extern void print_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda );
 extern void findBasisA(std::vector<std::vector<bool>>&, std::vector<bool>&);
 extern void findBasisB(std::vector<std::vector<bool>>&, std::vector<bool>&);
-extern void cartoonState(int, int, std::vector<bool>& );
+extern void initState(int, int, int*);
 
 
 // variables used in this set of functions
@@ -32,12 +32,11 @@ std::vector<double> sel_evec;
 
 // calculate the EE for all the states in a chosen sector
 // corresponding to the cut specified
-void entanglementEntropy(int sector, int wx, int wy){
+void entanglementEntropy(int sector){
   int p,i;
   int q1,q2;
   FILE *outf;
   MKL_INT sizet;
-  std::vector<bool> cart1(2*VOL);
   std::vector<double> alpha;
   double EENT_diag;
 
@@ -48,8 +47,8 @@ void entanglementEntropy(int sector, int wx, int wy){
   createBasis(sector);
 
   /* construct cartoon state and calculate the overlap with the eigenstates */
-  cartoonState(wx, wy, cart1);
-  q1=Wind[sector].binscan(cart1);
+  initState(sector, INIT, &q1);
+  std::cout<<"Starting state is basis state = "<<q1<<std::endl;
   for(p=0; p<sizet; p++){
      alpha.push_back(Wind[sector].evecs[p*sizet+q1]);
   }

@@ -15,7 +15,6 @@ int *next[2*DIM+1];
 int *nextCHK[2*DIM+1];
 int *chk2lin,*lin2chk;
 int LX,LY,VOL,VOL2;
-int INIT;
 // Labels the winding number sectors
 // lookup[LX/2+wx][LY/2+wy] refers to the (wx,wy) winding number sector
 int nWindSector;
@@ -29,10 +28,15 @@ std::vector<std::vector<bool>> basis_nonflip;
 std::vector<std::vector<bool>> basis_flip;
 int STORE_SVD;
 int CHKDIAG;
-// initial state is specified by W and LR
+// initial state is specified by W and LR and INIT
 // W is the amount of y-flux=Wy. 
 // LR=0 flux to the left (subsystem LA), LR=1 flux to the right (subsystem LB).
+// INIT=0, symm broken states with all flippable plaquettes
+// INIT=1, C1-C2-C1 domain wall states with fused domain walls
+// INIT=2,3 domain wall states with inter-dw distance ~ LX/2
+// For winding number states INIT > 10
 int WX, WY, LR;
+int INIT;
 
 int main(){
   FILE *fptr;
@@ -100,31 +104,33 @@ int main(){
   constH(sector);
 
   // calculate the <psi_n| O_flip |psi_n>, for every eigenstate psi_n
-  calc_Oflip(sector);
+  //calc_Oflip(sector);
 
   // real time evolution of <PHI(t)| O_flip |PHI(t)> and <PHI(t)| Cflip |PHI(t)>
   // starting from specified initial states in each sector (see notes)
   // note that recalculates the same as the previous routine, so don't use both!
-  calc_Oflipt(sector, WX, WY);
+  //calc_Oflipt(sector);
 
   // real time evolution of <PHI(t)| O_kin |PHI(t)>, 
-  calc_Okint(sector, WX, WY);
+  //calc_Okint(sector);
   
   //FilePrintBasis(sector);
 
-  // real-time evolution of cartoon states and Locshmidt Echo in (wx,wy)=(0,0) 
-  // functions in evolveH_ov2 can have different initial states
-  //if((WX==0)&&(WY==0)){
-  	  //evolve_cartoons(sector);
-  	  //evolveH_ov1(sector);
-  	  //evolveH_ov2(sector);
+  // Lochschmidt Echo
+  //if((WX==0)&&(WY==0)&&(INIT==0)){
+  //     Lecho(sector);
   //}
 
+  // real-time evolution of initial states (evolveH_ov2
+  // has all the functionalities of evolveH_ov1 built in!)
+  // evolveH_ov1(sector);
+  evolveH_ov2(sector);
+
   // real-time evolution of Entanglement Entropy (storing the SVD coefficients)
-  evolve_Eent(sector, WX, WY);
+  //evolve_Eent(sector);
 
   // calculate the Entanglement Entropy for the states
-  entanglementEntropy(sector, WX, WY);
+  //entanglementEntropy(sector);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }

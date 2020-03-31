@@ -8,13 +8,14 @@
 #include<algorithm>
 #include "define.h"
 
-extern void cartoonState(int, int, std::vector<bool>& );
+extern void initState(int, int, int*);
 
 // Notation: eigenstate |psi_n> = \sum_k \alpha_k |k>, |k> is a basis state in 
 //           specified winding number (wx,wy) sector.
-void calc_Oflipt(int sector, int wx, int wy){
-  MKL_INT p,q,r,sizet,q1,k,m;
+void calc_Oflipt(int sector){
+  MKL_INT p,q,r,sizet,k,m;
   MKL_INT sizesp;
+  int q1;
   double t;
   sizet =  Wind[sector].nBasis;
   std::vector<bool> cart1(2*VOL);
@@ -28,8 +29,8 @@ void calc_Oflipt(int sector, int wx, int wy){
   FILE *outf;
   
   /* construct cartoon state */
-  cartoonState(wx, wy, cart1);
-  q1=Wind[sector].binscan(cart1);
+  initState(sector, INIT, &q1);
+  std::cout<<"In function calc_Oflipt. Starting state is basis state = "<<q1<<std::endl;
   for(p=0; p<sizet; p++){
      alpha.push_back(Wind[sector].evecs[p*sizet+q1]);
   }
@@ -86,7 +87,6 @@ void calc_Oflipt(int sector, int wx, int wy){
  }
  fclose(outf);
  /* clear memory */
- cart1.clear();
  alpha.clear();
  CR.clear(); CR_diag.clear(); temp.clear();
 
@@ -95,18 +95,18 @@ void calc_Oflipt(int sector, int wx, int wy){
 // This routine serves as a check of the calculation of the real-time
 // evolution done in the first routine. It takes much longer (as explained
 // in the notes) and also checked in actual run-time.
-void calc_Oflipt2(int sector, int wx, int wy){
-  MKL_INT p,q,sizet,q1,k,l,m,n;
+void calc_Oflipt2(int sector){
+  MKL_INT p,q,sizet,k,l,m,n;
+  int q1;
   double t;
   sizet =  Wind[sector].nBasis;
-  std::vector<bool> cart1(2*VOL);
   std::vector<double> alpha;
   double Omn,oflipt; 
   FILE *outf;
 
   /* construct cartoon state */
-  cartoonState(wx, wy, cart1);
-  q1=Wind[sector].binscan(cart1);
+  initState(sector, INIT, &q1);
+  std::cout<<"Starting state is basis state = "<<q1<<std::endl;
   for(p=0; p<sizet; p++){
      alpha.push_back(Wind[sector].evecs[p*sizet+q1]);
   }
@@ -126,7 +126,6 @@ void calc_Oflipt2(int sector, int wx, int wy){
   }
   fclose(outf);
   /* clear memory */
-  cart1.clear();
   alpha.clear();
 }
 

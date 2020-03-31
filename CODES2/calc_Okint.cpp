@@ -8,16 +8,16 @@
 #include<algorithm>
 #include "define.h"
 
-extern void cartoonState(int, int, std::vector<bool>& );
+extern void initState(int, int, int*);
 
 // Notation: eigenstate |psi_n> = \sum_k \alpha_k |k>, |k> is a basis state in 
 //           specified winding number (wx,wy) sector.
-void calc_Okint(int sector, int wx, int wy){
-  MKL_INT p,q,sizet,q1,k,l,m;
+void calc_Okint(int sector){
+  MKL_INT p,q,sizet,k,l,m;
   MKL_INT row,col,row1,row2;
+  int q1;
   double t;
   sizet =  Wind[sector].nBasis;
-  std::vector<bool> cart1(2*VOL);
   std::vector<double> alpha;
   std::vector<double> phiRE(sizet),phiIM(sizet);
   double Okin_diag,Okin;
@@ -25,8 +25,8 @@ void calc_Okint(int sector, int wx, int wy){
   FILE *outf;
   
   /* construct cartoon state */
-  cartoonState(wx, wy, cart1);
-  q1=Wind[sector].binscan(cart1);
+  initState(sector, INIT, &q1);
+  std::cout<<"In function calc_Okint. Starting state is basis state = "<<q1<<std::endl;
   for(p=0; p<sizet; p++){
      alpha.push_back(Wind[sector].evecs[p*sizet+q1]);
   }
@@ -71,7 +71,6 @@ void calc_Okint(int sector, int wx, int wy){
   }
   fclose(outf);
   /* clear memory */
-  cart1.clear();
   alpha.clear();
   phiRE.clear(); phiIM.clear();
 }

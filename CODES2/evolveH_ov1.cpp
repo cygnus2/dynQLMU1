@@ -8,6 +8,7 @@
 #include<algorithm>
 #include "define.h"
 
+extern void initState(int, int, int*);
 // Notation: eigenstate |n> = \sum_k \alpha_k |k>, |k> is a cartoon state
 // In this function, we compute the overlap of the evolved state with the
 // ones of the ground state manifold (2 states) and the first excited state
@@ -15,7 +16,7 @@
 // perturbation theory.
 void evolveH_ov1(int sector){
     extern void printconf(bool*);	
-    int i,ix,iy,p,q,parity;
+    int i,ix,iy,p,q;
     int m,k,j;
     double t;
     int sizet, nstates0, nstates1, nstates2, nstates3, nTot; 
@@ -24,36 +25,32 @@ void evolveH_ov1(int sector){
      * we want the overlap; alphaK is the init state; while alphaL are
      * the states of the first manifold with three non-flippable plaq, 
      * and alphaM are the ones of the second manifold with four non-
-     * flippable plaqs; Eq(11) of the dynU1.pdf */
+     * flippable plaqs; Eq(11)(??) of the dynU1.pdf */
     std::vector<double> alphaK,alphaL,alphaM,alphaN;
     std::vector<double> initC;
-    std::vector<bool> cart(2*VOL); 
     double betaR,betaI,betaM,betaTot;
     FILE *fptr;
     bool bconf[2*VOL];
-
-    flipped_hist(sector);
-
-    sizet = Wind[sector].nBasis;	    
-    /* define the initial cartoon state */
-    for(iy=0;iy<LY;iy++){
-    for(ix=0;ix<LX;ix++){
-      parity=(ix+iy)%2;
-      p = 2*(iy*LX+ix);
-      if(parity){ cart[p]=false; cart[p+1]=true;  }
-      else      { cart[p]=true;  cart[p+1]=false; }
-    }}
-    q=Wind[sector].binscan(cart); 
-    std::cout<<"Starting state is basis state = "<<q<<std::endl;
-    /* store the overlap of the initial state with the eigenvectors */
-    for(p=0; p<sizet; p++){
-      initC.push_back(Wind[sector].evecs[p*sizet+q]);
-    }
 
     /* find the relevant cartoon states with the specified number of flippable plaquettes */
     if((LX == 2) && (LY == 2)){
        std::cout<<"This routine does not include the case LX=2 and LY=2"<<std::endl; exit(0);}
     if(LY > 2){ std::cout<<"This routine does not work for LY>2"<<std::endl; exit(0); }
+
+    sizet = Wind[sector].nBasis;	    
+    
+    q=0;
+    initState(sector,INIT,&q); 
+    if(q<0){ 
+      std::cout<<"Initial state not found!"<<std::endl; exit(0); }
+    else{
+      std::cout<<"Starting state is basis state = "<<q<<std::endl;
+      /* store the overlap of the initial state with the eigenvectors */
+      for(p=0; p<sizet; p++){
+        initC.push_back(Wind[sector].evecs[p*sizet+q]);
+      }
+    }
+
     FLIP1 = LX*LY;    nstates0=0;
     FLIP2 = LX*LY-3;  nstates1=0;
     FLIP3 = LX*LY-4;  nstates2=0;
@@ -89,6 +86,8 @@ void evolveH_ov1(int sector){
     std::cout<<"Computed total #-basis states ="<<nTot<<std::endl;
 
     /* overlap in the reduced "classical" basis */
+    // Note that the spectral weight in each class of plaquettes is 
+    // summed over.
     fptr = fopen("overlap_RedBas.dat","w");
     for(t=Ti; t<Tf; t=t+dT){
       fprintf(fptr, "%lf ",t);	   
@@ -137,36 +136,10 @@ void evolveH_ov1(int sector){
         betaTot += betaM;
       }
      fprintf(fptr,"%lf \n",betaTot);
-
    }
    fclose(fptr);
    
    /* free memory */  
    alphaK.clear(); alphaL.clear(); alphaM.clear(); alphaN.clear();
    initC.clear();
-}
-
-void flipped_hist(int sector){
-  int nFlip[VOL+1]; 
-  int k,p,sizet,tot; 
-  FILE *flipH;
-  
-  sizet = Wind[sector].nBasis;
-  /* initialize */
-  for(k=0;k<=VOL;k++) nFlip[k]=0;
-  /* compute #-basis states with k-flippable plaquettes */
-  for(k=0; k<sizet; k++){
-	  p = Wind[sector].nflip[k];
-	  nFlip[p]++;
-  }
-  /* print histogram */
-  tot=0;
-  flipH = fopen("flipH.dat","w");
-  for(k=0;k<=VOL;k++){
-    tot = tot + nFlip[k];
-    fprintf(flipH,"%d %d\n",k,nFlip[k]);
-  }
-  fclose(flipH);
-  if(tot != sizet) std::cout<<"Size mismatch: sizet="<<sizet<<" tot="<<tot<<std::endl;	
-
 }
