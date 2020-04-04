@@ -74,7 +74,7 @@ int main(){
   VOL = LX*LY;
   VOL2 = VOL/2;
 
-  if(INIT!=10+std::abs(WX)){ 
+  if((WX!=0)&&((INIT)!=(10+std::abs(WX)))){ 
      std::cout<<"Please specify INIT = 10 + abs(WX)"<<std::endl; exit(0);
   }
 
@@ -128,13 +128,10 @@ int main(){
   // real-time evolution of initial states (evolveH_ov2
   // has all the functionalities of evolveH_ov1 built in!)
   // evolveH_ov1(sector);
-  evolveH_ov2(sector);
+  //evolveH_ov2(sector);
 
-  // real-time evolution of Entanglement Entropy (storing the SVD coefficients)
-  //evolve_Eent(sector);
-
-  // calculate the Entanglement Entropy for the states
-  //entanglementEntropy(sector);
+  // Entanglement Entropy calculations
+  evolve_Eent(sector);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }

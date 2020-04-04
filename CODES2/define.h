@@ -112,9 +112,8 @@ extern double shanonE, IPR, structE;
 extern std::vector<double> chiSVD_evec;
 // functions to create the basis for subsystems A & B
 extern void createBasis(int);
-extern void schmidtDecom(std::vector<double>&, std::vector<std::vector<bool>>&, std::vector<std::vector<bool>>&,int);
-extern double schmidtDecomRT(std::vector<double>&, std::vector<double>&, std::vector<std::vector<bool>>&,
-  std::vector<std::vector<bool>>&,int, std::vector<MKL_INT>&);
+extern double schmidtDecom(std::vector<double>&, int, std::vector<MKL_INT>&);
+extern double schmidtDecomRT(std::vector<double>&, std::vector<double>&,int, std::vector<MKL_INT>&);
 extern void printvec(std::vector<double>&);
 
 /* routines */
@@ -124,7 +123,7 @@ void initState(int, int, int*);
 void constH(int);
 void winding_no_decompose(void);
 void calc_Oflip(int);
-void entanglementEntropy(int);
+double entanglementEntropy(int,int,std::vector<MKL_INT>&);
 void Lecho(int);
 void evolveH_ov1(int);
 void evolveH_ov2(int);

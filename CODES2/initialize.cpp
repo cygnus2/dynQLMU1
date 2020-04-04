@@ -8,6 +8,8 @@
 #include<vector>
 #include<iterator>
 
+extern void printconf(std::vector<bool>);
+
 /* The construction of the initial states follows the idea that
  * the cartoon states are identified with the already stored 
  * basis states. The q-th basis (handled as a pointer) is sent 
@@ -19,6 +21,8 @@ void initState(int sector, int INIT, int *q){
   int cx1,cx2; // i.e, with domain walls placed elsewhere
   int p1,p2,p3,p4,s1,s2,s3,s4;
   std::vector<bool> cart(2*VOL);
+
+  int chk1,chk2; //to check the routines scan, binscan and binscan2.
 
   wx = Wind[sector].Wx; 
   wy = Wind[sector].Wy;
@@ -42,16 +46,25 @@ void initState(int sector, int INIT, int *q){
          if(parity){ cart[p]=false; cart[p+1]=true;  }
          else      { cart[p]=true;  cart[p+1]=false; }
       }}
-      // locate the cart state in the list of basis states
+      // locate the cartoon state in the list of basis states
       (*q) = Wind[sector].binscan(cart);
       std::cout<<"In routine initState. Starting state ="<<(*q)<<std::endl; 
+
+      // sanity checks DELETE LATER!
+      //chk1=Wind[sector].scan(cart);
+      //chk2=Wind[sector].binscan2(cart);
+      //if(chk1!=(*q)) std::cout<<"Mismatch binscan vs scan. q="<<(*q)<<" chk1="<<chk1<<std::endl;
+      //if(chk2!=(*q)) std::cout<<"Mismatch binscan vs binscan2. q="<<(*q)<<" chk2="<<chk2<<std::endl;
+
       return;
     } // close INIT=0
     else if(INIT==1){ // 1-plaquette flipped cartoon state
        ch1 = 2; cx1 = 0;
        for(k=0; k<sizet; k++){
             if(Wind[sector].nflip[k]==(VOL-3)){
-                if(cx1 == ch1){ *q = k; return; }
+                if(cx1 == ch1){ *q = k; 
+			std::cout<<"In routine initState. Starting state="<<(*q)<<std::endl;
+			return; }
                 cx1++;
             }
        } 
@@ -100,8 +113,8 @@ void initState(int sector, int INIT, int *q){
            for(ix=0;ix<(LX-2*W);ix++){
              parity=(ix+iy)%2;
              p = 2*(iy*LX+ix);
-             if(parity){ cart[p]=false; cart[p+1]=true; }
-             else{       cart[p]=true;  cart[p+1]=false; }
+             if(parity){ cart[p]=true;  cart[p+1]=false; }
+             else{       cart[p]=false; cart[p+1]=true; }
            }
            for(ix=(LX-2*W);ix<LX;ix++){
              parity=(iy)%2;
@@ -124,8 +137,8 @@ void initState(int sector, int INIT, int *q){
            for(ix=2*W;ix<LX;ix++){
               parity=(ix+iy)%2;
               p = 2*(iy*LX+ix);
-              if(parity){ cart[p]=false; cart[p+1]=true; }
-              else{       cart[p]=true;  cart[p+1]=false; }
+              if(parity){ cart[p]=true;  cart[p+1]=false; }
+              else{       cart[p]=false; cart[p+1]=true; }
            }
            for(ix=0;ix<2*W;ix++){
               parity=(iy)%2;
@@ -141,8 +154,23 @@ void initState(int sector, int INIT, int *q){
            } // close loop ix
         }    // close loop iy
       }// close if(LR==1)
+  /* print the cartoon state for explicit checking */
+  printconf(cart);
   /* find the relevant basis state in the hilbert space */
-  *q = Wind[sector].binscan(cart); 
+  //*q = Wind[sector].binscan2(cart);
+  *q = Wind[sector].scan(cart);
+  std::cout<<"The initial state is "<<(*q)<<std::endl;
+  std::cout<<"#-of-flippable plaqs ="<<Wind[sector].nflip[(*q)]<<std::endl;
+
+  // sanity checks DELETE LATER!
+  chk1=Wind[sector].scan(cart);
+  chk2=Wind[sector].binscan2(cart);
+  if(chk1!=(*q)) std::cout<<"Mismatch binscan vs scan. q="<<(*q)<<" chk1="<<chk1<<std::endl;
+  if(chk2!=(*q)) std::cout<<"Mismatch binscan vs binscan2. q="<<(*q)<<" chk2="<<chk2<<std::endl;
+
+  /* print the state in the stored list of basis states */
+  //testc = Wind[sector].basisVec[(*q)];
+  //printconf(testc);
   return;
   } // close else if((W>0)&&(wy==0)&&(INIT>10))
   // control comes here if not encountered the cases before

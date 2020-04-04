@@ -19,6 +19,7 @@ void constH(int sector){
    extern void diag_LAPACK(MKL_INT, std::vector<double>&, std::vector<double>&, std::vector<double>&);
    extern void printmatrix(std::vector<MKL_INT>&,std::vector<MKL_INT>&,std::vector<double>&);
 
+   int chk1,chk2; //just to check results between scan, binscan and binscan2. Delete later!
    // workspace variables to construct the Hamiltonian  
    int i,j,k,p,q,r;
    int p1,p2,p3,p4;
@@ -80,6 +81,13 @@ void constH(int sector){
          // use the bin search if the basis states are sorted; it is much faster
          //q=Wind[sector].scan(newstate);
          q=Wind[sector].binscan(newstate);
+
+	 // sanity checks DELETE LATER!
+	 //chk1=Wind[sector].scan(newstate);
+	 //chk2=Wind[sector].binscan2(newstate);
+	 //if(chk1!=q) std::cout<<"Mismatch binscan vs scan. q="<<q<<" chk1="<<chk1<<std::endl;
+	 //if(chk2!=q) std::cout<<"Mismatch binscan vs binscan2. q="<<q<<" chk2="<<chk2<<std::endl;
+
          // store the position matrix element (i,stateq) 
          rowscan[stateq]=q; stateq++;
          //flip back the plq
@@ -145,10 +153,17 @@ void constH(int sector){
    diag_LAPACK_RRR(sector, Wind[sector].hamil, Wind[sector].evals, Wind[sector].evecs);
 }
 
+
+// NOTE: while printing out warnings is a *good* thing, here it is not so
+// useful, since this routine is called from the function schmidtDecom,
+// when the basis states from different subsystems are patched together.
+// There is is likely that no actual configs are found. It is better to
+// deal with the -100 value (in the case of an error) in the calling routine.
 int WindNo::scan(std::vector<bool> &newstate){
    for(int m=0;m<nBasis;m++){
      if(newstate==basisVec[m]) return m;
    }
+   //std::cout<<"WindNo::scan. Element not found here!"<<std::endl; 
    return -100;
  }
 
@@ -156,13 +171,17 @@ int WindNo::binscan(std::vector<bool> &newstate){
      unsigned int m;
      // binary search of the sorted array  
      std::vector<std::vector<bool>>::iterator it;
+     //it = std::lower_bound(basisVec.begin(),basisVec.end(),newstate);
      it = std::lower_bound(basisVec.begin(),basisVec.end(),newstate);
-     m  = std::distance(basisVec.begin(),it);
      if(it == basisVec.end()){
-       std::cout<<"Element not found here! "<<std::endl;
+       //std::cout<<"WindNo::binscan. Element not found here! "<<std::endl;
        return -100;
      }
-     return m;
+     else{
+       //m  = std::distance(basisVec.begin(),it);
+       m  = it-basisVec.begin();
+       return m;
+     }
 }
 
 // Alternate implementation of the search. Find where the required element 
@@ -172,7 +191,7 @@ int WindNo::binscan2(std::vector<bool> &newstate){
      std::vector<std::vector<bool>>::iterator it;
      it = std::find(basisVec.begin(),basisVec.end(),newstate);
      if(it == basisVec.end()){
-       //std::cout<<"Element not found here! "<<std::endl; 
+       //std::cout<<"WindNo::binscan2. Element not found here! Aborting. "<<std::endl; 
        return -100;
      }
      m  = std::distance(basisVec.begin(),it);

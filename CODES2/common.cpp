@@ -59,7 +59,8 @@ void initneighbor(void)
 /* configurations are stored such that i=2*p and i=2*p+1
    denotes the x and the y links of the site p=y*LX + x.
  */
-void printconf(bool *conf){
+//void printconf(bool *conf){
+void printconf(std::vector<bool> conf){
   int p,d,x,y;
   for(p=0;p<VOL;p++){
    x=p%LX; y=p/LX;
@@ -161,6 +162,38 @@ void deallocatedouble2d(double **mat, int row, int col){
    free(mat[i]);
 
  free(mat);
+}
+
+
+/* Auxiliary routine: printing a complex matrix */
+void print_zmatrix( char* desc, MKL_INT m, MKL_INT n, MKL_Complex16* a, MKL_INT lda ) {
+        MKL_INT i, j;
+        printf( "\n %s\n", desc );
+        for( i = 0; i < m; i++ ) {
+                for( j = 0; j < n; j++ )
+                        printf( " (%6.2f,%6.2f)", a[i*lda+j].real, a[i*lda+j].imag );
+                printf( "\n" );
+        }
+}
+
+/* Auxiliary routine: printing a real matrix */
+void print_rmatrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda ) {
+        MKL_INT i, j;
+        printf( "\n %s\n", desc );
+        for( i = 0; i < m; i++ ) {
+                for( j = 0; j < n; j++ ) printf( " %6.2f", a[i*lda+j] );
+                printf( "\n" );
+        }
+}
+
+void printvec(std::vector<double> &vec){
+ int i;
+ double norm;
+ norm = 0.0;
+ for(i=0;i<vec.size();i++){
+    norm += vec[i]*vec[i];
+ }
+ std::cout<<"Norm = "<<norm<<std::endl;
 }
 
 
