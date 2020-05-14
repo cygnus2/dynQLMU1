@@ -17,26 +17,26 @@ void evolveH_ov2(int sector){
     std::vector<double> initC;
     int i,ix,iy,p,q;
     int m,k,j,r;
-    int nFlip[VOL+1]; 
+    int nFlip[VOL+1];
     double specWT[VOL+1];
     double t;
     double betaR,betaI,betaM,betaTot;
     double fprof[VOL];
     int sizet, nTot;
-    FILE *fptr,*fptr1; 
+    FILE *fptr,*fptr1;
 
     /* find the relevant cartoon states with the specified number of flippable plaquettes */
     if((LX == 2) && (LY == 2)){
       std::cout<<"This routine does not include the case LX=2 and LY=2"<<std::endl; exit(0);}
     if(LY > 2){ std::cout<<"This routine does not work for LY>2"<<std::endl; exit(0); }
-    
+
     sizet = Wind[sector].nBasis;
 
     /* initialize */
-    //for(k=0;k<=VOL;k++) nFlip[k]=0; 
+    //for(k=0;k<=VOL;k++) nFlip[k]=0;
 
     flippedHist(sector, VOL+1, nFlip);
-    
+
     /* compute #-basis states with k-flippable plaquettes */
     //for(k=0; k<sizet; k++){
     //	  p = Wind[sector].nflip[k];
@@ -46,7 +46,7 @@ void evolveH_ov2(int sector){
     /* obtain the initial starting state */
     q=0;
     initState(sector,INIT,&q);
-    if(q<0){ 
+    if(q<0){
       std::cout<<"Initial state not found!"<<std::endl; exit(0); }
     else{
       std::cout<<"Starting state is basis state = "<<q<<std::endl;
@@ -65,21 +65,21 @@ void evolveH_ov2(int sector){
       for(k=VOL;k>=0;k--) specWT[k]=0.0;
 
       /* initialize flux profile */
-      for(k=0;k<VOL;k++) fprof[k]=0.0; 
+      for(k=0;k<VOL;k++) fprof[k]=0.0;
 
       for(k=0; k<sizet; k++){
           p = Wind[sector].nflip[k];
           betaR = 0.0; betaI = 0.0;
           for(m=0; m<sizet; m++){
-	     betaR += Wind[sector].evecs[m*sizet+k]*initC[m]*cos(-Wind[sector].evals[m]*t);	  
-	     betaI += Wind[sector].evecs[m*sizet+k]*initC[m]*sin(-Wind[sector].evals[m]*t);	  
+	     betaR += Wind[sector].evecs[m*sizet+k]*initC[m]*cos(-Wind[sector].evals[m]*t);
+	     betaI += Wind[sector].evecs[m*sizet+k]*initC[m]*sin(-Wind[sector].evals[m]*t);
 	  }
           betaM = betaR*betaR + betaI*betaI;
           specWT[p] = specWT[p] + betaM;
-          
+
           /* get the flippability profile at time t */
           for(r=0;r<VOL;r++){
-	  	  if(Wind[sector].xflip[k][r]) fprof[r] += betaM; 	  
+	  	  if(Wind[sector].xflip[k][r]) fprof[r] += betaM;
 	  }
       } // close loop over basis states
       betaTot = 0.0;
@@ -88,7 +88,7 @@ void evolveH_ov2(int sector){
       fprintf(fptr,"%lf ",t);
       for(k=VOL; k>=0; k--){
 	  fprintf(fptr,"%lf ",specWT[k]);
-          betaTot += specWT[k];	  
+          betaTot += specWT[k];
       }
       fprintf(fptr,"%lf \n",betaTot);
       /* print the flippability profile at each times */
@@ -103,8 +103,8 @@ void evolveH_ov2(int sector){
     initC.clear();
 }
 
-void flippedHist(int sector, int T, int *nFlip){ 
-  int k,p,sizet,tot; 
+void flippedHist(int sector, int T, int *nFlip){
+  int k,p,sizet,tot;
   FILE *flipH;
   if(T!=(VOL+1)) std::cout<<"Mismatch in the routine flipped_hist. Check!"<<std::endl;
   sizet = Wind[sector].nBasis;
@@ -123,5 +123,5 @@ void flippedHist(int sector, int T, int *nFlip){
     fprintf(flipH,"%d %d\n",k,nFlip[k]);
   }
   fclose(flipH);
-  if(tot != sizet) std::cout<<"Size mismatch: sizet="<<sizet<<" tot="<<tot<<std::endl;	
+  if(tot != sizet) std::cout<<"Size mismatch: sizet="<<sizet<<" tot="<<tot<<std::endl;
 }

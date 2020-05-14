@@ -62,7 +62,7 @@ void calc_Oflipt(int sector){
  for(r=0;r<(LX/2);r++) CR_diag[r] = CR_diag[r]/((double)VOL);
  Oflip_diag = Oflip_diag/((double)VOL);
  outf = fopen("OflipT.dat","w");
- fprintf(outf,"# value in the diagonal observable = %f ",Oflip_diag);
+ fprintf(outf,"# value in the diagonal observable = %.12f ",Oflip_diag);
  for(r=0;r<(LX/2);r++) fprintf(outf, " %lf ",CR_diag[r]);
  fprintf(outf,"\n");
 

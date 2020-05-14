@@ -14,13 +14,13 @@
 
 void constH(int sector){
 
-   extern void eigcheck(std::vector<double>&, std::vector<std::vector<double>>&,int); 
+   extern void eigcheck(std::vector<double>&, std::vector<std::vector<double>>&,int);
    extern void diag_LAPACK_RRR(MKL_INT, std::vector<double>&, std::vector<double>&, std::vector<double>&);
    extern void diag_LAPACK(MKL_INT, std::vector<double>&, std::vector<double>&, std::vector<double>&);
    extern void printmatrix(std::vector<MKL_INT>&,std::vector<MKL_INT>&,std::vector<double>&);
 
    int chk1,chk2; //just to check results between scan, binscan and binscan2. Delete later!
-   // workspace variables to construct the Hamiltonian  
+   // workspace variables to construct the Hamiltonian
    int i,j,k,p,q,r;
    int p1,p2,p3,p4;
    int q1,q2,q3,q4;
@@ -44,7 +44,7 @@ void constH(int sector){
 
    int x,y;
    bool f1,f2;
-  
+
    printf("Construct Hamiltonian in sector %d with basis states =%ld. \n",sector,Wind[sector].nBasis);
    curr_index=1;
    Wind[sector].rows.push_back(curr_index);
@@ -54,9 +54,9 @@ void constH(int sector){
 
       // initialize the correlation functions for a given basis state
       for(r=0;r<(LX/2);r++) corrf1[r]=0.0;
-  
+
       /* act on the basis state with the Hamiltonian */
-      /* a single plaquette is arranged as 
+      /* a single plaquette is arranged as
                 pzw
              o-------o
              |       |
@@ -70,11 +70,11 @@ void constH(int sector){
       for(p=0;p<VOL;p++){
        f1    =false; //f1 stores the flippability
        xfl[p]=false; // initially assume it is not flippable
-       // Find if a single plaquette is flippable 
+       // Find if a single plaquette is flippable
        p1=2*p; p2=2*next[DIM+1][p]+1; p3=2*next[DIM+2][p]; p4=2*p+1;
        pxy=newstate[p1]; pyz=newstate[p2]; pzw=newstate[p3]; pwx=newstate[p4];
        if((pxy==pyz)&&(pzw==pwx)&&(pwx!=pxy)){
-         // If flippable, act with the Hamiltonian 
+         // If flippable, act with the Hamiltonian
          newstate[p1]=!newstate[p1]; newstate[p2]=!newstate[p2];
          newstate[p3]=!newstate[p3]; newstate[p4]=!newstate[p4];
          // check which state it is by scanning other states in the same sector
@@ -88,7 +88,7 @@ void constH(int sector){
 	 //if(chk1!=q) std::cout<<"Mismatch binscan vs scan. q="<<q<<" chk1="<<chk1<<std::endl;
 	 //if(chk2!=q) std::cout<<"Mismatch binscan vs binscan2. q="<<q<<" chk2="<<chk2<<std::endl;
 
-         // store the position matrix element (i,stateq) 
+         // store the position matrix element (i,stateq)
          rowscan[stateq]=q; stateq++;
          //flip back the plq
          newstate[p1]=!newstate[p1]; newstate[p2]=!newstate[p2];
@@ -96,21 +96,21 @@ void constH(int sector){
          //if(newstate!=basis_flip[i]) std::cout<<"state mismatch"<<std::endl;
 
          f1    =true;
-	 xfl[p]=true; // reset flippability info
+      	 xfl[p]=true; // reset flippability info
        }
 
        // calculate the corrF in the basis state
        for(r=1;r<=(LX/2);r++){
          f2=false;
          // go r units forward in x
-         ix = p%LX; iy = p/LX; q= iy*LX + (ix+r)%LX; 
+         ix = p%LX; iy = p/LX; q= iy*LX + (ix+r)%LX;
          q1=2*q; q2=2*next[DIM+1][q]+1; q3=2*next[DIM+2][q]; q4=q1+1;
          qxy=newstate[q1]; qyz=newstate[q2]; qzw=newstate[q3]; qwx=newstate[q4];
          if((qxy==qyz)&&(qzw==qwx)&&(qwx!=qxy)) f2=true;
          if((f1)&&(f2)) corrf1[r-1]++;
        }
      }
-   
+
      // normalize and store the correlation function
      for(r=0;r<(LX/2);r++) corrf1[r] /= VOL;
      Wind[sector].cflip.push_back(corrf1);
@@ -126,7 +126,7 @@ void constH(int sector){
      // check
      if(stateq > (VOL+1)){ printf("Error in bound.\n"); }
      // sort the matrix columns
-     std::sort (rowscan.begin(), rowscan.end()); 
+     std::sort (rowscan.begin(), rowscan.end());
      // construct the matrix in CSC format
      curr_index = curr_index + stateq;
      Wind[sector].rows.push_back(curr_index);
@@ -146,7 +146,7 @@ void constH(int sector){
    //  std::cout<<"Basis state ="<<i<<std::endl;
    //  for(r=0;r<(LX/2);r++) std::cout<<Wind[sector].cflip[i][r]<<" ";
    //  std::cout<<std::endl;
-   //}   
+   //}
 
    // diagonalize: use RELATIVELY ROBUST REPRESENTATIONS
    //diag_LAPACK(sector, Wind[sector].hamil, Wind[sector].evals, Wind[sector].evecs);
@@ -163,13 +163,13 @@ int WindNo::scan(std::vector<bool> &newstate){
    for(int m=0;m<nBasis;m++){
      if(newstate==basisVec[m]) return m;
    }
-   //std::cout<<"WindNo::scan. Element not found here!"<<std::endl; 
+   //std::cout<<"WindNo::scan. Element not found here!"<<std::endl;
    return -100;
  }
 
 int WindNo::binscan(std::vector<bool> &newstate){
      unsigned int m;
-     // binary search of the sorted array  
+     // binary search of the sorted array
      std::vector<std::vector<bool>>::iterator it;
      //it = std::lower_bound(basisVec.begin(),basisVec.end(),newstate);
      it = std::lower_bound(basisVec.begin(),basisVec.end(),newstate);
@@ -184,14 +184,14 @@ int WindNo::binscan(std::vector<bool> &newstate){
      }
 }
 
-// Alternate implementation of the search. Find where the required element 
-// exists in the vector with the iterator, then the index.  
+// Alternate implementation of the search. Find where the required element
+// exists in the vector with the iterator, then the index.
 int WindNo::binscan2(std::vector<bool> &newstate){
      unsigned int m;
      std::vector<std::vector<bool>>::iterator it;
      it = std::find(basisVec.begin(),basisVec.end(),newstate);
      if(it == basisVec.end()){
-       //std::cout<<"WindNo::binscan2. Element not found here! Aborting. "<<std::endl; 
+       //std::cout<<"WindNo::binscan2. Element not found here! Aborting. "<<std::endl;
        return -100;
      }
      m  = std::distance(basisVec.begin(),it);

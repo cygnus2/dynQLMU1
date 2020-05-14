@@ -20,14 +20,14 @@
   int ix,iy,wx,wy;
   bool pxy,pyz,pzw,pwx;
   int count_flip;
-  
+
   init_WindNo(Wind, lookup, LX+1, LY+1);
   // check the Winding number assignment
   //initcheck_WindNo(Wind,nWind,lookup);
   // scan basis states and pick out the Winding number
   for(i=0;i<basis.size();i++){
     // compute the diagonal term in the Hamiltonian
-    /* a single plaquette is arranged as 
+    /* a single plaquette is arranged as
                 pzw
              o-------o
              |       |
@@ -75,6 +75,7 @@
   // Note that this can only be calculated after sorting the basis!
   for(i=0; i<nWind; i++){
      Wind[i].flip_plaq();
+     Wind[i].computeEy();
   }
 
  }
@@ -85,7 +86,7 @@
    Similarly (LX/2)*(LY/2) for (Wx,Wy),(-Wx,Wy),(Wx,-Wy),(-Wx,-Wy)
  */
 int calc_WindNo(int LX,int LY){
-  int nWindSector=1 + 2*(LX/2) + 2*(LY/2) + 4*(LX/2)*(LY/2); 
+  int nWindSector=1 + 2*(LX/2) + 2*(LY/2) + 4*(LX/2)*(LY/2);
   printf("Total winding number sectors = %d\n",nWindSector);
   return nWindSector;
 }
@@ -169,7 +170,7 @@ void WindNo::flip_plaq(){
     if(!nBasis){ std::cout<<"Total basis state not defined! "<<std::endl; exit(0); }
     for(i=0; i<nBasis; i++){
       // compute the diagonal term in the Hamiltonian
-      /* a single plaquette is arranged as 
+      /* a single plaquette is arranged as
                 pzw
              o-------o
              |       |
@@ -190,3 +191,33 @@ void WindNo::flip_plaq(){
     }
 }
 
+// calculates the local Ey
+void WindNo::computeEy(){
+    int i,j,p,p1,p2;
+    std::vector<int> Eytot(LX);
+    bool pxy,pyz;
+
+    // the lattice arrangement is as follows
+    /*  z o----o----o----o----o
+      p2  |    |    |    |    |
+        y o----o----o----o----o
+      p1  |    |    |    |    |
+        x o----o----o----o----o
+    */
+
+    //printf("In sector (% d, % d); basis states = %ld \n",Wx,Wy,nBasis);
+    // error message for zero basis
+    if(!nBasis){ std::cout<<"Total basis state not defined! "<<std::endl; exit(0); }
+    for(i=0; i<nBasis; i++){
+      // compute the total Ey for each x
+      for(p=0;p<LX;p++){
+          p1=2*p+1; p2=2*next[DIM+2][p]+1;
+          pxy=basisVec[i][p1]; pyz=basisVec[i][p2];
+          if(pxy!=pyz) Eytot[p]=0.0;
+          else{ if(pxy==true) Eytot[p]= 1.0;
+                else          Eytot[p]=-1.0;
+              }
+      }
+      Ey.push_back(Eytot);
+    }
+}

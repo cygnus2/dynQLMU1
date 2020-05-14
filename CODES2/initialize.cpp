@@ -11,24 +11,24 @@
 extern void printconf(std::vector<bool>);
 
 /* The construction of the initial states follows the idea that
- * the cartoon states are identified with the already stored 
- * basis states. The q-th basis (handled as a pointer) is sent 
+ * the cartoon states are identified with the already stored
+ * basis states. The q-th basis (handled as a pointer) is sent
  * back into the main routine.  */
 void initState(int sector, int INIT, int *q){
   int ix,iy,parity,k,p,r;
   int W,sign,wx,wy,sizet;
-  int ch1,ch2; // allow the choice of a different initial state, 
+  int ch1,ch2; // allow the choice of a different initial state,
   int cx1,cx2; // i.e, with domain walls placed elsewhere
   int p1,p2,p3,p4,s1,s2,s3,s4;
   std::vector<bool> cart(2*VOL);
 
   int chk1,chk2; //to check the routines scan, binscan and binscan2.
 
-  wx = Wind[sector].Wx; 
+  wx = Wind[sector].Wx;
   wy = Wind[sector].Wy;
-  W = std::abs(wx); 
-  if(wy!=0){ 
-	  printf("The option with Wy != 0 is not yet supported. \n"); exit(0); 
+  W = std::abs(wx);
+  if(wy!=0){
+	  printf("The option with Wy != 0 is not yet supported. \n"); exit(0);
   }
   std::cout<<"Routine to initialize states. INIT="<<INIT<<", wx="<<wx<<", wy="<<
 	  wy<<std::endl;
@@ -38,7 +38,7 @@ void initState(int sector, int INIT, int *q){
   sizet = Wind[sector].nBasis;
   /* initial states in (Wx,Wy)=(0,0) */
   if((wx==0)&&(wy==0)&&(INIT<=10)){
-    if(INIT==0){ // symmetry broken cartoon state; all flippable plaqs	  
+    if(INIT==0){ // symmetry broken cartoon state; all flippable plaqs
       for(iy=0;iy<LY;iy++){
       for(ix=0;ix<LX;ix++){
          parity=(ix+iy)%2;
@@ -48,26 +48,22 @@ void initState(int sector, int INIT, int *q){
       }}
       // locate the cartoon state in the list of basis states
       (*q) = Wind[sector].binscan(cart);
-      std::cout<<"In routine initState. Starting state ="<<(*q)<<std::endl; 
-
-      // sanity checks DELETE LATER!
-      //chk1=Wind[sector].scan(cart);
-      //chk2=Wind[sector].binscan2(cart);
-      //if(chk1!=(*q)) std::cout<<"Mismatch binscan vs scan. q="<<(*q)<<" chk1="<<chk1<<std::endl;
-      //if(chk2!=(*q)) std::cout<<"Mismatch binscan vs binscan2. q="<<(*q)<<" chk2="<<chk2<<std::endl;
+      std::cout<<"In routine initState. Starting state ="<<(*q)<<std::endl;
 
       return;
     } // close INIT=0
     else if(INIT==1){ // 1-plaquette flipped cartoon state
-       ch1 = 2; cx1 = 0;
+       ch1 = 5; cx1 = 0;
        for(k=0; k<sizet; k++){
             if(Wind[sector].nflip[k]==(VOL-3)){
-                if(cx1 == ch1){ *q = k; 
+                if(cx1 == ch1){ *q = k;
 			std::cout<<"In routine initState. Starting state="<<(*q)<<std::endl;
+      std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
+      for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<std::endl;
 			return; }
                 cx1++;
             }
-       } 
+       }
     } // close INIT=1
     else if(INIT==2){ // 2 domain wall cartoon state, even separation
        r = (LX/2);
@@ -78,8 +74,8 @@ void initState(int sector, int INIT, int *q){
                     ix=1;   iy=1; p2=iy*LX+ix;  s2=Wind[sector].xflip[k][p2];
                     ix=r;   iy=0; p3=iy*LX+ix;  s3=Wind[sector].xflip[k][p3];
                     ix=r+1; iy=1; p4=iy*LX+ix;  s4=Wind[sector].xflip[k][p4];
-                    if((!s1) && (!s2) && (!s3) && (!s4)){ *q = k; 
-                        std::cout<<"In routine initState. Starting state ="<<(*q)<<std::endl; 
+                    if((!s1) && (!s2) && (!s3) && (!s4)){ *q = k;
+                        std::cout<<"In routine initState. Starting state ="<<(*q)<<std::endl;
 			return;}
             }
        }
@@ -93,13 +89,13 @@ void initState(int sector, int INIT, int *q){
                     ix=1;     iy=1; p2=iy*LX+ix;  s2=Wind[sector].xflip[k][p2];
                     ix=r-1;   iy=1; p3=iy*LX+ix;  s3=Wind[sector].xflip[k][p3];
                     ix=r;     iy=0; p4=iy*LX+ix;  s4=Wind[sector].xflip[k][p4];
-                    if((!s1) && (!s2) && (!s3) && (!s4)){ *q = k; 
+                    if((!s1) && (!s2) && (!s3) && (!s4)){ *q = k;
 		       std::cout<<"In routine initState. Starting state = "<<(*q)<<std::endl;
 		       return;}
             }
        }
     } // close INIT=3
-  } // close if((wx==0)&&(wy==0)) 
+  } // close if((wx==0)&&(wy==0))
   else if((W>0)&&(wy==0)&&(INIT>10)){
       std::cout<<"Initial state in the winding sector "<<std::endl;
       if(wx>0) sign=1;
@@ -108,7 +104,7 @@ void initState(int sector, int INIT, int *q){
       /* cartoon state in (Wx,Wy)=(WX,0) */
       if(LR==0){
         // the flux is in the right end (LB)
-        std::cout<<"Putting strings on the right end"<<std::endl;
+        //std::cout<<"Putting strings on the right end"<<std::endl;
         for(iy=0;iy<LY;iy++){
            for(ix=0;ix<(LX-2*W);ix++){
              parity=(ix+iy)%2;
@@ -132,7 +128,7 @@ void initState(int sector, int INIT, int *q){
       } // close if(LR==0)
       else if(LR==1){
         // flux is in the left end (LA)
-        std::cout<<"Putting strings on the left end"<<std::endl;
+        //std::cout<<"Putting strings on the left end"<<std::endl;
         for(iy=0;iy<LY;iy++){
            for(ix=2*W;ix<LX;ix++){
               parity=(ix+iy)%2;
@@ -155,7 +151,7 @@ void initState(int sector, int INIT, int *q){
         }    // close loop iy
       }// close if(LR==1)
   /* print the cartoon state for explicit checking */
-  printconf(cart);
+  //printconf(cart);
   /* find the relevant basis state in the hilbert space */
   //*q = Wind[sector].binscan2(cart);
   *q = Wind[sector].scan(cart);
@@ -179,4 +175,3 @@ void initState(int sector, int INIT, int *q){
      exit(0);
   }
 }
-

@@ -7,7 +7,7 @@
 #include<vector>
 #include<iterator>
 
-/* according to the rules of cpp, the variables are declared here 
+/* according to the rules of cpp, the variables are declared here
  * and also in the header file as extern such that they are avl to
  * the other functions.
  */
@@ -29,7 +29,7 @@ std::vector<std::vector<bool>> basis_flip;
 int STORE_SVD;
 int CHKDIAG;
 // initial state is specified by W and LR and INIT
-// W is the amount of y-flux=Wy. 
+// W is the amount of y-flux=Wy.
 // LR=0 flux to the left (subsystem LA), LR=1 flux to the right (subsystem LB).
 // INIT=0, symm broken states with all flippable plaquettes
 // INIT=1, C1-C2-C1 domain wall states with fused domain walls
@@ -74,16 +74,16 @@ int main(){
   VOL = LX*LY;
   VOL2 = VOL/2;
 
-  if((WX!=0)&&((INIT)!=(10+std::abs(WX)))){ 
+  if((WX!=0)&&((INIT)!=(10+std::abs(WX)))){
      std::cout<<"Please specify INIT = 10 + abs(WX)"<<std::endl; exit(0);
   }
 
-  // decide whether to check the results of the diagonalization 
+  // decide whether to check the results of the diagonalization
   CHKDIAG=0;
 
   /* Initialize nearest neighbours */
   for(i=0;i<=2*DIM;i++){
-    next[i] = (int *)malloc(VOL*sizeof(int)); 
+    next[i] = (int *)malloc(VOL*sizeof(int));
     nextCHK[i] = (int *)malloc(VOL*sizeof(int));
   }
 
@@ -91,19 +91,19 @@ int main(){
   lin2chk = (int *)malloc(VOL*sizeof(int));
   chk2lin = (int *)malloc(VOL*sizeof(int));
   initneighbor();
-  
+
   /* Winding number sectors */
   lookup = allocateint2d(LX+1,LY+1);
 
   /* build basis states satisfying Gauss' Law */
   conststates();
-  
+
   /* get number of winding number sectors */
   nWind = calc_WindNo(LX,LY);
-  Wind.reserve(nWind); 
+  Wind.reserve(nWind);
   winding_no_decompose();
- 
-  printf("Chosen (Wx,Wy) sector = (%d,%d)\n",WX,WY); 
+
+  //printf("Chosen (Wx,Wy) sector = (%d,%d)\n",WX,WY);
   sector = lookup[LX/2+WX][LY/2+WY];
   constH(sector);
 
@@ -115,9 +115,9 @@ int main(){
   // note that recalculates the same as the previous routine, so don't use both!
   //calc_Oflipt(sector);
 
-  // real time evolution of <PHI(t)| O_kin |PHI(t)>, 
+  // real time evolution of <PHI(t)| O_kin |PHI(t)>,
   //calc_Okint(sector);
-  
+
   //FilePrintBasis(sector);
 
   // Lochschmidt Echo
@@ -128,7 +128,8 @@ int main(){
   // real-time evolution of initial states (evolveH_ov2
   // has all the functionalities of evolveH_ov1 built in!)
   // evolveH_ov1(sector);
-  //evolveH_ov2(sector);
+  evolveH_ov2(sector);
+  evolveH_ov3(sector);
 
   // Entanglement Entropy calculations
   evolve_Eent(sector);

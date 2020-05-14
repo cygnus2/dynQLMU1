@@ -71,7 +71,7 @@ void evolve_Eent(int sector){
 
    outf = fopen("EENT_tevol.dat","w");
    fprintf(outf,"# avg energy of initial state = %.8lf\n",initE);
-   fprintf(outf,"# diagonal entropy for initial state = %.8lf\n",diagEE);
+   fprintf(outf,"# diagonal entropy for initial state = %.12lf\n",diagEE);
    // calculate alpha(t)
    for(t=Ti; t<Tf; t=t+dT){
       alpha_real.assign(alpha_real.size(), 0.0);
@@ -93,7 +93,7 @@ void evolve_Eent(int sector){
       //};
       //if( fabs(norm-1.0) >  1e-6) std::cout<<"t = "<<t<<" Norm = "<<norm<<std::endl;
       entE = schmidtDecomRT(alpha_real,alpha_imag,sector,sub2main);
-      fprintf(outf,"%lf %lf\n",t,entE);
+      fprintf(outf,"%lf %.12lf\n",t,entE);
    }
    fclose(outf);
    alpha_real.clear(); alpha_imag.clear(); sub2main.clear();
@@ -126,9 +126,9 @@ double schmidtDecomRT(std::vector<double> &alpha_real, std::vector<double> &alph
      else chi[i] = {alpha_real[sub2main[i]], alpha_imag[sub2main[i]]};
   }
   // check norm
-  norm = 0.0;
-  for(i=0;i<(DA*DB);i++) norm += (chi[i].real*chi[i].real + chi[i].imag*chi[i].imag);
-  if( fabs(norm-1.0) >  1e-6) std::cout<<"Norm = "<<norm<<std::endl;
+  //norm = 0.0;
+  //for(i=0;i<(DA*DB);i++) norm += (chi[i].real*chi[i].real + chi[i].imag*chi[i].imag);
+  //if( fabs(norm-1.0) >  1e-6) std::cout<<"Norm = "<<norm<<std::endl;
 
   //printf( "LAPACKE_dgesvd (row-major, high-level) Example Program Results\n" );
   /* Compute SVD */
@@ -147,9 +147,9 @@ double schmidtDecomRT(std::vector<double> &alpha_real, std::vector<double> &alph
   //print_zmatrix( "Right singular vectors (stored rowwise)", M, N, vt, ldvt );
 
   // check norm
-  //norm = 0;
-  //for(i=0;i<dmin; i++) norm += chi_svd[i]*chi_svd[i];
-  //if( fabs(norm - 1.0) > 1e-6) std::cout<<"Norm of svd ="<<norm<<std::endl;
+  norm = 0;
+  for(i=0;i<dmin; i++) norm += chi_svd[i]*chi_svd[i];
+  if( fabs(norm - 1.0) > 1e-6) std::cout<<"Norm of svd ="<<norm<<std::endl;
 
   EE=0.0;
   for(i=0; i<dmin; i++){
@@ -157,7 +157,7 @@ double schmidtDecomRT(std::vector<double> &alpha_real, std::vector<double> &alph
       EE -= chi_svd[i]*chi_svd[i]*log(chi_svd[i]*chi_svd[i]);
   }
   //std::cout<<"Entanglement Entropy = "<<EE<<std::endl;
-
+  
   // clear memory
   free(chi); free(chi_svd); free(superb);
   //free(u); free(vt);
@@ -192,9 +192,9 @@ double schmidtDecom(std::vector<double> &vec, int sector, std::vector<MKL_INT> &
   } 
 
   // check norm
-  norm = 0.0;
-  for(i=0;i<(DA*DB);i++) norm += chi[i]*chi[i];
-  if( fabs(norm-1.0) >  1e-6) std::cout<<"Norm = "<<norm<<std::endl;
+  //norm = 0.0;
+  //for(i=0;i<(DA*DB);i++) norm += chi[i]*chi[i];
+  //if( fabs(norm-1.0) >  1e-6) std::cout<<"Norm = "<<norm<<std::endl;
   
   //print_matrix("Density matrix", DA, DB, chi, DA);
   //printf( "LAPACKE_dgesvd (row-major, high-level) Example Program Results\n" );
@@ -211,9 +211,9 @@ double schmidtDecom(std::vector<double> &vec, int sector, std::vector<MKL_INT> &
   /* Print singular values */
   //print_matrix( "Singular values", 1, dmin, chi_svd, 1 );
   // check norm
-  norm = 0;
-  for(i=0;i<dmin; i++) norm += chi_svd[i]*chi_svd[i];
-  if( fabs(norm - 1.0) > 1e-6) std::cout<<"Norm of svd ="<<norm<<std::endl;
+  //norm = 0;
+  //for(i=0;i<dmin; i++) norm += chi_svd[i]*chi_svd[i];
+  //if( fabs(norm - 1.0) > 1e-6) std::cout<<"Norm of svd ="<<norm<<std::endl;
   
   EE=0.0;
   for(i=0; i<dmin; i++){
@@ -298,7 +298,7 @@ double entanglementEntropy(int initC, int sector,  std::vector<MKL_INT> &sub2mai
     EE = schmidtDecom(sel_evec,sector,sub2main);
     EENT_diag += alpha[p]*alpha[p]*EE;
     // write to file
-    fprintf(outf,"%lf %lf\n",sel_eval,EE);
+    fprintf(outf,"%.12lf %.12lf\n",sel_eval,EE);
   }
   fclose(outf);
   // clear the allocated memory in this routine 
