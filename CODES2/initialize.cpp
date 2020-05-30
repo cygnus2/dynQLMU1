@@ -15,7 +15,7 @@ extern void printconf(std::vector<bool>);
  * basis states. The q-th basis (handled as a pointer) is sent
  * back into the main routine.  */
 void initState(int sector, int INIT, int *q){
-  int ix,iy,parity,k,p,r;
+  int ix,iy,parity,k,p,r,py;
   int W,sign,wx,wy,sizet;
   int ch1,ch2; // allow the choice of a different initial state,
   int cx1,cx2; // i.e, with domain walls placed elsewhere
@@ -49,7 +49,9 @@ void initState(int sector, int INIT, int *q){
       // locate the cartoon state in the list of basis states
       (*q) = Wind[sector].binscan(cart);
       std::cout<<"In routine initState. Starting state ="<<(*q)<<std::endl;
-
+      std::cout<<"#-of-flippable plaqs ="<<Wind[sector].nflip[(*q)]<<std::endl;
+      std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
+      for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<std::endl;
       return;
     } // close INIT=0
     else if(INIT==1){ // 1-plaquette flipped cartoon state
@@ -58,6 +60,7 @@ void initState(int sector, int INIT, int *q){
             if(Wind[sector].nflip[k]==(VOL-3)){
                 if(cx1 == ch1){ *q = k;
 			std::cout<<"In routine initState. Starting state="<<(*q)<<std::endl;
+      std::cout<<"#-of-flippable plaqs ="<<Wind[sector].nflip[(*q)]<<std::endl;
       std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
       for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<std::endl;
 			return; }
@@ -76,6 +79,9 @@ void initState(int sector, int INIT, int *q){
                     ix=r+1; iy=1; p4=iy*LX+ix;  s4=Wind[sector].xflip[k][p4];
                     if((!s1) && (!s2) && (!s3) && (!s4)){ *q = k;
                         std::cout<<"In routine initState. Starting state ="<<(*q)<<std::endl;
+      std::cout<<"#-of-flippable plaqs ="<<Wind[sector].nflip[(*q)]<<std::endl;
+      std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
+      for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<std::endl;
 			return;}
             }
        }
@@ -91,10 +97,63 @@ void initState(int sector, int INIT, int *q){
                     ix=r;     iy=0; p4=iy*LX+ix;  s4=Wind[sector].xflip[k][p4];
                     if((!s1) && (!s2) && (!s3) && (!s4)){ *q = k;
 		       std::cout<<"In routine initState. Starting state = "<<(*q)<<std::endl;
+      std::cout<<"#-of-flippable plaqs ="<<Wind[sector].nflip[(*q)]<<std::endl;
+      std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
+      for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<std::endl;
 		       return;}
             }
        }
     } // close INIT=3
+    else if(INIT==4){ // domain walls cartoon state, staggered along x-direction
+       for(ix=0;ix<LX;ix++){
+	   parity = ix%2;    
+           for(iy=0;iy<LY;iy++){
+              p = 2*(iy*LX+ix);
+	      if(iy%2)   cart[p]=false;
+	      else       cart[p]=true;
+              py= p+1;
+	      if(parity) cart[py]=false;
+	      else       cart[py]=true;
+         }
+         sign=-sign;
+       }
+       /* find the relevant basis state in the hilbert space */
+       //*q = Wind[sector].binscan2(cart);
+       *q = Wind[sector].scan(cart);
+       std::cout<<"The initial state is "<<(*q)<<std::endl;
+       std::cout<<"#-of-flippable plaqs ="<<Wind[sector].nflip[(*q)]<<std::endl;
+       std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
+       for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<std::endl;
+       return;
+    } // close INIT=4
+    else if(INIT==5){ // domain walls together, and anti-domain walls stacked together
+       for(ix=0;ix<(LX/2);ix++){
+           for(iy=0;iy<LY;iy++){
+              p = 2*(iy*LX+ix);
+	      if(iy%2)   cart[p]=false;
+	      else       cart[p]=true;
+              py= p+1;
+	      cart[py]=true;
+           }
+       }
+       for(ix=(LX/2);ix<LX;ix++){
+           for(iy=0;iy<LY;iy++){
+              p = 2*(iy*LX+ix);
+	      if(iy%2)   cart[p]=false;
+	      else       cart[p]=true;
+              py= p+1;
+	      cart[py]=false;
+           }
+       }
+       /* find the relevant basis state in the hilbert space */
+       //*q = Wind[sector].binscan2(cart);
+       *q = Wind[sector].scan(cart);
+       std::cout<<"The initial state is "<<(*q)<<std::endl;
+       std::cout<<"#-of-flippable plaqs ="<<Wind[sector].nflip[(*q)]<<std::endl;
+       std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
+       for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<std::endl;
+       return;      
+    } // close INIT=5
   } // close if((wx==0)&&(wy==0))
   else if((W>0)&&(wy==0)&&(INIT>10)){
       std::cout<<"Initial state in the winding sector "<<std::endl;
@@ -157,6 +216,9 @@ void initState(int sector, int INIT, int *q){
   *q = Wind[sector].scan(cart);
   std::cout<<"The initial state is "<<(*q)<<std::endl;
   std::cout<<"#-of-flippable plaqs ="<<Wind[sector].nflip[(*q)]<<std::endl;
+  std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
+  for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<std::endl;
+
 
   // sanity checks DELETE LATER!
   chk1=Wind[sector].scan(cart);
