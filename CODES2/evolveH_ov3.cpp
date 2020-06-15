@@ -8,7 +8,7 @@
 #include<algorithm>
 #include "define.h"
 
-extern void initState(int, int, int*);
+//extern void initState(int, int, int*);
 
 // Notation: eigenstate |n> = \sum_k \alpha_k |k>, |k> is a cartoon state
 void evolveH_ov3(int sector){
@@ -18,9 +18,10 @@ void evolveH_ov3(int sector){
     int m,k,j,r;
     double t;
     double betaR,betaI,betaM,betaTot;
-    double EyProf[LX];
+    double EyProf[LX],dEyProf[LX];
+    double Cf1, Cf2;
     int sizet, nTot;
-    FILE *fptr;
+    FILE *fptr,*fptr1,*fptr2;
 
     /* find the relevant cartoon states with the specified number of flippable plaquettes */
     if((LX == 2) && (LY == 2)){
@@ -30,43 +31,49 @@ void evolveH_ov3(int sector){
     sizet = Wind[sector].nBasis;
 
     /* obtain the initial starting state */
-    q=0;
-    initState(sector,INIT,&q);
-    if(q<0){
-      std::cout<<"Initial state not found!"<<std::endl; exit(0); }
-    else{
-      std::cout<<"Starting state is basis state = "<<q<<std::endl;
-      /* store the overlap of the initial state with the eigenvectors */
-      for(p=0; p<sizet; p++){
+    if(INITq == -1){ std::cout<<"Error in initial state. Aborting. "<<std::endl; exit(0); }
+    q = INITq;
+    std::cout<<"Starting state is basis state = "<<q<<std::endl;
+    /* store the overlap of the initial state with the eigenvectors */
+    for(p=0; p<sizet; p++){
         initC.push_back(Wind[sector].evecs[p*sizet+q]);
-      }
     }
 
     /* now compute the overlap in each sector */
     fptr = fopen("EyProf.dat","w");
+    fptr1= fopen("dEyProf.dat","w");
+    fptr2= fopen("CorrEy.dat","w");
     for(t=Ti; t<Tf; t=t+dT){
 
       /* initialize Ey profile */
-      for(k=0;k<LX;k++) EyProf[k]=0.0;
+      for(k=0;k<LX;k++) { EyProf[k]=0.0; dEyProf[k]=0.0; }
+      Cf1=0.0; Cf2=0.0;
 
       for(k=0; k<sizet; k++){
           betaR = 0.0; betaI = 0.0;
           for(m=0; m<sizet; m++){
-       betaR += Wind[sector].evecs[m*sizet+k]*initC[m]*cos(-Wind[sector].evals[m]*t);
-	     betaI += Wind[sector].evecs[m*sizet+k]*initC[m]*sin(-Wind[sector].evals[m]*t);
-	    }
+       betaR += Wind[sector].evecs[m*sizet+k]*initC[m]*cos(Wind[sector].evals[m]*t);
+	     betaI += Wind[sector].evecs[m*sizet+k]*initC[m]*sin(Wind[sector].evals[m]*t);
+	        }
           betaM = betaR*betaR + betaI*betaI;
           /* get the Ey profile at time t */
           for(r=0;r<LX;r++){
 	  	      EyProf[r] += Wind[sector].Ey[k][r]*betaM;
+            dEyProf[r]+= Wind[sector].dEy[k][r]*betaM;
 	        }
+          Cf1 += Wind[sector].CEy1[k]*betaM;
+          Cf2 += Wind[sector].CEy2[k]*betaM;
       } // close loop over basis states
       /* print the Ey profile at each times */
       fprintf(fptr,"%lf ",t);
-      for(k=0;k<LX;k++){ fprintf(fptr,"%lf ",EyProf[k]); }
-      fprintf(fptr,"\n");
+      fprintf(fptr1,"%lf ",t);
+      for(r=0;r<LX;r++){ fprintf(fptr,"%lf ",EyProf[r]); fprintf(fptr1,"%lf ",dEyProf[r]); }
+      fprintf(fptr,"\n"); fprintf(fptr1,"\n");
+      fprintf(fptr2,"%.4lf %.12lf %.12lf\n",t,Cf1,Cf2);
     }
     fclose(fptr);
+    fclose(fptr1);
+    fclose(fptr2);
 
     /* free memory */
     initC.clear();

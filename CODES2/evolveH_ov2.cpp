@@ -8,7 +8,7 @@
 #include<algorithm>
 #include "define.h"
 
-extern void initState(int, int, int*);
+//extern void initState(int, int, int*);
 extern void flippedHist(int, int, int*);
 
 // Notation: eigenstate |n> = \sum_k \alpha_k |k>, |k> is a cartoon state
@@ -32,28 +32,15 @@ void evolveH_ov2(int sector){
 
     sizet = Wind[sector].nBasis;
 
-    /* initialize */
-    //for(k=0;k<=VOL;k++) nFlip[k]=0;
-
     flippedHist(sector, VOL+1, nFlip);
 
-    /* compute #-basis states with k-flippable plaquettes */
-    //for(k=0; k<sizet; k++){
-    //	  p = Wind[sector].nflip[k];
-    //	  nFlip[p]++;
-    //}
-
     /* obtain the initial starting state */
-    q=0;
-    initState(sector,INIT,&q);
-    if(q<0){
-      std::cout<<"Initial state not found!"<<std::endl; exit(0); }
-    else{
-      std::cout<<"Starting state is basis state = "<<q<<std::endl;
-      /* store the overlap of the initial state with the eigenvectors */
-      for(p=0; p<sizet; p++){
+    if(INITq == -1){ std::cout<<"Error in initial state. Aborting. "<<std::endl; exit(0); }
+    q = INITq;
+    std::cout<<"Starting state is basis state = "<<q<<std::endl;
+    /* store the overlap of the initial state with the eigenvectors */
+    for(p=0; p<sizet; p++){
         initC.push_back(Wind[sector].evecs[p*sizet+q]);
-      }
     }
 
     /* now compute the overlap in each sector */
@@ -71,16 +58,16 @@ void evolveH_ov2(int sector){
           p = Wind[sector].nflip[k];
           betaR = 0.0; betaI = 0.0;
           for(m=0; m<sizet; m++){
-	     betaR += Wind[sector].evecs[m*sizet+k]*initC[m]*cos(-Wind[sector].evals[m]*t);
-	     betaI += Wind[sector].evecs[m*sizet+k]*initC[m]*sin(-Wind[sector].evals[m]*t);
+	     betaR += Wind[sector].evecs[m*sizet+k]*initC[m]*cos(Wind[sector].evals[m]*t);
+	     betaI += Wind[sector].evecs[m*sizet+k]*initC[m]*sin(Wind[sector].evals[m]*t);
 	  }
           betaM = betaR*betaR + betaI*betaI;
           specWT[p] = specWT[p] + betaM;
 
           /* get the flippability profile at time t */
           for(r=0;r<VOL;r++){
-	  	  if(Wind[sector].xflip[k][r]) fprof[r] += betaM;
-	  }
+	  	     if(Wind[sector].xflip[k][r]) fprof[r] += betaM*Wind[sector].xflip[k][r];
+	        }
       } // close loop over basis states
       betaTot = 0.0;
       /* print the spectral weights, starting from maximal flippable plaquettes,
@@ -93,7 +80,7 @@ void evolveH_ov2(int sector){
       fprintf(fptr,"%lf \n",betaTot);
       /* print the flippability profile at each times */
       fprintf(fptr1,"%lf ",t);
-      for(k=0;k<VOL;k++){ fprintf(fptr1,"%lf ",fprof[k]); }
+      for(r=0;r<VOL;r++){ fprintf(fptr1,"%lf ",fprof[r]); }
        fprintf(fptr1,"\n");
     }
     fclose(fptr);

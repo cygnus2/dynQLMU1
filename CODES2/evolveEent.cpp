@@ -13,7 +13,7 @@
 extern void printconf1(std::vector<bool>);
 extern void printconfA(std::vector<std::vector<bool>>);
 extern void printconfB(std::vector<std::vector<bool>>);
-extern void print_zmatrix( char*, MKL_INT, MKL_INT, MKL_Complex16*, MKL_INT ); 
+extern void print_zmatrix( char*, MKL_INT, MKL_INT, MKL_Complex16*, MKL_INT );
 extern void print_rmatrix( char* , MKL_INT , MKL_INT , double* , MKL_INT  );
 extern void patch(std::vector<bool>&, std::vector<bool>&, std::vector<bool>&);
 extern int checkGL2(std::vector<bool>&);
@@ -23,10 +23,10 @@ extern void findBasisB(std::vector<std::vector<bool>>&, std::vector<bool>&);
 extern void createLookupTable(int, MKL_INT, MKL_INT, std::vector<MKL_INT>&);
 extern double schmidtDecom(std::vector<double>&, int, std::vector<MKL_INT>&);
 extern double schmidtDecomRT(std::vector<double>&, std::vector<double>&, int, std::vector<MKL_INT>&);
-extern void initState(int, int, int*);
+//extern void initState(int, int, int*);
 extern double entanglementEntropy(int, int, std::vector<MKL_INT>&);
 
-// local variables used 
+// local variables used
 unsigned int LEN_A,LEN_B,VOL_A,VOL_B;
 unsigned int DA,DB,NCHI;
 // basis for subsystems A and B
@@ -47,15 +47,16 @@ void evolve_Eent(int sector){
    std::vector<MKL_INT> sub2main;
    FILE *outf;
    double overlap,norm;
-   sizet = Wind[sector].nBasis; 
+   sizet = Wind[sector].nBasis;
 
    /* construct cartoon state */
-   initState(sector, INIT, &initC);
+   if(INITq == -1){ std::cout<<"Error in initial state. Aborting. "<<std::endl; exit(0); }
+   initC = INITq;
    std::cout<<"In routine evolve_Eent. Starting state is basis state = "<<initC<<std::endl;
    // calculate the average energy of the initial state
    initE=0.0;
    for(k=0; k<sizet; k++){
-     initE += Wind[sector].evals[k]*Wind[sector].evecs[k*sizet+initC]*Wind[sector].evecs[k*sizet+initC]; 
+     initE += Wind[sector].evals[k]*Wind[sector].evecs[k*sizet+initC]*Wind[sector].evecs[k*sizet+initC];
    }
 
    // Construct the spin basis for the sub-systems
@@ -88,7 +89,7 @@ void evolve_Eent(int sector){
       }}
       // check norm
       //norm=0.0;
-      //for(k=0; k<sizet; k++){ 
+      //for(k=0; k<sizet; k++){
       //  norm += alpha_real[k]*alpha_real[k] + alpha_imag[k]*alpha_imag[k];
       //};
       //if( fabs(norm-1.0) >  1e-6) std::cout<<"t = "<<t<<" Norm = "<<norm<<std::endl;
@@ -116,11 +117,11 @@ double schmidtDecomRT(std::vector<double> &alpha_real, std::vector<double> &alph
   chi     = (MKL_Complex16*)malloc((M*N)*sizeof(MKL_Complex16));
   //u       = (MKL_Complex16*)malloc((ldu*M)*sizeof(MKL_Complex16));
   //vt      = (MKL_Complex16*)malloc((ldvt*N)*sizeof(MKL_Complex16));
-  chi_svd = (double*)malloc(dmin*sizeof(double)); 
+  chi_svd = (double*)malloc(dmin*sizeof(double));
   superb  = (double*)malloc((dmin-1)*sizeof(double));
 
   // note that this is ROW_MAJOR_REPRESENTATION in contrast to the representations
-  // used in the diagonalization routines. 
+  // used in the diagonalization routines.
   for(i=0; i<(DA*DB); i++){
      if(sub2main[i] == -5) chi[i] = {0.0 , 0.0};
      else chi[i] = {alpha_real[sub2main[i]], alpha_imag[sub2main[i]]};
@@ -138,7 +139,7 @@ double schmidtDecomRT(std::vector<double> &alpha_real, std::vector<double> &alph
   if( info > 0 ) {
          printf( "The algorithm computing SVD failed to converge.\n" );
          exit( 1 );
-  } 
+  }
   /* Print singular values */
   //print_rmatrix( "Singular values", 1, dmin, chi_svd, 1 );
   /* Print left singular vectors */
@@ -157,7 +158,7 @@ double schmidtDecomRT(std::vector<double> &alpha_real, std::vector<double> &alph
       EE -= chi_svd[i]*chi_svd[i]*log(chi_svd[i]*chi_svd[i]);
   }
   //std::cout<<"Entanglement Entropy = "<<EE<<std::endl;
-  
+
   // clear memory
   free(chi); free(chi_svd); free(superb);
   //free(u); free(vt);
@@ -179,7 +180,7 @@ double schmidtDecom(std::vector<double> &vec, int sector, std::vector<MKL_INT> &
   if(DA < DB) dmin = DA;
   else dmin = DB;
   chi     = (double*)malloc((M*N)*sizeof(double));
-  chi_svd = (double*)malloc(dmin*sizeof(double)); 
+  chi_svd = (double*)malloc(dmin*sizeof(double));
   superb  = (double*)malloc((dmin-1)*sizeof(double));
 
   // a simple check; remove it later
@@ -189,13 +190,13 @@ double schmidtDecom(std::vector<double> &vec, int sector, std::vector<MKL_INT> &
   for(i=0;i<(DA*DB);i++){
      if(sub2main[i] == -5) chi[i] = 0.0;
      else                  chi[i] = vec[sub2main[i]];
-  } 
+  }
 
   // check norm
   //norm = 0.0;
   //for(i=0;i<(DA*DB);i++) norm += chi[i]*chi[i];
   //if( fabs(norm-1.0) >  1e-6) std::cout<<"Norm = "<<norm<<std::endl;
-  
+
   //print_matrix("Density matrix", DA, DB, chi, DA);
   //printf( "LAPACKE_dgesvd (row-major, high-level) Example Program Results\n" );
   /* Compute SVD */
@@ -207,14 +208,14 @@ double schmidtDecom(std::vector<double> &vec, int sector, std::vector<MKL_INT> &
   if( info > 0 ) {
          printf( "The algorithm computing SVD failed to converge.\n" );
          exit( 1 );
-  } 
+  }
   /* Print singular values */
   //print_matrix( "Singular values", 1, dmin, chi_svd, 1 );
   // check norm
   //norm = 0;
   //for(i=0;i<dmin; i++) norm += chi_svd[i]*chi_svd[i];
   //if( fabs(norm - 1.0) > 1e-6) std::cout<<"Norm of svd ="<<norm<<std::endl;
-  
+
   EE=0.0;
   for(i=0; i<dmin; i++){
       if(chi_svd[i] < 1e-6) continue;
@@ -245,7 +246,7 @@ void createLookupTable(int sector, MKL_INT DA, MKL_INT DB, std::vector<MKL_INT> 
       if(flagGI==0){ sub2main[i*DB+j]=-1; continue; }
       // match with the corresponding basis state in the winding number sector
       // it is very important that binscan2() is used. binscan() seems to give
-      // wrong results. Why? 
+      // wrong results. Why?
       //p = Wind[sector].binscan2(conf);
       p = Wind[sector].scan(conf);
       if(p == -100) continue;
@@ -279,10 +280,11 @@ double entanglementEntropy(int initC, int sector,  std::vector<MKL_INT> &sub2mai
 
   outf = fopen("EntE.dat","w");
   fprintf(outf,"# Entropy of Entanglement as a function of the eigenvalues for LA = %d\n",LEN_A);
-  fprintf(outf,"# Eigenvalues  Entanglement Entropy \n");
- 
-  // Calculate the EE for each of the eigenstates 
+  fprintf(outf,"# Eigenvalues  Entanglement_Entropy  Overlap_w_InitC \n");
+
+  // Calculate the EE for each of the eigenstates
   EENT_diag = 0.0;
+  norm = 0.0;
   for(p=0; p<sizet; p++){
     // initialize the state and the entropy
     sel_evec.clear(); EE = -100.0;
@@ -291,18 +293,21 @@ double entanglementEntropy(int initC, int sector,  std::vector<MKL_INT> &sub2mai
     for(i=0; i<sizet; i++){
        sel_evec.push_back(Wind[sector].evecs[p*sizet+i]);
     }
-    //q1 = p*sizet; q2 = (p+1)*sizet; 
+    //q1 = p*sizet; q2 = (p+1)*sizet;
     //sel_evec.insert(sel_evec.begin(), Wind[sector].evecs.begin()+q1, Wind[sector].evecs.begin()+q2);
     //std::cout<<"Going to do Schmidt decompose eigenvector = "<< p << std::endl;
     //printvec(sel_evec);
     EE = schmidtDecom(sel_evec,sector,sub2main);
     EENT_diag += alpha[p]*alpha[p]*EE;
+    norm += alpha[p]*alpha[p];
     // write to file
-    fprintf(outf,"%.12lf %.12lf\n",sel_eval,EE);
+    fprintf(outf,"%.12lf %.12lf %.12lf\n",sel_eval,EE,alpha[p]*alpha[p]);
   }
   fclose(outf);
-  // clear the allocated memory in this routine 
-  alpha.clear();  
+  // check normalization
+  if( fabs(norm - 1.0) > 1e-6) std::cout<<"Norm of overlap ="<<norm<<std::endl;
+  // clear the allocated memory in this routine
+  alpha.clear();
 
   // return the result of the diagonal ensemble
   return EENT_diag;
@@ -320,8 +325,8 @@ void createBasis(int sector){
 
   for(i=0; i<Wind[sector].nBasis; i++){
     tconf = Wind[sector].basisVec[i];
-    // collect A vectors    
-    p1 = 0; 
+    // collect A vectors
+    p1 = 0;
     for(iy=0; iy<LY;    iy++){
     for(ix=0; ix<LEN_A; ix++){
       p = iy*LX + ix;
@@ -330,7 +335,7 @@ void createBasis(int sector){
     }}
     if((int)confA.size() != 2*VOL_A) std::cout<<"Size mismatch in A! "<<std::endl;
     eA.push_back(confA);
-    // collect B vectors     
+    // collect B vectors
     p1 = 0;
     for(iy=0; iy<LY;    iy++){
     for(ix=0; ix<LEN_B; ix++){
@@ -389,22 +394,22 @@ int checkGL2(std::vector<bool> &conf){
   //ix=0;
   //for(iy=0; iy<LY; iy++){
   //  p = iy*LX+ix;
-    qx=2*next[DIM-1][p]; 
-    qy=2*next[DIM-2][p]+1; 
+    qx=2*next[DIM-1][p];
+    qy=2*next[DIM-2][p]+1;
     pp=2*p;
     e1 = (conf[pp])? 1:-1; e2 = (conf[pp+1])? 1:-1; e3 = (conf[qx])? 1:-1; e4 = (conf[qy])? 1:-1;
     // if Q=e1+e2-e3-e4=0 return 1 (Gauss' Law OK) else return 0
-    if(e1+e2-e3-e4) return 0; 
+    if(e1+e2-e3-e4) return 0;
   }
   //ix=LEN_A;
   //for(iy=0; iy<LY; iy++){
   //  p = iy*LX+ix;
-  //  qx=2*next[DIM-1][p]; 
-  //  qy=2*next[DIM-2][p]+1; 
+  //  qx=2*next[DIM-1][p];
+  //  qy=2*next[DIM-2][p]+1;
   //  pp=2*p;
   //  e1 = (conf[pp])? 1:-1; e2 = (conf[pp+1])? 1:-1; e3 = (conf[qx])? 1:-1; e4 = (conf[qy])? 1:-1;
     // if Q=e1+e2-e3-e4=0 return 1 (Gauss' Law OK) else return 0
-  //  if(e1+e2-e3-e4) return 0; 
+  //  if(e1+e2-e3-e4) return 0;
   //}
   return 1;
 }
@@ -413,8 +418,8 @@ int checkGL2(std::vector<bool> &conf){
 // check routines. Finds a given basis state for the subsystem A
 void findBasisA(std::vector<std::vector<bool>> &eA, std::vector<bool> &newstate){
      unsigned int m;
-     // binary search of the sorted array  
-     std::vector<std::vector<bool>>::iterator it; 
+     // binary search of the sorted array
+     std::vector<std::vector<bool>>::iterator it;
      it = std::find(eA.begin(),eA.end(),newstate);
      m  = std::distance(eA.begin(),it);
      if( m == eA.size() ){
@@ -426,8 +431,8 @@ void findBasisA(std::vector<std::vector<bool>> &eA, std::vector<bool> &newstate)
 // check routines. Finds a given basis state for the subsystem B
 void findBasisB(std::vector<std::vector<bool>> &eB, std::vector<bool> &newstate){
      unsigned int m;
-     // binary search of the sorted array  
-     std::vector<std::vector<bool>>::iterator it; 
+     // binary search of the sorted array
+     std::vector<std::vector<bool>>::iterator it;
      it = std::find(eB.begin(),eB.end(),newstate);
      m  = std::distance(eB.begin(),it);
      if( m == eB.size() ){
@@ -435,4 +440,3 @@ void findBasisB(std::vector<std::vector<bool>> &eB, std::vector<bool> &newstate)
      }
      else std::cout<<"Test state matches with Basis B found at "<<m<<std::endl;
 }
-

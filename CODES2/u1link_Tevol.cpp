@@ -7,7 +7,7 @@
 #include<vector>
 #include<iterator>
 
-/* according to the rules of cpp, the variables are declared here 
+/* according to the rules of cpp, the variables are declared here
  * and also in the header file as extern such that they are avl to
  * the other functions.
  */
@@ -29,7 +29,7 @@ std::vector<std::vector<bool>> basis_flip;
 int STORE_SVD;
 int CHKDIAG;
 // initial state is specified by W and LR
-// W is the amount of y-flux=Wy. 
+// W is the amount of y-flux=Wy.
 // LR=0 flux to the left (subsystem LA), LR=1 flux to the right (subsystem LB).
 int WX, WY, LR;
 
@@ -65,12 +65,12 @@ int main(){
   VOL = LX*LY;
   VOL2 = VOL/2;
 
-  // decide whether to check the results of the diagonalization 
+  // decide whether to check the results of the diagonalization
   CHKDIAG=0;
 
   /* Initialize nearest neighbours */
   for(i=0;i<=2*DIM;i++){
-    next[i] = (int *)malloc(VOL*sizeof(int)); 
+    next[i] = (int *)malloc(VOL*sizeof(int));
     nextCHK[i] = (int *)malloc(VOL*sizeof(int));
   }
 
@@ -78,32 +78,37 @@ int main(){
   lin2chk = (int *)malloc(VOL*sizeof(int));
   chk2lin = (int *)malloc(VOL*sizeof(int));
   initneighbor();
-  
+
   /* Winding number sectors */
   lookup = allocateint2d(LX+1,LY+1);
 
   /* build basis states satisfying Gauss' Law */
   conststates();
-  
+
   /* get number of winding number sectors */
   nWind = calc_WindNo(LX,LY);
-  Wind.reserve(nWind); 
+  Wind.reserve(nWind);
   winding_no_decompose();
- 
-  printf("Chosen (Wx,Wy) sector = (%d,%d)\n",WX,WY); 
+
+  printf("Chosen (Wx,Wy) sector = (%d,%d)\n",WX,WY);
   sector = lookup[LX/2+WX][LY/2+WY];
   constH(sector);
+
+  INITq = -1;
+  //set the starting state once (and for all!)
+  initState(sector, INIT, &INITq);
+
   // calculate the <psi_n| O_flip |psi_n>, for every eigenstate psi_n
   calc_Oflip(sector);
-  
+
   // real-time evolution of Entanglement Entropy (storing the SVD coefficients)
   evolve_Eent(sector, WX, WY);
 
-  // real time evolution of <PHI| O_flip(t) |PHI>, 
+  // real time evolution of <PHI| O_flip(t) |PHI>,
   //  where |PHI> is an initial cartoon state
   //calc_Oflipt(sector, WX, WY);
 
-  // real-time evolution of cartoon states and Locshmidt Echo in (wx,wy)=(0,0) 
+  // real-time evolution of cartoon states and Locshmidt Echo in (wx,wy)=(0,0)
   // if((WX==0)&&(WY==0)) evolve_cartoons(sector);
 
 

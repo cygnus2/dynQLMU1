@@ -18,7 +18,7 @@ extern unsigned int nWind;
 extern int **lookup;
 extern double lam,Ti,Tf,dT;
 extern int LOG;
-extern int INIT;
+extern int INIT,INITq;
 /* NTOT = total no of basis states
  * NH   = states not killed by H  */
 extern int NTOT;
@@ -55,13 +55,17 @@ class WindNo{
     std::vector<double> evecs;
 
     // information about correlation functions
-    std::vector<std::vector<double>> cflip;
+    //std::vector<std::vector<double>> cflip;
 
-    // information about the flip(x)
-    std::vector<std::vector<bool>> xflip;
+    // flip(x)=1 (anti-clockwise), -1 (clockwise), 0 (not-flippable)
+    std::vector<std::vector<int>> xflip;
 
-    // information about the Ey(x)
+    // information about the Ey(x): Ey = sum, dEy = diff,
     std::vector<std::vector<int>> Ey;
+    std::vector<std::vector<int>> dEy;
+    // CEy1,CEy2 = corrf of Ey for separations 1 and 2, summed over Lx
+    std::vector<int> CEy1;
+    std::vector<int> CEy2;
 
     // function to display variables
     void display(){
@@ -71,7 +75,7 @@ class WindNo{
     // function to count flippable plaquettes
     void flip_plaq();
 
-    // function to count Ey;
+    // function to count Ey and related operators;
     void computeEy();
 
     // function to sort the basis states
@@ -98,6 +102,13 @@ class WindNo{
        hamil.clear();
        evals.clear();
        evecs.clear();
+       hamil.clear();
+       //cflip.clear();
+       xflip.clear();
+       Ey.clear();
+       dEy.clear();
+       CEy1.clear();
+       CEy2.clear();
      }
 };
 
@@ -129,6 +140,7 @@ void initState(int, int, int*);
 void constH(int);
 void winding_no_decompose(void);
 void calc_Oflip(int);
+void calc_OvlapEig(int);
 double entanglementEntropy(int,int,std::vector<MKL_INT>&);
 void Lecho(int);
 void evolveH_ov1(int);

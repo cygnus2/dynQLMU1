@@ -7,6 +7,7 @@
 #include<algorithm>
 #include<vector>
 #include<iterator>
+#include<time.h>
 
 extern void printconf(std::vector<bool>);
 
@@ -19,7 +20,9 @@ void initState(int sector, int INIT, int *q){
   int W,sign,wx,wy,sizet;
   int ch1,ch2; // allow the choice of a different initial state,
   int cx1,cx2; // i.e, with domain walls placed elsewhere
+  int flag;
   int p1,p2,p3,p4,s1,s2,s3,s4;
+  std::vector<int> posX(LX); // co-ordinates to set Ey[x]=+1,-1
   std::vector<bool> cart(2*VOL);
 
   int chk1,chk2; //to check the routines scan, binscan and binscan2.
@@ -30,8 +33,7 @@ void initState(int sector, int INIT, int *q){
   if(wy!=0){
 	  printf("The option with Wy != 0 is not yet supported. \n"); exit(0);
   }
-  std::cout<<"Routine to initialize states. INIT="<<INIT<<", wx="<<wx<<", wy="<<
-	  wy<<std::endl;
+  std::cout<<"Routine to initialize states. INIT="<<INIT<<", wx="<<wx<<", wy="<<wy<<std::endl;
 
   /* initialization */
   *q = -100;
@@ -50,8 +52,11 @@ void initState(int sector, int INIT, int *q){
       (*q) = Wind[sector].binscan(cart);
       std::cout<<"In routine initState. Starting state ="<<(*q)<<std::endl;
       std::cout<<"#-of-flippable plaqs ="<<Wind[sector].nflip[(*q)]<<std::endl;
+      std::cout<<"Printing the flippability profile of initial state "<<std::endl;
+      for(r=0; r<VOL; r++) std::cout<<r<<"  "<<Wind[sector].xflip[(*q)][r]<<std::endl;
       std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
-      for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<std::endl;
+      for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<" "<<Wind[sector].dEy[*q][r]<<std::endl;
+      std::cout<<"CEy1 ="<<Wind[sector].CEy1[*q]<<"; CEy2 ="<<Wind[sector].CEy2[*q]<<";"<<std::endl;
       return;
     } // close INIT=0
     else if(INIT==1){ // 1-plaquette flipped cartoon state
@@ -61,8 +66,11 @@ void initState(int sector, int INIT, int *q){
                 if(cx1 == ch1){ *q = k;
 			std::cout<<"In routine initState. Starting state="<<(*q)<<std::endl;
       std::cout<<"#-of-flippable plaqs ="<<Wind[sector].nflip[(*q)]<<std::endl;
+      std::cout<<"Printing the flippability profile of initial state "<<std::endl;
+      for(r=0; r<VOL; r++) std::cout<<r<<"  "<<Wind[sector].xflip[(*q)][r]<<std::endl;
       std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
-      for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<std::endl;
+      for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<" "<<Wind[sector].dEy[*q][r]<<std::endl;
+      std::cout<<"CEy1 ="<<Wind[sector].CEy1[*q]<<"; CEy2 ="<<Wind[sector].CEy2[*q]<<";"<<std::endl;
 			return; }
                 cx1++;
             }
@@ -80,8 +88,11 @@ void initState(int sector, int INIT, int *q){
                     if((!s1) && (!s2) && (!s3) && (!s4)){ *q = k;
                         std::cout<<"In routine initState. Starting state ="<<(*q)<<std::endl;
       std::cout<<"#-of-flippable plaqs ="<<Wind[sector].nflip[(*q)]<<std::endl;
+      std::cout<<"Printing the flippability profile of initial state "<<std::endl;
+      for(r=0; r<VOL; r++) std::cout<<r<<"  "<<Wind[sector].xflip[(*q)][r]<<std::endl;
       std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
-      for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<std::endl;
+      for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<" "<<Wind[sector].dEy[*q][r]<<std::endl;
+      std::cout<<"CEy1 ="<<Wind[sector].CEy1[*q]<<"; CEy2 ="<<Wind[sector].CEy2[*q]<<";"<<std::endl;
 			return;}
             }
        }
@@ -96,24 +107,27 @@ void initState(int sector, int INIT, int *q){
                     ix=r-1;   iy=1; p3=iy*LX+ix;  s3=Wind[sector].xflip[k][p3];
                     ix=r;     iy=0; p4=iy*LX+ix;  s4=Wind[sector].xflip[k][p4];
                     if((!s1) && (!s2) && (!s3) && (!s4)){ *q = k;
-		       std::cout<<"In routine initState. Starting state = "<<(*q)<<std::endl;
+		  std::cout<<"In routine initState. Starting state = "<<(*q)<<std::endl;
       std::cout<<"#-of-flippable plaqs ="<<Wind[sector].nflip[(*q)]<<std::endl;
+      std::cout<<"Printing the flippability profile of initial state "<<std::endl;
+      for(r=0; r<VOL; r++) std::cout<<r<<"  "<<Wind[sector].xflip[(*q)][r]<<std::endl;
       std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
-      for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<std::endl;
+      for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<" "<<Wind[sector].dEy[*q][r]<<std::endl;
+      std::cout<<"CEy1 ="<<Wind[sector].CEy1[*q]<<"; CEy2 ="<<Wind[sector].CEy2[*q]<<";"<<std::endl;
 		       return;}
             }
        }
     } // close INIT=3
     else if(INIT==4){ // domain walls cartoon state, staggered along x-direction
        for(ix=0;ix<LX;ix++){
-	   parity = ix%2;    
+	         parity = ix%2;
            for(iy=0;iy<LY;iy++){
               p = 2*(iy*LX+ix);
-	      if(iy%2)   cart[p]=false;
-	      else       cart[p]=true;
+	            if(iy%2)   cart[p]=false;
+	            else       cart[p]=true;
               py= p+1;
-	      if(parity) cart[py]=false;
-	      else       cart[py]=true;
+	            if(parity) cart[py]=false;
+	            else       cart[py]=true;
          }
          sign=-sign;
        }
@@ -122,27 +136,30 @@ void initState(int sector, int INIT, int *q){
        *q = Wind[sector].scan(cart);
        std::cout<<"The initial state is "<<(*q)<<std::endl;
        std::cout<<"#-of-flippable plaqs ="<<Wind[sector].nflip[(*q)]<<std::endl;
+       std::cout<<"Printing the flippability profile of initial state "<<std::endl;
+       for(r=0; r<VOL; r++) std::cout<<r<<"  "<<Wind[sector].xflip[(*q)][r]<<std::endl;
        std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
-       for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<std::endl;
+       for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<" "<<Wind[sector].dEy[*q][r]<<std::endl;
+       std::cout<<"CEy1 ="<<Wind[sector].CEy1[*q]<<"; CEy2 ="<<Wind[sector].CEy2[*q]<<";"<<std::endl;
        return;
     } // close INIT=4
     else if(INIT==5){ // domain walls together, and anti-domain walls stacked together
        for(ix=0;ix<(LX/2);ix++){
            for(iy=0;iy<LY;iy++){
               p = 2*(iy*LX+ix);
-	      if(iy%2)   cart[p]=false;
-	      else       cart[p]=true;
+	            if(iy%2)   cart[p]=false;
+	            else       cart[p]=true;
               py= p+1;
-	      cart[py]=true;
+	            cart[py]=true;
            }
        }
        for(ix=(LX/2);ix<LX;ix++){
            for(iy=0;iy<LY;iy++){
               p = 2*(iy*LX+ix);
-	      if(iy%2)   cart[p]=false;
-	      else       cart[p]=true;
+	            if(iy%2)   cart[p]=false;
+	            else       cart[p]=true;
               py= p+1;
-	      cart[py]=false;
+	            cart[py]=false;
            }
        }
        /* find the relevant basis state in the hilbert space */
@@ -151,9 +168,53 @@ void initState(int sector, int INIT, int *q){
        std::cout<<"The initial state is "<<(*q)<<std::endl;
        std::cout<<"#-of-flippable plaqs ="<<Wind[sector].nflip[(*q)]<<std::endl;
        std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
-       for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<std::endl;
-       return;      
+       for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<" "<<Wind[sector].dEy[*q][r]<<std::endl;
+       std::cout<<"CEy1 ="<<Wind[sector].CEy1[*q]<<"; CEy2 ="<<Wind[sector].CEy2[*q]<<";"<<std::endl;
+       std::cout<<"Printing the flippability profile of initial state "<<std::endl;
+       for(r=0; r<VOL; r++) std::cout<<r<<"  "<<Wind[sector].xflip[(*q)][r]<<std::endl;
+       return;
     } // close INIT=5
+    else if(INIT==6){ // Ey =+1,-1 scattered randomly in x
+       /* initialize random seed: */
+       srand (time(NULL));
+       // there is a (low) probability that the chosen Ey fluxes are all next to each other
+       // need to insert a condition to stop this. Check with the #-of-flippable plaquettes
+       do{
+          for(r=0;r<LX;r++) posX[r]=-1; // initialize everything to -1
+          k=0;  // counter to check how many distinct values are initialized
+          while(k<(LX/2)){
+               r=rand()%LX;
+               if(posX[r]==1) continue;
+               posX[r]=1;  k++;
+          };
+          printf("Randomly selected profile\n");
+          for(k=0;k<LX;k++) std::cout<<"Ey["<<k<<"]= "<<posX[k]<<std::endl;
+          // initialize the x-links
+          for(ix=0;ix<LX;ix++){
+          for(iy=0;iy<LY;iy++){
+                p=2*(iy*LX+ix);
+                if(iy%2)   cart[p]=false;
+ 	              else       cart[p]=true;
+          }}
+          // initialize the y-links
+          for(ix=0;ix<LX;ix++){
+          for(iy=0;iy<LY;iy++){
+                p=2*(iy*LX+ix)+1;
+                if(posX[ix]==1) cart[p]=true;
+                else            cart[p]=false;
+          }}
+          /* find the relevant basis state in the hilbert space */
+          *q = Wind[sector].scan(cart);
+       }while(Wind[sector].nflip[*q]<=2);
+       std::cout<<"The initial state is "<<(*q)<<std::endl;
+       std::cout<<"#-of-flippable plaqs ="<<Wind[sector].nflip[(*q)]<<std::endl;
+       std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
+       for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<" "<<Wind[sector].dEy[*q][r]<<std::endl;
+       std::cout<<"CEy1 ="<<Wind[sector].CEy1[*q]<<"; CEy2 ="<<Wind[sector].CEy2[*q]<<";"<<std::endl;
+       std::cout<<"Printing the flippability profile of initial state "<<std::endl;
+       for(r=0; r<VOL; r++) std::cout<<r<<"  "<<Wind[sector].xflip[(*q)][r]<<std::endl;
+       return;
+    } // close INIT=6
   } // close if((wx==0)&&(wy==0))
   else if((W>0)&&(wy==0)&&(INIT>10)){
       std::cout<<"Initial state in the winding sector "<<std::endl;
@@ -216,8 +277,11 @@ void initState(int sector, int INIT, int *q){
   *q = Wind[sector].scan(cart);
   std::cout<<"The initial state is "<<(*q)<<std::endl;
   std::cout<<"#-of-flippable plaqs ="<<Wind[sector].nflip[(*q)]<<std::endl;
+  std::cout<<"Printing the flippability profile of initial state "<<std::endl;
+  for(r=0; r<VOL; r++) std::cout<<r<<"  "<<Wind[sector].xflip[(*q)][r]<<std::endl;
   std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
-  for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<std::endl;
+  for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<" "<<Wind[sector].dEy[*q][r]<<std::endl;
+  std::cout<<"CEy1 ="<<Wind[sector].CEy1[*q]<<"; CEy2 ="<<Wind[sector].CEy2[*q]<<";"<<std::endl;
 
 
   // sanity checks DELETE LATER!

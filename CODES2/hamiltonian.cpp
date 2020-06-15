@@ -37,10 +37,10 @@ void constH(int sector){
 
    // note that corrf1(0) corresponds to the corrf at distance 1,..., corrf(LX/2-1) is the maximally
    // separated one. At distance 0, the correlation function is just the same as oflip.
-   std::vector<double> corrf1(LX/2);
+   //std::vector<double> corrf1(LX/2);
 
-   // flip(x)=true (false) if the plaq x is flippable (non-flippable) for the k-th basis state
-   std::vector<bool> xfl(VOL);
+   // flip(x)=1 (anti-clockwise), -1 (clockwise), 0 (non-flippable) for the k-th basis state
+   std::vector<int> xfl(VOL);
 
    int x,y;
    bool f1,f2;
@@ -53,7 +53,7 @@ void constH(int sector){
       newstate = Wind[sector].basisVec[i];
 
       // initialize the correlation functions for a given basis state
-      for(r=0;r<(LX/2);r++) corrf1[r]=0.0;
+      //for(r=0;r<(LX/2);r++) corrf1[r]=0.0;
 
       /* act on the basis state with the Hamiltonian */
       /* a single plaquette is arranged as
@@ -68,8 +68,8 @@ void constH(int sector){
       for(j=0;j<=VOL;j++) rowscan[j]=NTOT;
       stateq = 0;
       for(p=0;p<VOL;p++){
-       f1    =false; //f1 stores the flippability
-       xfl[p]=false; // initially assume it is not flippable
+       //f1    =false; //f1 stores the flippability
+       xfl[p]=0; // initially assume it is not flippable
        // Find if a single plaquette is flippable
        p1=2*p; p2=2*next[DIM+1][p]+1; p3=2*next[DIM+2][p]; p4=2*p+1;
        pxy=newstate[p1]; pyz=newstate[p2]; pzw=newstate[p3]; pwx=newstate[p4];
@@ -95,25 +95,27 @@ void constH(int sector){
          newstate[p3]=!newstate[p3]; newstate[p4]=!newstate[p4];
          //if(newstate!=basis_flip[i]) std::cout<<"state mismatch"<<std::endl;
 
-         f1    =true;
-      	 xfl[p]=true; // reset flippability info
-       }
+         //f1    =true;
+         // reset flippability info
+         if(pxy) xfl[p]= 1;
+         else    xfl[p]=-1;
+       } // close if-statement
 
        // calculate the corrF in the basis state
-       for(r=1;r<=(LX/2);r++){
-         f2=false;
+       //for(r=1;r<=(LX/2);r++){
+       //  f2=false;
          // go r units forward in x
-         ix = p%LX; iy = p/LX; q= iy*LX + (ix+r)%LX;
-         q1=2*q; q2=2*next[DIM+1][q]+1; q3=2*next[DIM+2][q]; q4=q1+1;
-         qxy=newstate[q1]; qyz=newstate[q2]; qzw=newstate[q3]; qwx=newstate[q4];
-         if((qxy==qyz)&&(qzw==qwx)&&(qwx!=qxy)) f2=true;
-         if((f1)&&(f2)) corrf1[r-1]++;
-       }
-     }
+       // ix = p%LX; iy = p/LX; q= iy*LX + (ix+r)%LX;
+       // q1=2*q; q2=2*next[DIM+1][q]+1; q3=2*next[DIM+2][q]; q4=q1+1;
+       // qxy=newstate[q1]; qyz=newstate[q2]; qzw=newstate[q3]; qwx=newstate[q4];
+       // if((qxy==qyz)&&(qzw==qwx)&&(qwx!=qxy)) f2=true;
+       // if((f1)&&(f2)) corrf1[r-1]++;
+       //}
+     } // close for loop over p VOL
 
      // normalize and store the correlation function
-     for(r=0;r<(LX/2);r++) corrf1[r] /= VOL;
-     Wind[sector].cflip.push_back(corrf1);
+     //for(r=0;r<(LX/2);r++) corrf1[r] /= VOL;
+     //Wind[sector].cflip.push_back(corrf1);
 
      // store the info about the flippability of the basis state
      Wind[sector].xflip.push_back(xfl);

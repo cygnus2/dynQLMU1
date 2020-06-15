@@ -193,8 +193,11 @@ void WindNo::flip_plaq(){
 
 // calculates the local Ey
 void WindNo::computeEy(){
-    int i,j,p,p1,p2;
+    int i,j,p,q,x,y,p1,p2;
+    int xp1,xp2;
     std::vector<int> Eytot(LX);
+    std::vector<int> diffEy(LX);
+    int CorrF1, CorrF2;
     bool pxy,pyz;
 
     // the lattice arrangement is as follows
@@ -205,19 +208,50 @@ void WindNo::computeEy(){
         x o----o----o----o----o
     */
 
-    //printf("In sector (% d, % d); basis states = %ld \n",Wx,Wy,nBasis);
     // error message for zero basis
     if(!nBasis){ std::cout<<"Total basis state not defined! "<<std::endl; exit(0); }
     for(i=0; i<nBasis; i++){
-      // compute the total Ey for each x
-      for(p=0;p<LX;p++){
+      // compute the total Ey for each x; note that we work with integer values!
+      for(x=0;x<LX;x++){
+          Eytot[x] = 0; diffEy[x] = 0;
+          for(y=0;y<LY;y++){
+            p=y*LX+x;  q=2*p+1;
+            if(basisVec[i][q]) Eytot[x]++;
+            else               Eytot[x]--;
+          }
+      if(Eytot[x]%2){ printf("Error! LY != 2, aborting \n"); exit(0); }
+      Eytot[x] /= 2;
+      }
+
+      // compute the correlators
+      CorrF1=0; CorrF2=0;
+      for(x=0;x<LX;x++){
+        xp1 = (x+1)%LX; xp2 = (x+2)%LX;
+        CorrF1 += Eytot[x]*Eytot[xp1];
+        CorrF2 += Eytot[x]*Eytot[xp2];
+      }
+      // push the values to original variables defined within the class
+      Ey.push_back(Eytot);
+      CEy1.push_back(CorrF1);
+      CEy2.push_back(CorrF2);
+
+      // if LY=2 then calculate the difference otherwise assign zero
+      if(LY==2){
+        for(p=0;p<LX;p++){
           p1=2*p+1; p2=2*next[DIM+2][p]+1;
           pxy=basisVec[i][p1]; pyz=basisVec[i][p2];
-          if(pxy!=pyz) Eytot[p]=0.0;
-          else{ if(pxy==true) Eytot[p]= 1.0;
-                else          Eytot[p]=-1.0;
+          if(pxy==pyz) diffEy[p]=0.0;
+          else{ if(pxy==true) diffEy[p]= 1.0;
+                else          diffEy[p]=-1.0;
               }
+        }
       }
-      Ey.push_back(Eytot);
-    }
+      else{
+        for(x=0;x<LX;x++) diffEy[x]=0;
+      }
+      dEy.push_back(diffEy);
+
+    } // close loop i over basis states
+
+  Eytot.clear(); diffEy.clear();
 }

@@ -34,9 +34,11 @@ int CHKDIAG;
 // INIT=0, symm broken states with all flippable plaquettes
 // INIT=1, C1-C2-C1 domain wall states with fused domain walls
 // INIT=2,3 domain wall states with inter-dw distance ~ LX/2
+// INIT=4, domain walls and anti-domain walls arranged as alternating manner
+// INIT=5, domain walls and anti-domain walls are phase separated.
 // For winding number states INIT has a value 10+WX.
 int WX, WY, LR;
-int INIT;
+int INIT, INITq;
 
 int main(){
   FILE *fptr;
@@ -103,9 +105,13 @@ int main(){
   Wind.reserve(nWind);
   winding_no_decompose();
 
-  //printf("Chosen (Wx,Wy) sector = (%d,%d)\n",WX,WY);
+  printf("Chosen (Wx,Wy) sector = (%d,%d)\n",WX,WY);
   sector = lookup[LX/2+WX][LY/2+WY];
   constH(sector);
+
+  INITq = -1;
+  //set the starting state once (and for all!)
+  initState(sector, INIT, &INITq);
 
   // calculate the <psi_n| O_flip |psi_n>, for every eigenstate psi_n
   //calc_Oflip(sector);
@@ -113,7 +119,7 @@ int main(){
   // real time evolution of <PHI(t)| O_flip |PHI(t)> and <PHI(t)| Cflip |PHI(t)>
   // starting from specified initial states in each sector (see notes)
   // note that recalculates the same as the previous routine, so don't use both!
-  //calc_Oflipt(sector);
+  calc_Oflipt(sector);
 
   // real time evolution of <PHI(t)| O_kin |PHI(t)>,
   //calc_Okint(sector);
@@ -121,9 +127,7 @@ int main(){
   //FilePrintBasis(sector);
 
   // Lochschmidt Echo
-  //if((WX==0)&&(WY==0)&&(INIT==0)){
-  //     Lecho(sector);
-  //}
+  Lecho(sector);
 
   // real-time evolution of initial states (evolveH_ov2
   // has all the functionalities of evolveH_ov1 built in!)
