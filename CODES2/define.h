@@ -105,6 +105,7 @@ class WindNo{
        hamil.clear();
        //cflip.clear();
        xflip.clear();
+       nflip.clear();
        Ey.clear();
        dEy.clear();
        CEy1.clear();
@@ -140,8 +141,8 @@ void initState(int, int, int*);
 void constH(int);
 void winding_no_decompose(void);
 void calc_Oflip(int);
-void calc_OvlapEig(int);
 double entanglementEntropy(int,int,std::vector<MKL_INT>&);
+void evolve_Eent(int);
 void Lecho(int);
 void evolveH_ov1(int);
 void evolveH_ov2(int);

@@ -40,14 +40,13 @@ void evolve_Eent(int sector){
    int initC;
    double t,EE,entE,diagEE;
    double initE;
-   sizet = Wind[sector].nBasis;
-   std::vector<double> alpha_real(sizet,0.0);
-   std::vector<double> alpha_imag(sizet,0.0);
    // this stores which subsystem states map to states of the full system
    std::vector<MKL_INT> sub2main;
    FILE *outf;
    double overlap,norm;
    sizet = Wind[sector].nBasis;
+   std::vector<double> alpha_real(sizet);
+   std::vector<double> alpha_imag(sizet);
 
    /* construct cartoon state */
    if(INITq == -1){ std::cout<<"Error in initial state. Aborting. "<<std::endl; exit(0); }
