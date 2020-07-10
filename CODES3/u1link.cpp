@@ -7,7 +7,11 @@
 #include<vector>
 #include<iterator>
 
-/* according to the rules of cpp, the variables are declared here 
+// push these variable definitions to evolveEent.cpp
+unsigned int LEN_A,LEN_B,VOL_A,VOL_B;
+//unsigned int DA,DB,NCHI;
+
+/* according to the rules of cpp, the variables are declared here
  * and also in the header file as extern such that they are avl to
  * the other functions.
  */
@@ -26,6 +30,10 @@ int NTOT,NH;
 std::vector<std::vector<bool>> basis;
 std::vector<std::vector<bool>> basis_nonflip;
 std::vector<std::vector<bool>> basis_flip;
+int CHKDIAG, STORE_SVD;
+int INIT, INITq, INITbag;
+int INITphasePi0, INITphase0Pi, INITphasePiPi;
+double inorm;
 
 int main(){
   FILE *fptr;
@@ -54,16 +62,21 @@ int main(){
   fscanf(fptr,"%s %lf\n",string,&Tf);
   fscanf(fptr,"%s %lf\n",string,&dT);
   fscanf(fptr,"%s %d\n",string,&LEN_A);
-  
+  fscanf(fptr,"%s %d\n",string,&INIT);
   fclose(fptr);
   if(( LX%2 != 0 )||( LY%2 !=0 )) { printf("Code does not work with odd LX and/or LY. \n"); exit(0); }
   if(LX<LY) printf("Please make sure LX >= LY. Unforseen errors can occur otherwise. \n");
   VOL = LX*LY;
   VOL2 = VOL/2;
 
+  std::cout<<"Initial state ="<<INIT<<std::endl;
+
+  // decide whether to check the results of the diagonalization
+  CHKDIAG=1;
+
   /* Initialize nearest neighbours */
   for(i=0;i<=2*DIM;i++){
-    next[i] = (int *)malloc(VOL*sizeof(int)); 
+    next[i] = (int *)malloc(VOL*sizeof(int));
     nextCHK[i] = (int *)malloc(VOL*sizeof(int));
   }
 
@@ -71,7 +84,7 @@ int main(){
   lin2chk = (int *)malloc(VOL*sizeof(int));
   chk2lin = (int *)malloc(VOL*sizeof(int));
   initneighbor();
-  
+
   /* Winding number sectors */
   lookup = allocateint2d(LX+1,LY+1);
 
@@ -80,9 +93,9 @@ int main(){
 
   /* get number of winding number sectors */
   nWind = calc_WindNo(LX,LY);
-  Wind.reserve(nWind); 
+  Wind.reserve(nWind);
   winding_no_decompose();
- 
+
   // get the winding number sector (wx,wy)
   wx = 0; wy = 0;
   sector = lookup[LX/2+wx][LY/2+wy];
@@ -90,19 +103,39 @@ int main(){
 
   /* breakup into translation sectors */
   // presently this only works for (kx,ky)=(0,0)
-  trans_decompose(sector); 
+  trans_decompose(sector);
 
   /* Hamiltonian in the (kx,ky)=(0,0) sector */
   trans_Hamil(sector);
-   
-  // calculate the expectation value of Oflip for every eigenstate 
-  calc_Oflip(sector);
+
+  INITq = -1;
+  // initialize the starting state (once and for all the routines)
+  initState(sector, INIT, &INITq);
+  // initalize the bag details for the initial state
+  INITbag = Wind[sector].Tflag[INITq]-1;
+  inorm = sqrt(Wind[sector].Tdgen[INITq]/(double)VOL);
+  INITphasePi0 = Wind[sector].FPi0[INITq];
+  INITphase0Pi = Wind[sector].F0Pi[INITq];
+  INITphasePiPi= Wind[sector].FPiPi[INITq];
+  std::cout<<"Initial state belongs to bag ="<<INITbag<<std::endl;
+  std::cout<<"Normalization ="<<inorm<<std::endl;
+  std::cout<<"Phases: (Pi,0):"<<INITphasePi0<<";  (0,Pi):"<<INITphase0Pi<<"; (Pi,Pi):"<<INITphasePiPi<<std::endl;
+
+  // calculate <psi_n| O_flip |psi_n>, for every eigenstate psi_n
+  //calc_Oflip(sector);
+  // real time evolution of <PHI(t)| O_flip |PHI(t)>
+  // starting from specified initial states in each sector (see notes)
+  calc_Oflipt(sector);
+
+  // real-time evolution of initial states 
+  evolveH_ov2(sector);
+  //evolveH_ov3(sector);
 
   // calculate the Entanglement Entropy for the states
-  entanglementEntropy(sector);
+  //evolve_Eent(sector);
 
   // calculate the structural entropy
-  structuralEntropy(sector);
+  //structuralEntropy(sector);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }
