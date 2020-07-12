@@ -127,9 +127,14 @@ int main(){
   // starting from specified initial states in each sector (see notes)
   calc_Oflipt(sector);
 
-  // real-time evolution of initial states 
-  evolveH_ov2(sector);
-  //evolveH_ov3(sector);
+  // real-time evolution of initial states
+  if(INIT==0)      evolveH_ov2_INIT0(sector);
+  else if(INIT==4) evolveH_ov2_INIT4(sector);
+
+  // real-time evolution of initial states
+  if(INIT==0)      evolveH_ov3_INIT0(sector);
+  else if(INIT==4) evolveH_ov3_INIT4(sector);
+
 
   // calculate the Entanglement Entropy for the states
   //evolve_Eent(sector);

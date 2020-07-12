@@ -1,8 +1,8 @@
-Lx 4
+Lx 10
 Ly 2
 lam 0.0
 Ti 0.0
 Tf 10.0
-dT 0.05
+dT 0.1
 LA 1
-INIT 0
+INIT 4

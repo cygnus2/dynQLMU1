@@ -17,18 +17,18 @@ void structuralEntropy(int sector){
    outf = fopen("ShanonE.dat","w");
    fprintf(outf,"# Eigenvalues  Shanon_Entropy    Inverse_Participation_Ratio   Structural_Entropy\n");
 
-   // Calculate the quantities for each of the eigenstates 
+   // Calculate the quantities for each of the eigenstates
    for(p=0; p<Wind[sector].trans_sectors; p++){
       shanonE = 0.0; IPR = 0.0;
       for(i=0; i < Wind[sector].trans_sectors; i++){
-         ampl = Wind[sector].evecs[p*Wind[sector].trans_sectors + i];
-         shanonE -= (ampl*ampl)*log(ampl*ampl); 
+         ampl = Wind[sector].evecs_K00[p*Wind[sector].trans_sectors + i];
+         shanonE -= (ampl*ampl)*log(ampl*ampl);
          IPR     += (ampl*ampl*ampl*ampl);
       }
       IPR = 1.0/IPR;
       structE = shanonE - log(IPR);
       // write to file
-      fprintf(outf,"%lf %lf %lf %lf\n",Wind[sector].evals[p],shanonE,IPR,structE);
+      fprintf(outf,"%lf %lf %lf %lf\n",Wind[sector].evals_K00[p],shanonE,IPR,structE);
   }
   fclose(outf);
 }
