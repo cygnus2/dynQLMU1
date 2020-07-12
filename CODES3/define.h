@@ -162,7 +162,10 @@ void diag_LAPACK(int, std::vector<std::vector<double>>&, std::vector<double>&, s
 void diag_LAPACK_RRR(int, std::vector<std::vector<double>>&, std::vector<double>&, std::vector<double>&);
 void calc_Oflip(int, std::vector<double>&);
 void calc_Oflipt(int);
-void evolveH_ov2(int);
+void evolveH_ov2_INIT0(int);
+void evolveH_ov2_INIT4(int);
+void evolveH_ov3_INIT0(int);
+void evolveH_ov3_INIT4(int);
 void initState(int, int, int*);
 double entanglementEntropy(int,int,std::vector<MKL_INT>&);
 void structuralEntropy(int);
