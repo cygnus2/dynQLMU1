@@ -121,10 +121,13 @@ class WindNo{
     ~WindNo(){
        basisVec.clear();
        rows.clear(); cols.clear(); hamil.clear();
+       Tflag.clear(); Tdgen.clear(); Tbag.clear();
        hamil_K00.clear(); hamil_K0Pi.clear(); hamil_KPi0.clear(); hamil_KPiPi.clear();
        evals_K00.clear(); evals_K0Pi.clear(); evals_KPi0.clear(); evals_KPiPi.clear();
        evecs_K00.clear(); evecs_K0Pi.clear(); evecs_KPi0.clear(); evecs_KPiPi.clear();
        xflip.clear(); nflip.clear();  Ey.clear(); dEy.clear();
+       FPi0.clear();  F0Pi.clear();   FPiPi.clear(); isRep.clear();
+       mom00.clear(); momPi0.clear(); mom0Pi.clear(); momPiPi.clear();
     }
 };
 extern std::vector<WindNo> Wind;

@@ -61,7 +61,7 @@ void diag_LAPACK(int size, std::vector<std::vector<double>>& matrix, std::vector
     /* Print eigenvectors */
     //print_matrix( "Eigenvectors (stored columnwise)", N, N, A, LDA );
 
-    free(A); free(W);
+    free(A); free(W); acopy.clear();
 }
 
 void diag_LAPACK_RRR(int size, std::vector<std::vector<double>>& matrix, std::vector<double>& evals,
@@ -107,6 +107,7 @@ void diag_LAPACK_RRR(int size, std::vector<std::vector<double>>& matrix, std::ve
   if(CHKDIAG) check_eigvecs(N, acopy, evals, evecs);
 
   free(A); free(W); free(Z); free(ISUPPZ);
+  acopy.clear();
 }
 
 /* Auxiliary routine: printing a matrix */

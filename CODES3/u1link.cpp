@@ -72,7 +72,7 @@ int main(){
   std::cout<<"Initial state ="<<INIT<<std::endl;
 
   // decide whether to check the results of the diagonalization
-  CHKDIAG=1;
+  CHKDIAG=0;
 
   /* Initialize nearest neighbours */
   for(i=0;i<=2*DIM;i++){

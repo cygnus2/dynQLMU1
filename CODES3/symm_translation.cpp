@@ -102,8 +102,9 @@ void trans_decompose(int sector){
 
    // print and display statement to check, debug etc
    std::cout<<"No of (kx,ky) sectors="<<Wind[sector].trans_sectors<<std::endl;
-   Wind[sector].disp_Tprop();
-
+   //Wind[sector].disp_Tprop();
+   init.clear(); new1.clear(); new2.clear();
+   phaseSET.clear();
 }
 
 void WindNo::initTflag(){
@@ -235,7 +236,8 @@ void trans_Hamil(int sector){
     fclose(fptr);
   }
 
-  // diagonalize the matrix K00 with a LAPACK routine
+  // diagonalize the matrixes with a LAPACK routine
+
   diag_LAPACK_RRR(Wind[sector].trans_sectors,Wind[sector].hamil_K00,
     Wind[sector].evals_K00,Wind[sector].evecs_K00);
 
@@ -302,6 +304,7 @@ void WindNo::allocate_Kxy(){
    }
    hamil_K00.push_back(myvec);  hamil_K0Pi.push_back(myvec);
    hamil_KPi0.push_back(myvec); hamil_KPiPi.push_back(myvec);
+   myvec.clear();
   }
   //printf("Successful allocation. \n");
   //printf("======================\n");
