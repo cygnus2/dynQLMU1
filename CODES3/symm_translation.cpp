@@ -6,6 +6,7 @@
 #include<algorithm>
 #include<vector>
 #include<iterator>
+#include<chrono>
 
 void print_matrixTbasis(char *str, int, int);
 /* Decompose the Winding Number sector into states connected by translation flags */
@@ -205,24 +206,46 @@ void trans_Hamil(int sector){
   // for e.g. print out the whole matrix for a 2x2 system
   //Wind[sector].check_getH();
 
+  // Get starting timepoint
+  auto start = std::chrono::high_resolution_clock::now();
+
   // construct the hamil_kxy matrix
   for(i=0;i<Wind[sector].nBasis;i++){
      k=Wind[sector].Tflag[i]-1;
      // though the flags start from 1; the indices start from 0
-     for(j=0;j<Wind[sector].nBasis;j++){
+     //for(j=0;j<Wind[sector].nBasis;j++){
+     // off-diagonal elements
+     for(j=i+1;j<Wind[sector].nBasis;j++){
        ele = Wind[sector].getH(i,j);
-       if(ele==0.0) continue;
+       if(ele == 0) continue;
+       //if(ele==0.0) continue;
        l   = Wind[sector].Tflag[j]-1;
        norm= sqrt(Wind[sector].Tdgen[i]*Wind[sector].Tdgen[j])/VOL;
-       Wind[sector].hamil_K00[k][l] +=  ele*norm;
+       Wind[sector].hamil_K00[k][l] +=  2*ele*norm;
        if((Wind[sector].momPi0[k]) && (Wind[sector].momPi0[l]))
-        Wind[sector].hamil_KPi0[k][l] += ele*Wind[sector].FPi0[i]*Wind[sector].FPi0[j]*norm;
+        Wind[sector].hamil_KPi0[k][l] += 2*ele*Wind[sector].FPi0[i]*Wind[sector].FPi0[j]*norm;
        if((Wind[sector].mom0Pi[k]) && (Wind[sector].mom0Pi[l]))
-        Wind[sector].hamil_K0Pi[k][l] += ele*Wind[sector].F0Pi[i]*Wind[sector].F0Pi[j]*norm;
+        Wind[sector].hamil_K0Pi[k][l] += 2*ele*Wind[sector].F0Pi[i]*Wind[sector].F0Pi[j]*norm;
        if((Wind[sector].momPiPi[k]) && (Wind[sector].momPiPi[l]))
-        Wind[sector].hamil_KPiPi[k][l] += ele*Wind[sector].FPiPi[i]*Wind[sector].FPiPi[j]*norm;
+        Wind[sector].hamil_KPiPi[k][l] += 2*ele*Wind[sector].FPiPi[i]*Wind[sector].FPiPi[j]*norm;
    }
+   // diagonal elements
+   ele = Wind[sector].getH(i,i);
+   if(ele == 0) continue;
+   norm= Wind[sector].Tdgen[i]/VOL;
+   Wind[sector].hamil_K00[k][k] +=  ele*norm;
+   if(Wind[sector].momPi0[k])
+      Wind[sector].hamil_KPi0[k][k] += ele*Wind[sector].FPi0[i]*Wind[sector].FPi0[i]*norm;
+   if(Wind[sector].mom0Pi[k])
+    Wind[sector].hamil_K0Pi[k][k] += ele*Wind[sector].F0Pi[i]*Wind[sector].F0Pi[i]*norm;
+   if(Wind[sector].momPiPi[k])
+    Wind[sector].hamil_KPiPi[k][k] += ele*Wind[sector].FPiPi[i]*Wind[sector].FPiPi[i]*norm;
   }
+
+  // Get ending timepoint
+  auto stop = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop-start);
+  std::cout<<"Time taken ="<<duration.count()<< " secs"<<std::endl;
 
   // print matrix in translation basis
   //print_matrixTbasis( "Hamiltonian for (0,0)   sector", sector, 1 );
@@ -269,7 +292,7 @@ void print_matrixTbasis(char *str, int sector, int whichMom){
 
 double WindNo::getH(int p,int q){
    double ele;
-   double row1,row2;
+   int row1,row2;
    int c;
 
    ele=0.0;
