@@ -210,10 +210,10 @@ void trans_Hamil(int sector){
      k=Wind[sector].Tflag[i]-1;
      // though the flags start from 1; the indices start from 0
      for(j=0;j<Wind[sector].nBasis;j++){
-       l   = Wind[sector].Tflag[j]-1;
        ele = Wind[sector].getH(i,j);
+       if(ele==0.0) continue;
+       l   = Wind[sector].Tflag[j]-1;
        norm= sqrt(Wind[sector].Tdgen[i]*Wind[sector].Tdgen[j])/VOL;
-       //if(ele==0.0) continue;
        Wind[sector].hamil_K00[k][l] +=  ele*norm;
        if((Wind[sector].momPi0[k]) && (Wind[sector].momPi0[l]))
         Wind[sector].hamil_KPi0[k][l] += ele*Wind[sector].FPi0[i]*Wind[sector].FPi0[j]*norm;
