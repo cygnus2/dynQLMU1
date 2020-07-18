@@ -245,7 +245,7 @@ void trans_Hamil(int sector){
   // Get ending timepoint
   auto stop = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop-start);
-  std::cout<<"Time taken ="<<duration.count()<< " secs"<<std::endl;
+  std::cout<<"Time taken for Hamiltonian construction in t-basis="<<duration.count()<< " secs"<<std::endl;
 
   // print matrix in translation basis
   //print_matrixTbasis( "Hamiltonian for (0,0)   sector", sector, 1 );
@@ -258,6 +258,11 @@ void trans_Hamil(int sector){
     fptr=fopen("eigencheck.dat","w");
     fclose(fptr);
   }
+
+  // remove memory for the original Hamiltonian which is not needed any more
+  Wind[sector].hamil.clear();
+  Wind[sector].rows.clear();
+  Wind[sector].cols.clear();
 
   // diagonalize the matrixes with a LAPACK routine
 
