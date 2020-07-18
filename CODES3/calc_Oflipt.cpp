@@ -22,10 +22,8 @@ void calc_Oflipt(int sector){
   tsect =  Wind[sector].trans_sectors;
   std::vector<double> alpha00, alphaPiPi, alphaPi0, alpha0Pi;
   std::vector<double> oflip(tsect, 0.0);
-  std::vector<double> cos00(tsect);
-  std::vector<double> cosPiPi(tsect); 
-  std::vector<double> cosPi0(tsect); 
-  std::vector<double> cos0Pi(tsect);
+  std::vector<double> cos00(tsect), cosPiPi(tsect), cosPi0(tsect), cos0Pi(tsect);
+  std::vector<double> sin00(tsect), sinPiPi(tsect), sinPi0(tsect), sin0Pi(tsect);
   double phiRE00, phiIM00, phiREPiPi, phiIMPiPi;
   double phiRE0Pi, phiIM0Pi, phiREPi0, phiIMPi0;
   double oflipt;
@@ -68,15 +66,25 @@ void calc_Oflipt(int sector){
  if(INIT==0){ // for initial condition = 0 with fully flippable plaquettes
   for(t=Ti;t<Tf;t=t+dT){
      oflipt = 0.0;
+     for(std::size_t ii = 0; ii < tsect; ii++){
+        cos00[ii]   = cos(Wind[sector].evals_K00[ii]*t);
+        cosPiPi[ii] = cos(Wind[sector].evals_KPiPi[ii]*t);
+        sin00[ii]   = sin(Wind[sector].evals_K00[ii]*t);
+        sinPiPi[ii] = sin(Wind[sector].evals_KPiPi[ii]*t);
+     }
      for(k=0; k<tsect; k++){
        phiRE00 = 0.0; phiIM00 = 0.0; phiREPiPi=0.0; phiIMPiPi=0.0;
        for(m=0; m<tsect; m++){
          /* contributions from sector (0,0) */
-         phiRE00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*cos(Wind[sector].evals_K00[m]*t);
-         phiIM00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*sin(Wind[sector].evals_K00[m]*t);
+         //phiRE00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*cos(Wind[sector].evals_K00[m]*t);
+         //phiIM00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*sin(Wind[sector].evals_K00[m]*t);
+         phiRE00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*cos00[m];
+         phiIM00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*sin00[m];
          /* contributions from sector (pi,pi) */
-         phiREPiPi += alphaPiPi[m]*INITphasePiPi*Wind[sector].evecs_KPiPi[tsect*m+k]*cos(Wind[sector].evals_KPiPi[m]*t);
-         phiIMPiPi += alphaPiPi[m]*INITphasePiPi*Wind[sector].evecs_KPiPi[tsect*m+k]*sin(Wind[sector].evals_KPiPi[m]*t);
+         //phiREPiPi += alphaPiPi[m]*INITphasePiPi*Wind[sector].evecs_KPiPi[tsect*m+k]*cos(Wind[sector].evals_KPiPi[m]*t);
+         //phiIMPiPi += alphaPiPi[m]*INITphasePiPi*Wind[sector].evecs_KPiPi[tsect*m+k]*sin(Wind[sector].evals_KPiPi[m]*t);
+         phiREPiPi += alphaPiPi[m]*INITphasePiPi*Wind[sector].evecs_KPiPi[tsect*m+k]*cosPiPi[m];
+         phiIMPiPi += alphaPiPi[m]*INITphasePiPi*Wind[sector].evecs_KPiPi[tsect*m+k]*sinPiPi[m];
        }
        oflipt += (phiRE00*phiRE00 +  phiIM00*phiIM00 + phiREPiPi*phiREPiPi + phiIMPiPi*phiIMPiPi)*oflip[k];
      }
@@ -93,6 +101,10 @@ else if(INIT==4){
         cosPiPi[ii] = cos(Wind[sector].evals_KPiPi[ii]*t);
         cosPi0[ii]  = cos(Wind[sector].evals_KPi0[ii]*t);
         cos0Pi[ii]  = cos(Wind[sector].evals_K0Pi[ii]*t);
+        sin00[ii]   = sin(Wind[sector].evals_K00[ii]*t);
+        sinPiPi[ii] = sin(Wind[sector].evals_KPiPi[ii]*t);
+        sinPi0[ii]  = sin(Wind[sector].evals_KPi0[ii]*t);
+        sin0Pi[ii]  = sin(Wind[sector].evals_K0Pi[ii]*t);
      }
      for(k=0; k<tsect; k++){
        phiRE00 = 0.0; phiIM00 = 0.0; phiREPiPi=0.0; phiIMPiPi=0.0;
@@ -100,29 +112,38 @@ else if(INIT==4){
        // off diagonal terms
        for(m=0; m<tsect; m++){
          /* contributions from sector (0,0) */
-         phiRE00 += 2.0*alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*cos00[m];
-         phiIM00 += 2.0*alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*sqrt(1.0-cos00[m]*cos00[m]);
+         phiRE00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*cos00[m];
+         phiIM00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*sin00[m];
+         //phiRE00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*cos(Wind[sector].evals_K00[m]*t);
+         //phiIM00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*sin(Wind[sector].evals_K00[m]*t);
          /* contributions from sector (pi,pi) */
-         phiREPiPi += 2.0*alphaPiPi[m]*INITphasePiPi*Wind[sector].evecs_KPiPi[tsect*m+k]*cosPiPi[m];
-         phiIMPiPi += 2.0*alphaPiPi[m]*INITphasePiPi*Wind[sector].evecs_KPiPi[tsect*m+k]*sqrt(1.0-cosPiPi[m]*cosPiPi[m]);
+         phiREPiPi += alphaPiPi[m]*INITphasePiPi*Wind[sector].evecs_KPiPi[tsect*m+k]*cosPiPi[m];
+         phiIMPiPi += alphaPiPi[m]*INITphasePiPi*Wind[sector].evecs_KPiPi[tsect*m+k]*sinPiPi[m];
+         //phiREPiPi += alphaPiPi[m]*INITphasePiPi*Wind[sector].evecs_KPiPi[tsect*m+k]*cos(Wind[sector].evals_KPiPi[m]*t);
+         //phiIMPiPi += alphaPiPi[m]*INITphasePiPi*Wind[sector].evecs_KPiPi[tsect*m+k]*sin(Wind[sector].evals_KPiPi[m]*t);
          /* contributions from sector (pi,0) + (0,pi) */
-         phiREPi0 += 2.0*alphaPi0[m]*INITphasePi0*Wind[sector].evecs_KPi0[tsect*m+k]*cosPi0[m];
-         phiIMPi0 += 2.0*alphaPi0[m]*INITphasePi0*Wind[sector].evecs_KPi0[tsect*m+k]*sqrt(1.0-cosPi0[m]*cosPi0[m]);
-         phiRE0Pi += 2.0*alpha0Pi[m]*INITphase0Pi*Wind[sector].evecs_K0Pi[tsect*m+k]*cos0Pi[m];
-         phiIM0Pi += 2.0*alpha0Pi[m]*INITphase0Pi*Wind[sector].evecs_K0Pi[tsect*m+k]*sqrt(1.0-cos0Pi[m]*cos0Pi[m]);
+         phiREPi0 += alphaPi0[m]*INITphasePi0*Wind[sector].evecs_KPi0[tsect*m+k]*cosPi0[m];
+         phiIMPi0 += alphaPi0[m]*INITphasePi0*Wind[sector].evecs_KPi0[tsect*m+k]*sinPi0[m];
+         phiRE0Pi += alpha0Pi[m]*INITphase0Pi*Wind[sector].evecs_K0Pi[tsect*m+k]*cos0Pi[m];
+         phiIM0Pi += alpha0Pi[m]*INITphase0Pi*Wind[sector].evecs_K0Pi[tsect*m+k]*sin0Pi[m];
+         //phiREPi0 += alphaPi0[m]*INITphasePi0*Wind[sector].evecs_KPi0[tsect*m+k]*cos(Wind[sector].evals_KPi0[m]*t);
+         //phiIMPi0 += alphaPi0[m]*INITphasePi0*Wind[sector].evecs_KPi0[tsect*m+k]*sin(Wind[sector].evals_KPi0[m]*t);
+         //phiRE0Pi += alpha0Pi[m]*INITphase0Pi*Wind[sector].evecs_K0Pi[tsect*m+k]*cos(Wind[sector].evals_K0Pi[m]*t);
+         //phiIM0Pi += alpha0Pi[m]*INITphase0Pi*Wind[sector].evecs_K0Pi[tsect*m+k]*sin(Wind[sector].evals_K0Pi[m]*t);
        }
        // diagonal terms
+       m=k;
        /* contributions from sector (0,0) */
-       //phiRE00 += alpha00[k]*Wind[sector].evecs_K00[tsect*k+k]*cos00[k];
-       //phiIM00 += alpha00[k]*Wind[sector].evecs_K00[tsect*k+k]*sqrt(1.0-cos00[k]*cos00[k]);
+       phiRE00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*cos00[m];
+       phiIM00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*sin00[m];
        /* contributions from sector (pi,pi) */
-       //phiREPiPi += alphaPiPi[k]*INITphasePiPi*Wind[sector].evecs_KPiPi[tsect*k+k]*cosPiPi[k];
-       //phiIMPiPi += alphaPiPi[k]*INITphasePiPi*Wind[sector].evecs_KPiPi[tsect*k+k]*sqrt(1.0-cosPiPi[k]*cosPiPi[k]);
+       phiREPiPi += alphaPiPi[m]*INITphasePiPi*Wind[sector].evecs_KPiPi[tsect*m+k]*cosPiPi[m];
+       phiIMPiPi += alphaPiPi[m]*INITphasePiPi*Wind[sector].evecs_KPiPi[tsect*m+k]*sinPiPi[m];
        /* contributions from sector (pi,0) + (0,pi) */
-       //phiREPi0 += alphaPi0[k]*INITphasePi0*Wind[sector].evecs_KPi0[tsect*k+k]*cosPi0[k];
-       //phiIMPi0 += alphaPi0[k]*INITphasePi0*Wind[sector].evecs_KPi0[tsect*k+k]*sqrt(1.0-cosPi0[k]*cosPi0[k]);
-       //phiRE0Pi += alpha0Pi[k]*INITphase0Pi*Wind[sector].evecs_K0Pi[tsect*k+k]*cos0Pi[k];
-       //phiIM0Pi += alpha0Pi[k]*INITphase0Pi*Wind[sector].evecs_K0Pi[tsect*k+k]*sqrt(1.0-cos0Pi[k]*cos0Pi[k]);
+       phiREPi0 += alphaPi0[m]*INITphasePi0*Wind[sector].evecs_KPi0[tsect*m+k]*cosPi0[m];
+       phiIMPi0 += alphaPi0[m]*INITphasePi0*Wind[sector].evecs_KPi0[tsect*m+k]*sinPi0[m];
+       phiRE0Pi += alpha0Pi[m]*INITphase0Pi*Wind[sector].evecs_K0Pi[tsect*m+k]*cos0Pi[m];
+       phiIM0Pi += alpha0Pi[m]*INITphase0Pi*Wind[sector].evecs_K0Pi[tsect*m+k]*sin0Pi[m];
 
        oflipt += (phiRE00*phiRE00 +  phiIM00*phiIM00 + phiREPiPi*phiREPiPi + phiIMPiPi*phiIMPiPi +
          phiREPi0*phiREPi0 + phiIMPi0*phiIMPi0 + phiRE0Pi*phiRE0Pi + phiIM0Pi*phiIM0Pi)*oflip[k];
@@ -143,6 +164,8 @@ else if(INIT==4){
  /* clear memory */
  alpha00.clear(); alphaPiPi.clear(); alpha0Pi.clear(); alphaPi0.clear();
  oflip.clear();
+ cos00.clear(); cosPiPi.clear(); cosPi0.clear(); cos0Pi.clear();
+ sin00.clear(); sinPiPi.clear(); sinPi0.clear(); sin0Pi.clear();
 }
 
 /* calculate Oflip in the chosen winding sector for the different momenta  */

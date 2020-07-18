@@ -18,6 +18,7 @@ void evolveH_ov2_INIT0(int sector){
   sizet =  Wind[sector].nBasis;
   tsect =  Wind[sector].trans_sectors;
   std::vector<double> alpha00, alphaPiPi;
+  std::vector<double> cos00(tsect), cosPiPi(tsect), sin00(tsect), sinPiPi(tsect);
   double phiRE00, phiIM00, phiREPiPi, phiIMPiPi;
   double sum1, sum2, norm;
   FILE *fptr;
@@ -62,15 +63,25 @@ void evolveH_ov2_INIT0(int sector){
   for(t=Ti; t<Tf; t=t+dT){
       // initialize the flux profile
       fprof.assign(VOL, 0.0);
+      for(std::size_t ii = 0; ii < tsect; ii++){
+         cos00[ii]   = cos(Wind[sector].evals_K00[ii]*t);
+         cosPiPi[ii] = cos(Wind[sector].evals_KPiPi[ii]*t);
+         sin00[ii]   = sin(Wind[sector].evals_K00[ii]*t);
+         sinPiPi[ii] = sin(Wind[sector].evals_KPiPi[ii]*t);
+      }
       for(k=0; k<tsect; k++){
         phiRE00 = 0.0; phiIM00 = 0.0; phiREPiPi=0.0; phiIMPiPi=0.0;
         for(m=0; m<tsect; m++){
           /* contributions from sector (0,0) */
-          phiRE00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*cos(Wind[sector].evals_K00[m]*t);
-          phiIM00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*sin(Wind[sector].evals_K00[m]*t);
+          phiRE00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*cos00[m];
+          phiIM00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*sin00[m];
+          //phiRE00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*cos(Wind[sector].evals_K00[m]*t);
+          //phiIM00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*sin(Wind[sector].evals_K00[m]*t);
           /* contributions from sector (pi,pi) */
-          phiREPiPi += alphaPiPi[m]*Wind[sector].evecs_KPiPi[tsect*m+k]*cos(Wind[sector].evals_KPiPi[m]*t);
-          phiIMPiPi += alphaPiPi[m]*Wind[sector].evecs_KPiPi[tsect*m+k]*sin(Wind[sector].evals_KPiPi[m]*t);
+          phiREPiPi += alphaPiPi[m]*Wind[sector].evecs_KPiPi[tsect*m+k]*cosPiPi[m];
+          phiIMPiPi += alphaPiPi[m]*Wind[sector].evecs_KPiPi[tsect*m+k]*sinPiPi[m];
+          //phiREPiPi += alphaPiPi[m]*Wind[sector].evecs_KPiPi[tsect*m+k]*cos(Wind[sector].evals_KPiPi[m]*t);
+          //phiIMPiPi += alphaPiPi[m]*Wind[sector].evecs_KPiPi[tsect*m+k]*sin(Wind[sector].evals_KPiPi[m]*t);
         }
         sum1 = (phiRE00*phiRE00 +  phiIM00*phiIM00 + phiREPiPi*phiREPiPi + phiIMPiPi*phiIMPiPi)*inorm*inorm;
         sum2 = 2*(phiRE00*phiREPiPi + phiIM00*phiIMPiPi)*inorm*inorm*INITphasePiPi;
@@ -86,6 +97,7 @@ void evolveH_ov2_INIT0(int sector){
   /* free memory */
   alpha00.clear(); alphaPiPi.clear(); fprof.clear();
   flipx00.clear(); flipx01.clear();
+  cos00.clear(); sin00.clear(); cosPiPi.clear(); sinPiPi.clear();
 }
 
 
@@ -97,6 +109,8 @@ void evolveH_ov2_INIT4(int sector){
   sizet =  Wind[sector].nBasis;
   tsect =  Wind[sector].trans_sectors;
   std::vector<double> alpha00, alphaPiPi, alphaPi0, alpha0Pi;
+  std::vector<double> cos00(tsect), cosPiPi(tsect), cosPi0(tsect), cos0Pi(tsect);
+  std::vector<double> sin00(tsect), sinPiPi(tsect), sinPi0(tsect), sin0Pi(tsect);
   double phiRE00, phiIM00, phiREPiPi, phiIMPiPi;
   double phiRE0Pi, phiIM0Pi, phiREPi0, phiIMPi0;
   double sum1, sum2, sum3, sum4, sum5, sum6, sum7, norm;
@@ -144,22 +158,40 @@ void evolveH_ov2_INIT4(int sector){
   for(t=Ti; t<Tf; t=t+dT){
       // initialize the flux profile
       fprof.assign(VOL, 0.0);
+      for(std::size_t ii = 0; ii < tsect; ii++){
+         cos00[ii]   = cos(Wind[sector].evals_K00[ii]*t);
+         cosPiPi[ii] = cos(Wind[sector].evals_KPiPi[ii]*t);
+         cosPi0[ii]  = cos(Wind[sector].evals_KPi0[ii]*t);
+         cos0Pi[ii]  = cos(Wind[sector].evals_K0Pi[ii]*t);
+         sin00[ii]   = sin(Wind[sector].evals_K00[ii]*t);
+         sinPiPi[ii] = sin(Wind[sector].evals_KPiPi[ii]*t);
+         sinPi0[ii]  = sin(Wind[sector].evals_KPi0[ii]*t);
+         sin0Pi[ii]  = sin(Wind[sector].evals_K0Pi[ii]*t);
+      }
       for(k=0; k<tsect; k++){
         phiRE00=0.0; phiIM00=0.0; phiREPiPi=0.0; phiIMPiPi=0.0;
         phiREPi0=0.0; phiIMPi0=0.0; phiRE0Pi=0.0; phiIM0Pi=0.0;
         for(m=0; m<tsect; m++){
           /* contributions from sector (0,0) */
-          phiRE00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*cos(Wind[sector].evals_K00[m]*t);
-          phiIM00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*sin(Wind[sector].evals_K00[m]*t);
+          phiRE00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*cos00[m];
+          phiIM00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*sin00[m];
+          //phiRE00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*cos(Wind[sector].evals_K00[m]*t);
+          //phiIM00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*sin(Wind[sector].evals_K00[m]*t);
           /* contributions from sector (pi,pi) */
-          phiREPiPi += alphaPiPi[m]*Wind[sector].evecs_KPiPi[tsect*m+k]*cos(Wind[sector].evals_KPiPi[m]*t);
-          phiIMPiPi += alphaPiPi[m]*Wind[sector].evecs_KPiPi[tsect*m+k]*sin(Wind[sector].evals_KPiPi[m]*t);
+          phiREPiPi += alphaPiPi[m]*Wind[sector].evecs_KPiPi[tsect*m+k]*cosPiPi[m];
+          phiIMPiPi += alphaPiPi[m]*Wind[sector].evecs_KPiPi[tsect*m+k]*sinPiPi[m];
+          //phiREPiPi += alphaPiPi[m]*Wind[sector].evecs_KPiPi[tsect*m+k]*cos(Wind[sector].evals_KPiPi[m]*t);
+          //phiIMPiPi += alphaPiPi[m]*Wind[sector].evecs_KPiPi[tsect*m+k]*sin(Wind[sector].evals_KPiPi[m]*t);
           /* contributions from sector (pi,0) */
-          phiREPi0 += alphaPi0[m]*Wind[sector].evecs_KPi0[tsect*m+k]*cos(Wind[sector].evals_KPi0[m]*t);
-          phiIMPi0 += alphaPi0[m]*Wind[sector].evecs_KPi0[tsect*m+k]*sin(Wind[sector].evals_KPi0[m]*t);
+          phiREPi0 += alphaPi0[m]*Wind[sector].evecs_KPi0[tsect*m+k]*cosPi0[m];
+          phiIMPi0 += alphaPi0[m]*Wind[sector].evecs_KPi0[tsect*m+k]*sinPi0[m];
+          //phiREPi0 += alphaPi0[m]*Wind[sector].evecs_KPi0[tsect*m+k]*cos(Wind[sector].evals_KPi0[m]*t);
+          //phiIMPi0 += alphaPi0[m]*Wind[sector].evecs_KPi0[tsect*m+k]*sin(Wind[sector].evals_KPi0[m]*t);
           /* contributions from sector (0,pi) */
-          phiRE0Pi += alpha0Pi[m]*Wind[sector].evecs_K0Pi[tsect*m+k]*cos(Wind[sector].evals_K0Pi[m]*t);
-          phiIM0Pi += alpha0Pi[m]*Wind[sector].evecs_K0Pi[tsect*m+k]*sin(Wind[sector].evals_K0Pi[m]*t);
+          phiRE0Pi += alpha0Pi[m]*Wind[sector].evecs_K0Pi[tsect*m+k]*cos0Pi[m];
+          phiIM0Pi += alpha0Pi[m]*Wind[sector].evecs_K0Pi[tsect*m+k]*sin0Pi[m];
+          //phiRE0Pi += alpha0Pi[m]*Wind[sector].evecs_K0Pi[tsect*m+k]*cos(Wind[sector].evals_K0Pi[m]*t);
+          //phiIM0Pi += alpha0Pi[m]*Wind[sector].evecs_K0Pi[tsect*m+k]*sin(Wind[sector].evals_K0Pi[m]*t);
         }
         sum1 = (phiRE00*phiRE00 +  phiIM00*phiIM00 + phiREPiPi*phiREPiPi + phiIMPiPi*phiIMPiPi
              +  phiREPi0*phiREPi0 + phiIMPi0*phiIMPi0 + phiRE0Pi*phiRE0Pi + phiIM0Pi*phiIM0Pi)*inorm*inorm;
@@ -184,4 +216,6 @@ void evolveH_ov2_INIT4(int sector){
   alpha00.clear(); alphaPiPi.clear(); alphaPi0.clear(); alpha0Pi.clear();
   flipx00.clear(); flipx01.clear(); flipx02.clear(); flipx03.clear();
   flipx12.clear(); flipx13.clear(); flipx23.clear();
+  cos00.clear(); cosPiPi.clear(); cosPi0.clear(); cos0Pi.clear();
+  sin00.clear(); sinPiPi.clear(); sinPi0.clear(); sin0Pi.clear();
 }
