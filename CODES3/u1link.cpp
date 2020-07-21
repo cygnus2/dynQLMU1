@@ -7,9 +7,6 @@
 #include<vector>
 #include<iterator>
 
-// push these variable definitions to evolveEent.cpp
-unsigned int LEN_A,LEN_B,VOL_A,VOL_B;
-//unsigned int DA,DB,NCHI;
 
 /* according to the rules of cpp, the variables are declared here
  * and also in the header file as extern such that they are avl to
@@ -102,11 +99,12 @@ int main(){
   constH(sector);
 
   /* breakup into translation sectors */
-  // presently this only works for (kx,ky)=(0,0)
   trans_decompose(sector);
 
-  /* Hamiltonian in the (kx,ky)=(0,0) sector */
-  trans_Hamil(sector);
+  /* If INIT==0, Hamiltonian in the (kx,ky)=(0,0) & (Pi,Pi) sectors are constructed */
+  /* If INIT==4, H in sectors (0,0), (Pi,Pi), (Pi,0), (0,Pi) are constructed        */
+  if(INIT==0)      trans_Hamil_INIT0(sector);
+  else if(INIT==4) trans_Hamil_INIT4(sector);
 
   INITq = -1;
   // initialize the starting state (once and for all the routines)
@@ -135,12 +133,8 @@ int main(){
   if(INIT==0)      evolveH_ov3_INIT0(sector);
   else if(INIT==4) evolveH_ov3_INIT4(sector);
 
-
   // calculate the Entanglement Entropy for the states
-  //evolve_Eent(sector);
-
-  // calculate the structural entropy
-  //structuralEntropy(sector);
+  //entanglementEnt(sector);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }

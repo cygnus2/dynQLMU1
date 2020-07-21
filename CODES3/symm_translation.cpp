@@ -188,19 +188,21 @@ void WindNo::disp_Tprop(){
    }
 }
 
-void trans_Hamil(int sector){
+void trans_Hamil_INIT0(int sector){
   extern void diag_LAPACK(int,std::vector<std::vector<double>>&,std::vector<double>&,
       std::vector<double>&);
-  int i,j,k,l;
+  //int i,j,
+  int k,l;
   double ele, norm;
   FILE *fptr;
 
   std::cout<<"=================================================================================="<<std::endl;
-  std::cout<<"Constructing the Hamiltonian in the (kx,ky)=(0,0); (Pi,0); (0,Pi); (Pi,Pi) sectors."<<std::endl;
+  std::cout<<"Constructing the Hamiltonian in the (kx,ky)=(0,0); (Pi,Pi) sectors."<<std::endl;
   std::cout<<"Dimension of matrix = "<<Wind[sector].trans_sectors<<std::endl;
+  std::cout<<"Value of INIT flag ="<<INIT<<std::endl;
 
   // allocate space for hamil_Kxy
-  Wind[sector].allocate_Kxy();
+  Wind[sector].allocate_Kxy(INIT);
 
   // check the extraction of the Hamiltonian
   // for e.g. print out the whole matrix for a 2x2 system
@@ -210,12 +212,91 @@ void trans_Hamil(int sector){
   auto start = std::chrono::high_resolution_clock::now();
 
   // construct the hamil_kxy matrix
-  for(i=0;i<Wind[sector].nBasis;i++){
+  for(std::size_t i=0;i<Wind[sector].nBasis;i++){
+     k=Wind[sector].Tflag[i]-1;
+     // off-diagonal elements
+     for(std::size_t j=i+1;j<Wind[sector].nBasis;j++){
+       ele = Wind[sector].getH(i,j);
+       if(ele == 0) continue;
+       //if(ele==0.0) continue;
+       l   = Wind[sector].Tflag[j]-1;
+       norm= sqrt(Wind[sector].Tdgen[i]*Wind[sector].Tdgen[j])/VOL;
+       Wind[sector].hamil_K00[k][l] +=  2*ele*norm;
+       if((Wind[sector].momPiPi[k]) && (Wind[sector].momPiPi[l]))
+        Wind[sector].hamil_KPiPi[k][l] += 2*ele*Wind[sector].FPiPi[i]*Wind[sector].FPiPi[j]*norm;
+   }
+   // diagonal elements
+   ele = Wind[sector].getH(i,i);
+   if(ele == 0) continue;
+   norm= Wind[sector].Tdgen[i]/VOL;
+   Wind[sector].hamil_K00[k][k] +=  ele*norm;
+   if(Wind[sector].momPiPi[k])
+    Wind[sector].hamil_KPiPi[k][k] += ele*Wind[sector].FPiPi[i]*Wind[sector].FPiPi[i]*norm;
+  }
+
+  // Get ending timepoint
+  auto stop = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop-start);
+  std::cout<<"Time taken for Hamiltonian construction in t-basis="<<duration.count()<< " secs"<<std::endl;
+
+  // print matrix in translation basis
+  //print_matrixTbasis( "Hamiltonian for (0,0)   sector", sector, 1 );
+  //print_matrixTbasis( "Hamiltonian for (Pi,0)  sector", sector, 2 );
+  //print_matrixTbasis( "Hamiltonian for (0,Pi)  sector", sector, 3 );
+  //print_matrixTbasis( "Hamiltonian for (Pi,Pi) sector", sector, 4 );
+
+  // clear file
+  if(CHKDIAG){
+    fptr=fopen("eigencheck.dat","w");
+    fclose(fptr);
+  }
+
+  // remove memory for the original Hamiltonian which is not needed any more
+  Wind[sector].hamil.clear();
+  Wind[sector].rows.clear();
+  Wind[sector].cols.clear();
+
+  // diagonalize the matrixes with a LAPACK routine
+
+  diag_LAPACK_RRR(Wind[sector].trans_sectors,Wind[sector].hamil_K00,
+    Wind[sector].evals_K00,Wind[sector].evecs_K00);
+
+  diag_LAPACK_RRR(Wind[sector].trans_sectors,Wind[sector].hamil_KPiPi,
+    Wind[sector].evals_KPiPi,Wind[sector].evecs_KPiPi);
+
+  // deallocate space for hamil_Kxy
+  Wind[sector].deallocate_Kxy(INIT);
+}
+
+void trans_Hamil_INIT4(int sector){
+  extern void diag_LAPACK(int,std::vector<std::vector<double>>&,std::vector<double>&,
+      std::vector<double>&);
+  //int i,j,
+  int k,l;
+  double ele, norm;
+  FILE *fptr;
+
+  std::cout<<"=================================================================================="<<std::endl;
+  std::cout<<"Constructing the Hamiltonian in the (kx,ky)=(0,0); (Pi,0); (0,Pi); (Pi,Pi) sectors."<<std::endl;
+  std::cout<<"Dimension of matrix = "<<Wind[sector].trans_sectors<<std::endl;
+
+  // allocate space for hamil_Kxy
+  Wind[sector].allocate_Kxy(INIT);
+
+  // check the extraction of the Hamiltonian
+  // for e.g. print out the whole matrix for a 2x2 system
+  //Wind[sector].check_getH();
+
+  // Get starting timepoint
+  auto start = std::chrono::high_resolution_clock::now();
+
+  // construct the hamil_kxy matrix
+  for(std::size_t i=0;i<Wind[sector].nBasis;i++){
      k=Wind[sector].Tflag[i]-1;
      // though the flags start from 1; the indices start from 0
      //for(j=0;j<Wind[sector].nBasis;j++){
      // off-diagonal elements
-     for(j=i+1;j<Wind[sector].nBasis;j++){
+     for(std::size_t j=i+1;j<Wind[sector].nBasis;j++){
        ele = Wind[sector].getH(i,j);
        if(ele == 0) continue;
        //if(ele==0.0) continue;
@@ -278,6 +359,8 @@ void trans_Hamil(int sector){
   diag_LAPACK_RRR(Wind[sector].trans_sectors,Wind[sector].hamil_KPiPi,
     Wind[sector].evals_KPiPi,Wind[sector].evecs_KPiPi);
 
+  // deallocate space for hamil_Kxy
+  Wind[sector].deallocate_Kxy(INIT);
 }
 
 // print the Hamiltonian in the translation state basis
@@ -298,11 +381,11 @@ void print_matrixTbasis(char *str, int sector, int whichMom){
 double WindNo::getH(int p,int q){
    double ele;
    int row1,row2;
-   int c;
+   //int c;
 
    ele=0.0;
    row1 = rows[p]-1; row2 = rows[p+1]-1;
-   for(c=row1;c<row2;c++){
+   for(std::size_t c=row1;c<row2;c++){
      if((q+1)==cols[c]) { ele=hamil[c]; break; }
    }
    return ele;
@@ -322,20 +405,52 @@ void WindNo::check_getH(){
   }
 }
 
-void WindNo::allocate_Kxy(){
-  unsigned int i,j;
+void WindNo::allocate_Kxy(int initflag){
+  std::size_t i,j;
   std::vector<double> myvec;
   if(trans_sectors <= 0){ printf("Error in allocation. \n"); exit(0); }
-  for(i=0; i<trans_sectors; i++){
-  for(j=0; j<trans_sectors; j++){
-     myvec.push_back(0.0);
-   }
-   hamil_K00.push_back(myvec);  hamil_K0Pi.push_back(myvec);
-   hamil_KPi0.push_back(myvec); hamil_KPiPi.push_back(myvec);
-   myvec.clear();
+  if(initflag==0){
+    for(i=0; i<trans_sectors; i++){
+    for(j=0; j<trans_sectors; j++){
+       myvec.push_back(0.0);
+    }
+    hamil_K00.push_back(myvec);  hamil_KPiPi.push_back(myvec);
+    myvec.clear();
+    }
+  }
+  else if(initflag==4){
+    for(i=0; i<trans_sectors; i++){
+    for(j=0; j<trans_sectors; j++){
+       myvec.push_back(0.0);
+    }
+    hamil_K00.push_back(myvec);  hamil_K0Pi.push_back(myvec);
+    hamil_KPi0.push_back(myvec); hamil_KPiPi.push_back(myvec);
+    myvec.clear();
+    }
+  }
+  else{
+    std::cout<<"Wrong flag here. Aborting. "<<std::endl;
+    exit(0);
   }
   //printf("Successful allocation. \n");
   //printf("======================\n");
+}
+
+void WindNo::deallocate_Kxy(int initflag){
+  if(initflag==0){
+    hamil_K00.clear();
+    hamil_KPiPi.clear();
+  }
+  else if(initflag==4){
+    hamil_K00.clear();
+    hamil_KPiPi.clear();
+    hamil_KPi0.clear();
+    hamil_K0Pi.clear();
+  }
+  else{
+    std::cout<<"Wrong flag here. Aborting. "<<std::endl;
+    exit(0);
+  }
 }
 
 void WindNo::tbag_count(){

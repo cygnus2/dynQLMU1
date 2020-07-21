@@ -131,20 +131,6 @@ else if(INIT==4){
          //phiRE0Pi += alpha0Pi[m]*INITphase0Pi*Wind[sector].evecs_K0Pi[tsect*m+k]*cos(Wind[sector].evals_K0Pi[m]*t);
          //phiIM0Pi += alpha0Pi[m]*INITphase0Pi*Wind[sector].evecs_K0Pi[tsect*m+k]*sin(Wind[sector].evals_K0Pi[m]*t);
        }
-       // diagonal terms
-       m=k;
-       /* contributions from sector (0,0) */
-       phiRE00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*cos00[m];
-       phiIM00 += alpha00[m]*Wind[sector].evecs_K00[tsect*m+k]*sin00[m];
-       /* contributions from sector (pi,pi) */
-       phiREPiPi += alphaPiPi[m]*INITphasePiPi*Wind[sector].evecs_KPiPi[tsect*m+k]*cosPiPi[m];
-       phiIMPiPi += alphaPiPi[m]*INITphasePiPi*Wind[sector].evecs_KPiPi[tsect*m+k]*sinPiPi[m];
-       /* contributions from sector (pi,0) + (0,pi) */
-       phiREPi0 += alphaPi0[m]*INITphasePi0*Wind[sector].evecs_KPi0[tsect*m+k]*cosPi0[m];
-       phiIMPi0 += alphaPi0[m]*INITphasePi0*Wind[sector].evecs_KPi0[tsect*m+k]*sinPi0[m];
-       phiRE0Pi += alpha0Pi[m]*INITphase0Pi*Wind[sector].evecs_K0Pi[tsect*m+k]*cos0Pi[m];
-       phiIM0Pi += alpha0Pi[m]*INITphase0Pi*Wind[sector].evecs_K0Pi[tsect*m+k]*sin0Pi[m];
-
        oflipt += (phiRE00*phiRE00 +  phiIM00*phiIM00 + phiREPiPi*phiREPiPi + phiIMPiPi*phiIMPiPi +
          phiREPi0*phiREPi0 + phiIMPi0*phiIMPi0 + phiRE0Pi*phiRE0Pi + phiIM0Pi*phiIM0Pi)*oflip[k];
      }

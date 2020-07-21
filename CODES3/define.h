@@ -74,7 +74,8 @@ class WindNo{
     std::vector<std::vector<double>> hamil_K0Pi;
     std::vector<std::vector<double>> hamil_KPiPi;
 
-    void allocate_Kxy();
+    void allocate_Kxy(int);
+    void deallocate_Kxy(int);
 
     // eigenvalues and eigenvectors for the Hamiltonians in each of the four
     // momenta sectors
@@ -133,26 +134,16 @@ class WindNo{
 extern std::vector<WindNo> Wind;
 
 // basis for subsystems A and B
-extern std::vector<std::vector<bool>> eA;
-extern std::vector<std::vector<bool>> eB;
+//extern std::vector<std::vector<bool>> eA;
+//extern std::vector<std::vector<bool>> eB;
 // LEN_A, LEN_B are the sizes of subsystems A and B
 // DA and DB are the respective Hilbert spaces
 extern unsigned int LEN_A,LEN_B,VOL_A,VOL_B;
 extern unsigned int DA, DB;
 
-// Schmidt matrix and decomposed SVD
-extern double sel_eval;
-extern std::vector<double> sel_evec;
-extern double shanonE, IPR, structE;
-
 // functions to create the basis for subsystems A & B
 extern void createBasis(int);
 extern double schmidtDecom(std::vector<double>&, int, std::vector<MKL_INT>&);
-extern double schmidtDecomRT(std::vector<double>&, std::vector<double>&,int, std::vector<MKL_INT>&);
-
-//DEL extern void schmidtDecom(std::vector<double>&, std::vector<std::vector<bool>>&, std::vector<std::vector<bool>>&,int);
-//DEL extern void printvec(std::vector<double>&);
-
 
 /* routines */
 void initneighbor(void);
@@ -160,7 +151,8 @@ void conststates(void);
 void constH(int);
 void winding_no_decompose(void);
 void trans_decompose(int);
-void trans_Hamil(int);
+void trans_Hamil_INIT0(int);
+void trans_Hamil_INIT4(int);
 void diag_LAPACK(int, std::vector<std::vector<double>>&, std::vector<double>&, std::vector<double>&);
 void diag_LAPACK_RRR(int, std::vector<std::vector<double>>&, std::vector<double>&, std::vector<double>&);
 void calc_Oflip(int, std::vector<double>&);
@@ -170,6 +162,5 @@ void evolveH_ov2_INIT4(int);
 void evolveH_ov3_INIT0(int);
 void evolveH_ov3_INIT4(int);
 void initState(int, int, int*);
-double entanglementEntropy(int,int,std::vector<MKL_INT>&);
-void structuralEntropy(int);
+void entanglementEnt(int);
 #endif
