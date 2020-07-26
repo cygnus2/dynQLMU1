@@ -18,7 +18,7 @@ extern void patch(std::vector<bool>&, std::vector<bool>&, std::vector<bool>&);
 extern int checkGL2(std::vector<bool>&);
 extern void print_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda );
 extern void createLookupTable(int, MKL_INT, MKL_INT, std::vector<MKL_INT>&);
-extern double schmidtDecom(std::vector<double>&, int, std::vector<MKL_INT>&);
+extern double schmidtDecom(std::vector<double>&, int, std::vector<MKL_INT>&, size_t);
 
 // variables used in this set of functions
 unsigned int LEN_A,LEN_B,VOL_A,VOL_B;
@@ -29,16 +29,18 @@ std::vector<std::vector<bool>> eB;
 // entanglement Entropy for the eigenvector
 double EE;
 
-void entanglementEnt(int sector){
+void entanglementEnt_INIT0(int sector){
   int p,i;
-  int sizet;
-  FILE *outf;
+  int tsect;
+  FILE *outf1, *outf2;
   // eigenvector and eigenvalue to calculate EE
-  double sel_eval;
-  std::vector<double> sel_evec;
+  double sel_eval00, sel_evalPiPi;
+  std::vector<double> sel_evec00, sel_evecPiPi;
+  // overlap with the initial state
+  std::vector<double> alpha00, alphaPiPi;
 
 
-  sizet = Wind[sector].trans_sectors;
+  tsect = Wind[sector].trans_sectors;
   // this stores which subsystem states map to states of the full system
   std::vector<MKL_INT> sub2main;
 
@@ -49,27 +51,121 @@ void entanglementEnt(int sector){
   sub2main.assign(DA*DB, -5); // negative initial value
   createLookupTable(sector,DA,DB,sub2main);
 
-  outf = fopen("EntE.dat","w");
-  fprintf(outf,"# Entropy of Entanglement as a function of the eigenvalues for LA = %d\n",LEN_A);
-  fprintf(outf,"# Eigenvalues  Entanglement Entropy \n");
+  // < w_k | IN >; k-th eigenvector; IN=initial state; details about initial state
+  for(p=0; p<tsect; p++){
+       alpha00.push_back(Wind[sector].evecs_K00[p*tsect+INITbag]*inorm);
+       alphaPiPi.push_back(Wind[sector].evecs_KPiPi[p*tsect+INITbag]*inorm);
+  }
+
+  outf1 = fopen("EntE00.dat","w");
+  outf2 = fopen("EntEPiPi.dat","w");
+  fprintf(outf1,"# Entropy of Entanglement as a function of the eigenvalues for LA = %d\n",LEN_A);
+  fprintf(outf1,"# Eigenvalues  Entanglement Entropy  Overlap_w_InitC\n");
+  fprintf(outf2,"# Entropy of Entanglement as a function of the eigenvalues for LA = %d\n",LEN_A);
+  fprintf(outf2,"# Eigenvalues  Entanglement Entropy  Overlap_w_InitC\n");
 
   // Calculate the EE for each of the eigenstates
-  for(p=0; p<sizet; p++){
+  for(p=0; p<tsect; p++){
     // initialize the state and the entropy
-    sel_evec.clear(); EE = -100.0;
-    sel_eval = Wind[sector].evals_K00[p];
+    sel_evec00.clear(); sel_evecPiPi.clear(); EE = -100.0;
+    sel_eval00  = Wind[sector].evals_K00[p];
+    sel_evalPiPi= Wind[sector].evals_KPiPi[p];
     //sel_evec.assign(Wind[sector].evecs_K00[p*sizet], Wind[sector].evecs_K00[(p+1)*sizet-1]);
-    for(i=0; i < sizet; i++){
-       sel_evec.push_back(Wind[sector].evecs_K00[p*sizet + i]);
+    for(i=0; i < tsect; i++){
+       sel_evec00.push_back(Wind[sector].evecs_K00[p*tsect + i]);
+       sel_evecPiPi.push_back(Wind[sector].evecs_KPiPi[p*tsect + i]);
     }
-    std::cout<<"Going to do Schmidt decompose eigenvector = "<< p << std::endl;
-    std::cout<<"Size of the vector = "<<int(sel_evec.size())<<std::endl;
+    //std::cout<<"Going to do Schmidt decompose eigenvector = "<< p << std::endl;
+    //std::cout<<"Size of the vector = "<<int(sel_evec.size())<<std::endl;
     //printvec(sel_evec);
-    EE = schmidtDecom(sel_evec,sector,sub2main);
-    // write to file
-    fprintf(outf,"%lf %lf\n",sel_eval,EE);
+    EE = schmidtDecom(sel_evec00,sector,sub2main,0);
+    fprintf(outf1,"%.12lf %.12lf %.12lf\n",sel_eval00,EE,alpha00[p]*alpha00[p]);
+    EE = schmidtDecom(sel_evecPiPi,sector,sub2main,1);
+    fprintf(outf2,"%.12lf %.12lf %.12lf\n",sel_evalPiPi,EE,alphaPiPi[p]*alphaPiPi[p]);
   }
-  fclose(outf);
+  fclose(outf1);
+  fclose(outf2);
+  // free memory from the spin basis
+  eA.clear();
+  eB.clear();
+}
+
+void entanglementEnt_INIT4(int sector){
+  int p,i;
+  int tsect;
+  FILE *outf1, *outf2, *outf3, *outf4;
+  // eigenvector and eigenvalue to calculate EE
+  double sel_eval00, sel_evalPiPi, sel_evalPi0, sel_eval0Pi;
+  std::vector<double> sel_evec00, sel_evecPiPi;
+  std::vector<double> sel_evecPi0, sel_evec0Pi;
+  // overlap with the initial state
+  std::vector<double> alpha00, alphaPiPi;
+  std::vector<double> alphaPi0, alpha0Pi;
+
+  tsect = Wind[sector].trans_sectors;
+  // this stores which subsystem states map to states of the full system
+  std::vector<MKL_INT> sub2main;
+
+  // Construct the spin basis for the sub-systems
+  LEN_B = LX - LEN_A;
+  VOL_A = LEN_A*LY; VOL_B = LEN_B*LY;
+  createBasis(sector);
+  sub2main.assign(DA*DB, -5); // negative initial value
+  createLookupTable(sector,DA,DB,sub2main);
+
+  // < w_k | IN >; k-th eigenvector; IN=initial state; details about initial state
+  for(p=0; p<tsect; p++){
+       alpha00.push_back(Wind[sector].evecs_K00[p*tsect+INITbag]*inorm);
+       alphaPiPi.push_back(Wind[sector].evecs_KPiPi[p*tsect+INITbag]*inorm);
+       alphaPi0.push_back(Wind[sector].evecs_KPi0[p*tsect+INITbag]*inorm);
+       alpha0Pi.push_back(Wind[sector].evecs_K0Pi[p*tsect+INITbag]*inorm);
+  }
+
+  outf1 = fopen("EntE00.dat","w");
+  outf2 = fopen("EntEPiPi.dat","w");
+  outf3 = fopen("EntEPi0.dat","w");
+  outf4 = fopen("EntE0Pi.dat","w");
+  fprintf(outf1,"# Entropy of Entanglement as a function of the eigenvalues for LA = %d\n",LEN_A);
+  fprintf(outf1,"# Eigenvalues  Entanglement Entropy  Overlap_w_InitC\n");
+  fprintf(outf2,"# Entropy of Entanglement as a function of the eigenvalues for LA = %d\n",LEN_A);
+  fprintf(outf2,"# Eigenvalues  Entanglement Entropy  Overlap_w_InitC\n");
+  fprintf(outf3,"# Entropy of Entanglement as a function of the eigenvalues for LA = %d\n",LEN_A);
+  fprintf(outf3,"# Eigenvalues  Entanglement Entropy  Overlap_w_InitC\n");
+  fprintf(outf4,"# Entropy of Entanglement as a function of the eigenvalues for LA = %d\n",LEN_A);
+  fprintf(outf4,"# Eigenvalues  Entanglement Entropy  Overlap_w_InitC\n");
+
+  // Calculate the EE for each of the eigenstates
+  for(p=0; p<tsect; p++){
+    // initialize the state and the entropy
+    sel_evec00.clear();  sel_evecPiPi.clear(); EE = -100.0;
+    sel_evecPi0.clear(); sel_evec0Pi.clear();
+    sel_eval00  = Wind[sector].evals_K00[p];
+    sel_evalPiPi= Wind[sector].evals_KPiPi[p];
+    sel_evalPi0 = Wind[sector].evals_KPi0[p];
+    sel_eval0Pi = Wind[sector].evals_K0Pi[p];
+    //sel_evec.assign(Wind[sector].evecs_K00[p*sizet], Wind[sector].evecs_K00[(p+1)*sizet-1]);
+    for(i=0; i < tsect; i++){
+       sel_evec00.push_back(Wind[sector].evecs_K00[p*tsect + i]);
+       sel_evecPiPi.push_back(Wind[sector].evecs_KPiPi[p*tsect + i]);
+       sel_evecPi0.push_back(Wind[sector].evecs_KPi0[p*tsect + i]);
+       sel_evec0Pi.push_back(Wind[sector].evecs_K0Pi[p*tsect + i]);
+    }
+    //std::cout<<"Going to do Schmidt decompose eigenvector = "<< p << std::endl;
+    //std::cout<<"Size of the vector = "<<int(sel_evec.size())<<std::endl;
+    //printvec(sel_evec);
+    EE = schmidtDecom(sel_evec00,sector,sub2main,0);
+    fprintf(outf1,"%.12lf %.12lf %.12lf\n",sel_eval00,EE,alpha00[p]*alpha00[p]);
+    EE = schmidtDecom(sel_evecPiPi,sector,sub2main,1);
+    fprintf(outf2,"%.12lf %.12lf %.12lf\n",sel_evalPiPi,EE,alphaPiPi[p]*alphaPiPi[p]);
+    EE = schmidtDecom(sel_evecPi0,sector,sub2main,2);
+    fprintf(outf3,"%.12lf %.12lf %.12lf\n",sel_evalPi0,EE,alphaPi0[p]*alphaPi0[p]);
+    EE = schmidtDecom(sel_evec0Pi,sector,sub2main,3);
+    fprintf(outf4,"%.12lf %.12lf %.12lf\n",sel_eval0Pi,EE,alpha0Pi[p]*alpha0Pi[p]);
+  }
+  fclose(outf1);
+  fclose(outf2);
+  fclose(outf3);
+  fclose(outf4);
   // free memory from the spin basis
   eA.clear();
   eB.clear();
@@ -202,7 +298,7 @@ int checkGL2(std::vector<bool> &conf){
 }
 
 
-double schmidtDecom(std::vector<double> &vec, int sector, std::vector<MKL_INT> &sub2main){
+double schmidtDecom(std::vector<double> &vec, int sector, std::vector<MKL_INT> &sub2main, size_t cs){
   int i,j,p,k,l;
   int flagGI,count,sizet;
   double norm;
@@ -230,16 +326,55 @@ double schmidtDecom(std::vector<double> &vec, int sector, std::vector<MKL_INT> &
   //}
   // this is counted and stored in Tbag[q]
 
-  // initialize chi
-  for(i=0; i<(DA*DB); i++){
-    if(sub2main[i]==-5) chi[i]=0.0;
-    else{
-      k     = sub2main[i];                // get the ice state corresponding to the patch (eA,eB)
-      l     = Wind[sector].Tflag[k]-1;    // get the translation bag for the ice state
-      norm  = sqrt(Wind[sector].Tbag[l]); // get the frequency
-      chi[i]= vec[l]/norm;
+  if(cs==0){
+    // initialize chi
+    for(i=0; i<(DA*DB); i++){
+      if(sub2main[i]==-5) chi[i]=0.0;
+      else{
+        k     = sub2main[i];                // get the ice state corresponding to the patch (eA,eB)
+        l     = Wind[sector].Tflag[k]-1;    // get the translation bag for the ice state
+        norm  = sqrt(Wind[sector].Tbag[l]); // get the frequency
+        chi[i]= vec[l]/norm;
+      }
     }
   }
+  else if(cs==1){
+    // initialize chi
+    for(i=0; i<(DA*DB); i++){
+      if(sub2main[i]==-5) chi[i]=0.0;
+      else{
+        k     = sub2main[i];                // get the ice state corresponding to the patch (eA,eB)
+        l     = Wind[sector].Tflag[k]-1;    // get the translation bag for the ice state
+        norm  = sqrt(Wind[sector].Tbag[l]); // get the frequency
+        chi[i]= Wind[sector].FPiPi[k]*vec[l]/norm;
+      }
+    }
+  }
+  else if(cs==2){
+    // initialize chi
+    for(i=0; i<(DA*DB); i++){
+      if(sub2main[i]==-5) chi[i]=0.0;
+      else{
+        k     = sub2main[i];                // get the ice state corresponding to the patch (eA,eB)
+        l     = Wind[sector].Tflag[k]-1;    // get the translation bag for the ice state
+        norm  = sqrt(Wind[sector].Tbag[l]); // get the frequency
+        chi[i]= Wind[sector].FPi0[k]*vec[l]/norm;
+      }
+    }
+  }
+  else if(cs==3){
+    // initialize chi
+    for(i=0; i<(DA*DB); i++){
+      if(sub2main[i]==-5) chi[i]=0.0;
+      else{
+        k     = sub2main[i];                // get the ice state corresponding to the patch (eA,eB)
+        l     = Wind[sector].Tflag[k]-1;    // get the translation bag for the ice state
+        norm  = sqrt(Wind[sector].Tbag[l]); // get the frequency
+        chi[i]= Wind[sector].F0Pi[k]*vec[l]/norm;
+      }
+    }
+  }
+
 
   // initialize chi
   //for(i=0;i<(DA*DB);i++) chi[i]=0.0;

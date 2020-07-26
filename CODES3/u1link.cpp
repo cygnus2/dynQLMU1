@@ -67,6 +67,7 @@ int main(){
   VOL2 = VOL/2;
 
   std::cout<<"Initial state ="<<INIT<<std::endl;
+  std::cout<<"lambda ="<<lam<<std::endl;
 
   // decide whether to check the results of the diagonalization
   CHKDIAG=0;
@@ -119,8 +120,6 @@ int main(){
   std::cout<<"Normalization ="<<inorm<<std::endl;
   std::cout<<"Phases: (Pi,0):"<<INITphasePi0<<";  (0,Pi):"<<INITphase0Pi<<"; (Pi,Pi):"<<INITphasePiPi<<std::endl;
 
-  // calculate <psi_n| O_flip |psi_n>, for every eigenstate psi_n
-  //calc_Oflip(sector);
   // real time evolution of <PHI(t)| O_flip |PHI(t)>
   // starting from specified initial states in each sector (see notes)
   calc_Oflipt(sector);
@@ -134,7 +133,8 @@ int main(){
   else if(INIT==4) evolveH_ov3_INIT4(sector);
 
   // calculate the Entanglement Entropy for the states
-  //entanglementEnt(sector);
+  if(INIT==0)      entanglementEnt_INIT0(sector);
+  else if(INIT==4) entanglementEnt_INIT4(sector);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }

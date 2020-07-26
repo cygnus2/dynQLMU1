@@ -193,12 +193,15 @@ void trans_Hamil_INIT0(int sector){
       std::vector<double>&);
   //int i,j,
   int k,l;
+  int tsect, sizet;
   double ele, norm;
   FILE *fptr;
 
+  sizet = Wind[sector].nBasis;
+  tsect = Wind[sector].trans_sectors;
   std::cout<<"=================================================================================="<<std::endl;
   std::cout<<"Constructing the Hamiltonian in the (kx,ky)=(0,0); (Pi,Pi) sectors."<<std::endl;
-  std::cout<<"Dimension of matrix = "<<Wind[sector].trans_sectors<<std::endl;
+  std::cout<<"Dimension of matrix = "<<tsect<<std::endl;
   std::cout<<"Value of INIT flag ="<<INIT<<std::endl;
 
   // allocate space for hamil_Kxy
@@ -212,27 +215,34 @@ void trans_Hamil_INIT0(int sector){
   auto start = std::chrono::high_resolution_clock::now();
 
   // construct the hamil_kxy matrix
-  for(std::size_t i=0;i<Wind[sector].nBasis;i++){
+  for(std::size_t i=0;i<sizet;i++){
      k=Wind[sector].Tflag[i]-1;
      // off-diagonal elements
-     for(std::size_t j=i+1;j<Wind[sector].nBasis;j++){
+     for(std::size_t j=i+1;j<sizet;j++){
        ele = Wind[sector].getH(i,j);
        if(ele == 0) continue;
-       //if(ele==0.0) continue;
        l   = Wind[sector].Tflag[j]-1;
-       norm= sqrt(Wind[sector].Tdgen[i]*Wind[sector].Tdgen[j])/VOL;
+       norm= sqrt(Wind[sector].Tdgen[i]*Wind[sector].Tdgen[j])/((double)VOL);
        Wind[sector].hamil_K00[k][l] +=  2*ele*norm;
        if((Wind[sector].momPiPi[k]) && (Wind[sector].momPiPi[l]))
         Wind[sector].hamil_KPiPi[k][l] += 2*ele*Wind[sector].FPiPi[i]*Wind[sector].FPiPi[j]*norm;
-   }
-   // diagonal elements
-   ele = Wind[sector].getH(i,i);
-   if(ele == 0) continue;
-   norm= Wind[sector].Tdgen[i]/VOL;
-   Wind[sector].hamil_K00[k][k] +=  ele*norm;
-   if(Wind[sector].momPiPi[k])
-    Wind[sector].hamil_KPiPi[k][k] += ele*Wind[sector].FPiPi[i]*Wind[sector].FPiPi[i]*norm;
+     }
+    // diagonal elements
+    ele = Wind[sector].getH(i,i);
+    if(ele == 0) continue;
+    norm= Wind[sector].Tdgen[i]/((double)VOL);
+    Wind[sector].hamil_K00[k][k] +=  ele*norm;
+    if(Wind[sector].momPiPi[k])
+      Wind[sector].hamil_KPiPi[k][k] += ele*Wind[sector].FPiPi[i]*Wind[sector].FPiPi[i]*norm;
   }
+
+  // printing the K00 matrix
+  /*for(std::size_t i=0; i<tsect; i++){
+    for(std::size_t j=0; j<tsect; j++){
+      printf("% .3lf  ", Wind[sector].hamil_K00[i][j]);
+    }
+    printf("\n");
+  }*/
 
   // Get ending timepoint
   auto stop = std::chrono::high_resolution_clock::now();
@@ -301,7 +311,7 @@ void trans_Hamil_INIT4(int sector){
        if(ele == 0) continue;
        //if(ele==0.0) continue;
        l   = Wind[sector].Tflag[j]-1;
-       norm= sqrt(Wind[sector].Tdgen[i]*Wind[sector].Tdgen[j])/VOL;
+       norm= sqrt(Wind[sector].Tdgen[i]*Wind[sector].Tdgen[j])/((double)VOL);
        Wind[sector].hamil_K00[k][l] +=  2*ele*norm;
        if((Wind[sector].momPi0[k]) && (Wind[sector].momPi0[l]))
         Wind[sector].hamil_KPi0[k][l] += 2*ele*Wind[sector].FPi0[i]*Wind[sector].FPi0[j]*norm;
@@ -313,7 +323,7 @@ void trans_Hamil_INIT4(int sector){
    // diagonal elements
    ele = Wind[sector].getH(i,i);
    if(ele == 0) continue;
-   norm= Wind[sector].Tdgen[i]/VOL;
+   norm= Wind[sector].Tdgen[i]/((double)VOL);
    Wind[sector].hamil_K00[k][k] +=  ele*norm;
    if(Wind[sector].momPi0[k])
       Wind[sector].hamil_KPi0[k][k] += ele*Wind[sector].FPi0[i]*Wind[sector].FPi0[i]*norm;
