@@ -31,6 +31,9 @@ int CHKDIAG, STORE_SVD;
 int INIT, INITq, INITbag;
 int INITphasePi0, INITphase0Pi, INITphasePiPi;
 double inorm;
+int CALC;
+// if CALC=0 calculate everything
+// CALC==1,2,3,4 compute OflipT, state_Prof, Ey(dEy), EENT respectively
 
 int main(){
   FILE *fptr;
@@ -60,6 +63,7 @@ int main(){
   fscanf(fptr,"%s %lf\n",string,&dT);
   fscanf(fptr,"%s %d\n",string,&LEN_A);
   fscanf(fptr,"%s %d\n",string,&INIT);
+  fscanf(fptr,"%s %d\n",string,&CALC);
   fclose(fptr);
   if(( LX%2 != 0 )||( LY%2 !=0 )) { printf("Code does not work with odd LX and/or LY. \n"); exit(0); }
   if(LX<LY) printf("Please make sure LX >= LY. Unforseen errors can occur otherwise. \n");
@@ -122,19 +126,25 @@ int main(){
 
   // real time evolution of <PHI(t)| O_flip |PHI(t)>
   // starting from specified initial states in each sector (see notes)
-  calc_Oflipt(sector);
+  if(CALC==0 || CALC==1)  calc_Oflipt(sector);
 
-  // real-time evolution of initial states
-  if(INIT==0)      evolveH_ov2_INIT0(sector);
-  else if(INIT==4) evolveH_ov2_INIT4(sector);
+  // real-time evolution state_Prof
+  if(CALC==0 || CALC==2){
+     if(INIT==0)      evolveH_ov2_INIT0(sector);
+     else if(INIT==4) evolveH_ov2_INIT4(sector);
+  }
 
-  // real-time evolution of initial states
-  if(INIT==0)      evolveH_ov3_INIT0(sector);
-  else if(INIT==4) evolveH_ov3_INIT4(sector);
+  // real-time evolution dEy (for INIT=0) or Ey (for INIT=4)
+  if(CALC==0 || CALC==3){
+     if(INIT==0)      evolveH_ov3_INIT0(sector);
+     else if(INIT==4) evolveH_ov3_INIT4(sector);
+  }
 
   // calculate the Entanglement Entropy for the states
-  if(INIT==0)      entanglementEnt_INIT0(sector);
-  else if(INIT==4) entanglementEnt_INIT4(sector);
+  if(CALC==0 || CALC==4){
+     if(INIT==0)      entanglementEnt_INIT0(sector);
+     else if(INIT==4) entanglementEnt_INIT4(sector);
+  }
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }

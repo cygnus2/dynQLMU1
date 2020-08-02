@@ -8,6 +8,7 @@
 #define DIM 2
 #define PI 2*asin(1.0)
 
+extern int CALC;
 extern int CHKDIAG,STORE_SVD;
 extern int *next[2*DIM+1];
 extern int *nextCHK[2*DIM+1];
