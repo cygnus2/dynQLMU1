@@ -93,7 +93,6 @@ void init_WindNo(std::vector<WindNo> &Wind,int **lookup, int row, int col){
     lookup[(LX/2)][(LY/2)+iy]=count;
     iWind.Wx = 0; iWind.Wy = iy; iWind.nBasis = 0; Wind.push_back(iWind); count++;
 
-
     lookup[(LX/2)][(LY/2)-iy]=count;
     iWind.Wx = 0; iWind.Wy = -iy; iWind.nBasis = 0; Wind.push_back(iWind); count++;
   }
@@ -186,33 +185,29 @@ void WindNo::computeEy(){
     // error message for zero basis
     if(!nBasis){ std::cout<<"Total basis state not defined! "<<std::endl; exit(0); }
     for(i=0; i<nBasis; i++){
-      // compute the total Ey for each x; note that we work with integer values!
+      // compute the total Ey, diffEy for each x; note that we work with integer values!
       for(x=0;x<LX;x++){
           Eytot[x] = 0; diffEy[x] = 0;
           for(y=0;y<LY;y++){
             p=y*LX+x;  q=2*p+1;
             if(basisVec[i][q]) Eytot[x]++;
             else               Eytot[x]--;
+            if(y%2==0){
+              if(basisVec[i][q]) diffEy[x]++;
+              else               diffEy[x]--;
+            }
+            else{
+              if(basisVec[i][q]) diffEy[x]--;
+              else               diffEy[x]++;
+            }
           }
-      if(Eytot[x]%2){ printf("Error! LY != 2, aborting \n"); exit(0); }
+      if(Eytot[x]%2){ printf("Error in Ey! LY != even, aborting \n"); exit(0); }
+      if(diffEy[x]%2){ printf("Error in dEy! LY != even, aborting \n"); exit(0); }
       Eytot[x] /= 2;
+      diffEy[x] /= 2;
       }
       // push the values to original variables defined within the class
       Ey.push_back(Eytot);
-      // if LY=2 then calculate the difference otherwise assign zero
-      if(LY==2){
-        for(p=0;p<LX;p++){
-          p1=2*p+1; p2=2*next[DIM+2][p]+1;
-          pxy=basisVec[i][p1]; pyz=basisVec[i][p2];
-          if(pxy==pyz) diffEy[p]=0.0;
-          else{ if(pxy==true) diffEy[p]= 1.0;
-                else          diffEy[p]=-1.0;
-              }
-        }
-      }
-      else{
-        for(x=0;x<LX;x++) diffEy[x]=0;
-      }
       dEy.push_back(diffEy);
     } // close loop i over basis states
   Eytot.clear(); diffEy.clear();

@@ -165,4 +165,6 @@ void evolveH_ov3_INIT4(int);
 void initState(int, int, int*);
 void entanglementEnt_INIT0(int);
 void entanglementEnt_INIT4(int);
+void Lecho_INIT0(int);
+void Lecho_INIT4(int);
 #endif

@@ -146,6 +146,12 @@ int main(){
      else if(INIT==4) entanglementEnt_INIT4(sector);
   }
 
+  // calculate the Fidelity
+  if(CALC==0 || CALC==5){
+     if(INIT==0)      Lecho_INIT0(sector);
+     else if(INIT==4) Lecho_INIT4(sector);
+  }
+
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }
   free(chk2lin); free(lin2chk);

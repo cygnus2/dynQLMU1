@@ -8,6 +8,7 @@
 #include<algorithm>
 #include<iterator>
 #include "define.h"
+#include<chrono>
 
 extern void printconf1(std::vector<bool>);
 extern void printconfA(std::vector<std::vector<bool>>);
@@ -49,7 +50,13 @@ void entanglementEnt_INIT0(int sector){
   VOL_A = LEN_A*LY; VOL_B = LEN_B*LY;
   createBasis(sector);
   sub2main.assign(DA*DB, -5); // negative initial value
+  // Get starting timepoint
+  auto start = std::chrono::high_resolution_clock::now();
   createLookupTable(sector,DA,DB,sub2main);
+  // Get ending timepoint
+  auto stop = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop-start);
+  std::cout<<"Time taken for lookup table="<<duration.count()<< " secs"<<std::endl;
 
   // < w_k | IN >; k-th eigenvector; IN=initial state; details about initial state
   for(p=0; p<tsect; p++){
@@ -111,7 +118,14 @@ void entanglementEnt_INIT4(int sector){
   VOL_A = LEN_A*LY; VOL_B = LEN_B*LY;
   createBasis(sector);
   sub2main.assign(DA*DB, -5); // negative initial value
+  // Get starting timepoint
+  auto start = std::chrono::high_resolution_clock::now();
   createLookupTable(sector,DA,DB,sub2main);
+  // Get ending timepoint
+  auto stop = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop-start);
+  std::cout<<"Time taken for lookup table="<<duration.count()<< " secs"<<std::endl;
+
 
   // < w_k | IN >; k-th eigenvector; IN=initial state; details about initial state
   for(p=0; p<tsect; p++){
@@ -134,6 +148,8 @@ void entanglementEnt_INIT4(int sector){
   fprintf(outf4,"# Entropy of Entanglement as a function of the eigenvalues for LA = %d\n",LEN_A);
   fprintf(outf4,"# Eigenvalues  Entanglement Entropy  Overlap_w_InitC\n");
 
+  // Get starting timepoint
+  start = std::chrono::high_resolution_clock::now();
   // Calculate the EE for each of the eigenstates
   for(p=0; p<tsect; p++){
     // initialize the state and the entropy
@@ -162,6 +178,11 @@ void entanglementEnt_INIT4(int sector){
     EE = schmidtDecom(sel_evec0Pi,sector,sub2main,3);
     fprintf(outf4,"%.12lf %.12lf %.12lf\n",sel_eval0Pi,EE,alpha0Pi[p]*alpha0Pi[p]);
   }
+  // Get ending timepoint
+  stop = std::chrono::high_resolution_clock::now();
+  duration = std::chrono::duration_cast<std::chrono::seconds>(stop-start);
+  std::cout<<"Time taken for EE calculation="<<duration.count()<< " secs"<<std::endl;
+
   fclose(outf1);
   fclose(outf2);
   fclose(outf3);
@@ -375,33 +396,10 @@ double schmidtDecom(std::vector<double> &vec, int sector, std::vector<MKL_INT> &
     }
   }
 
-
-  // initialize chi
-  //for(i=0;i<(DA*DB);i++) chi[i]=0.0;
-  // calculate chi
-  //count=0;
-  //for(i=0; i<DA; i++){
-  //for(j=0; j<DB; j++){
-  //    cA = eA[i]; cB = eB[j];
-  //    patch(conf,cA,cB);
-      // if Gauss Law not satisfied, skip
-  //    flagGI = checkGL2(conf);
-  //    if(flagGI==0) continue;
-  //    count++;
-      // match with the corresponding basis state in the winding number sector
-  //    p = Wind[sector].binscan2(conf);
-  //    if(p == -100) continue;
-      //std::cout<<i<<" "<<j<<" "<<p<<" "<<Wind[sector].Tflag[p]-1<<std::endl;
-      // All ice states with the same Tflag get the same amplitude
-  //    k = Wind[sector].Tflag[p]-1;
-  //    chi[i*DB+j] = vec[k]/sqrt(freq[k]);
-  //}}
-  //std::cout<<"total no of GI states by patching "<<count<<std::endl;
-
   // check norm
-  norm = 0.0;
-  for(i=0;i<(DA*DB);i++) norm += chi[i]*chi[i];
-  if( fabs(norm-1.0) >  1e-6) std::cout<<"Norm = "<<norm<<std::endl;
+  //norm = 0.0;
+  //for(i=0;i<(DA*DB);i++) norm += chi[i]*chi[i];
+  //if( fabs(norm-1.0) >  1e-6) std::cout<<"Norm = "<<norm<<std::endl;
 
   //print_matrix("Density matrix", DA, DB, chi, DA);
   //printf( "LAPACKE_dgesvd (row-major, high-level) Example Program Results\n" );
@@ -418,9 +416,9 @@ double schmidtDecom(std::vector<double> &vec, int sector, std::vector<MKL_INT> &
   /* Print singular values */
   //print_matrix( "Singular values", 1, dmin, chi_svd, 1 );
   // check norm
-  norm = 0;
-  for(i=0;i<dmin; i++) norm += chi_svd[i]*chi_svd[i];
-  if( fabs(norm - 1.0) > 1e-6) std::cout<<"Norm of svd ="<<norm<<std::endl;
+  //norm = 0;
+  //for(i=0;i<dmin; i++) norm += chi_svd[i]*chi_svd[i];
+  //if( fabs(norm - 1.0) > 1e-6) std::cout<<"Norm of svd ="<<norm<<std::endl;
 
   EE=0.0;
   for(i=0; i<dmin; i++){

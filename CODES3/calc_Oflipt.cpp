@@ -60,6 +60,7 @@ void calc_Oflipt(int sector){
 
  // compute the static expectation values
  // value in the Diagonal Ensemble NOT computed yet!
+ // the calculation has to be separated depending on INIT
  //calc_Oflip(sector, oflip);
  // compute the time evolution
  outf = fopen("OflipT.dat","w");
@@ -171,6 +172,7 @@ void calc_Oflip(int sector, std::vector<double>& of){
   double Oflip_avg;
   FILE *outf;
 
+  std::cout<<"in calc_Oflip"<<std::endl;
   outf = fopen("Oflip.dat","w");
   fprintf(outf,"# Results for (kx,ky)=(0,0) \n");
   for(k=0;k<sizet;k++){
