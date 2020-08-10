@@ -14,7 +14,7 @@ extern void fileprint_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_I
 extern void eig_print(std::vector<double>&,std::vector<double>&,int);
 extern void check_eigvecs(MKL_INT, std::vector<double>&, std::vector<double>&, std::vector<double>&);
 
-void diag_LAPACK(MKL_INT sector, std::vector<double>& matrix, std::vector<double>& eval, std::vector<double>& evec){
+void diag_LAPACK(MKL_INT sector, std::vector<double>& eval, std::vector<double>& evec){
     unsigned int i,j;
     std::vector<double> acopy;
     // variabes to pass to LAPACK routine
@@ -73,11 +73,11 @@ void diag_LAPACK(MKL_INT sector, std::vector<double>& matrix, std::vector<double
        }}
        check_eigvecs(N, acopy, eval, evec); 
        acopy.clear();
-     }
+     } 
     free(A); free(W);
 }
 
-void diag_LAPACK_RRR(MKL_INT sector, std::vector<double>& matrix, std::vector<double>& eval, std::vector<double>& evec){
+void diag_LAPACK_RRR(MKL_INT sector, std::vector<double>& eval, std::vector<double>& evec){
  
   MKL_INT i, j;
   MKL_INT LDZ, LDA, NSELECT, info;    
@@ -138,7 +138,7 @@ void diag_LAPACK_RRR(MKL_INT sector, std::vector<double>& matrix, std::vector<do
   }
   
   // clear memory
-  free(A); free(W); free(Z); free(ISUPPZ);
+  free(A); free(W); free(Z); free(ISUPPZ); 
  }
 
 // Notes on printing the eigenvalues and eigenvectors: Note that we have chosen a column-major

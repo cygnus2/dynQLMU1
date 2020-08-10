@@ -15,8 +15,8 @@
 void constH(int sector){
 
    extern void eigcheck(std::vector<double>&, std::vector<std::vector<double>>&,int);
-   extern void diag_LAPACK_RRR(MKL_INT, std::vector<double>&, std::vector<double>&, std::vector<double>&);
-   extern void diag_LAPACK(MKL_INT, std::vector<double>&, std::vector<double>&, std::vector<double>&);
+   extern void diag_LAPACK_RRR(MKL_INT, std::vector<double>&, std::vector<double>&);
+   extern void diag_LAPACK(MKL_INT, std::vector<double>&, std::vector<double>&);
    extern void printmatrix(std::vector<MKL_INT>&,std::vector<MKL_INT>&,std::vector<double>&);
 
    int chk1,chk2; //just to check results between scan, binscan and binscan2. Delete later!
@@ -151,8 +151,11 @@ void constH(int sector){
    //}
 
    // diagonalize: use RELATIVELY ROBUST REPRESENTATIONS
-   //diag_LAPACK(sector, Wind[sector].hamil, Wind[sector].evals, Wind[sector].evecs);
-   diag_LAPACK_RRR(sector, Wind[sector].hamil, Wind[sector].evals, Wind[sector].evecs);
+   //diag_LAPACK(sector, Wind[sector].evals, Wind[sector].evecs);
+   diag_LAPACK_RRR(sector, Wind[sector].evals, Wind[sector].evecs);
+
+   // free memory
+   newstate.clear(); rowscan.clear(); xfl.clear();
 }
 
 

@@ -18,7 +18,7 @@ void Lecho(int sector){
    double t;
    double temp;
    double ampl_RE,ampl_IM;
-   double lEcho;
+   double lEcho,fidelity;
    std::vector<double> initC;
    FILE *outf;
 
@@ -33,25 +33,14 @@ void Lecho(int sector){
    }
 
    outf = fopen("overlap.dat","w");
-   // compute the real-time evolution
-   temp = 0.0;
-   for(p=0; p<sizet; p++){
-    if(fabs(Wind[sector].evals[p]) < 1e-10){
-      temp = temp + initC[p]*initC[p];
-    }
-   }
-
    for(t=Ti;t<Tf;t=t+dT){
-     ampl_RE=0.0; ampl_RE=0.0;
+     ampl_RE=0.0; ampl_IM=0.0;
      for(p=0; p<sizet; p++){
-        if(fabs(Wind[sector].evals[p]) > 1e-10){
           ampl_RE = ampl_RE + initC[p]*initC[p]*cos(Wind[sector].evals[p]*t);
           ampl_IM = ampl_IM + initC[p]*initC[p]*sin(Wind[sector].evals[p]*t);
-        } // close if-loop
      } // close for-loop
-     ampl_RE = ampl_RE + temp;
-     lEcho = -log(ampl_RE*ampl_RE + ampl_IM*ampl_IM)/VOL;
-     fprintf(outf,"%lf %.12lf %.12lf %.12lf\n",t,ampl_RE,ampl_IM,lEcho);
+     fidelity = ampl_RE*ampl_RE + ampl_IM*ampl_IM;
+     fprintf(outf,"%lf %.12lf %.12lf %.12lf\n",t,ampl_RE,ampl_IM,fidelity);
    }
    fclose(outf);
 

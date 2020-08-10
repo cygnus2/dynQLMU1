@@ -119,7 +119,7 @@ int main(){
   // real time evolution of <PHI(t)| O_flip |PHI(t)> and <PHI(t)| Cflip |PHI(t)>
   // starting from specified initial states in each sector (see notes)
   // note that recalculates the same as the previous routine, so don't use both!
-  calc_Oflipt(sector);
+  //calc_Oflipt(sector);
 
   // real time evolution of <PHI(t)| O_kin |PHI(t)>,
   //calc_Okint(sector);
@@ -131,12 +131,12 @@ int main(){
 
   // real-time evolution of initial states (evolveH_ov2
   // has all the functionalities of evolveH_ov1 built in!)
-  // evolveH_ov1(sector);
-  evolveH_ov2(sector);
-  evolveH_ov3(sector);
+  //// evolveH_ov1(sector);
+  //evolveH_ov2(sector);
+  //evolveH_ov3(sector);
 
   // Entanglement Entropy calculations
-  evolve_Eent(sector);
+  //evolve_Eent(sector);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }
