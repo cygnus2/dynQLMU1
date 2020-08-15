@@ -356,18 +356,38 @@ void trans_Hamil_INIT4(int sector){
   Wind[sector].cols.clear();
 
   // diagonalize the matrixes with a LAPACK routine
+  // measure and print the times needed to do ED
 
+  start = std::chrono::high_resolution_clock::now();
   diag_LAPACK_RRR(Wind[sector].trans_sectors,Wind[sector].hamil_K00,
     Wind[sector].evals_K00,Wind[sector].evecs_K00);
+  stop = std::chrono::high_resolution_clock::now();
+  duration = std::chrono::duration_cast<std::chrono::seconds>(stop-start);
+  std::cout<<"Time to diag H in (0,0) sector="<<duration.count()<< " secs"<<std::endl;
 
+
+  start = std::chrono::high_resolution_clock::now();
   diag_LAPACK_RRR(Wind[sector].trans_sectors,Wind[sector].hamil_KPi0,
     Wind[sector].evals_KPi0,Wind[sector].evecs_KPi0);
+  stop = std::chrono::high_resolution_clock::now();
+  duration = std::chrono::duration_cast<std::chrono::seconds>(stop-start);
+  std::cout<<"Time to diag H in (Pi,0) sector="<<duration.count()<< " secs"<<std::endl;
 
+
+  start = std::chrono::high_resolution_clock::now();
   diag_LAPACK_RRR(Wind[sector].trans_sectors,Wind[sector].hamil_K0Pi,
     Wind[sector].evals_K0Pi,Wind[sector].evecs_K0Pi);
+  stop = std::chrono::high_resolution_clock::now();
+  duration = std::chrono::duration_cast<std::chrono::seconds>(stop-start);
+  std::cout<<"Time to diag H in (0,Pi) sector="<<duration.count()<< " secs"<<std::endl;
 
+
+  start = std::chrono::high_resolution_clock::now();
   diag_LAPACK_RRR(Wind[sector].trans_sectors,Wind[sector].hamil_KPiPi,
     Wind[sector].evals_KPiPi,Wind[sector].evecs_KPiPi);
+  stop = std::chrono::high_resolution_clock::now();
+  duration = std::chrono::duration_cast<std::chrono::seconds>(stop-start);
+  std::cout<<"Time to diag H in (Pi,Pi) sector="<<duration.count()<< " secs"<<std::endl;
 
   // deallocate space for hamil_Kxy
   Wind[sector].deallocate_Kxy(INIT);
