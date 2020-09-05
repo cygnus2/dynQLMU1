@@ -6,6 +6,8 @@
 #include<algorithm>
 #include<vector>
 #include<iterator>
+#include<ctime>
+#include<chrono>
 
 /* according to the rules of cpp, the variables are declared here 
  * and also in the header file as extern such that they are avl to
@@ -61,21 +63,26 @@ int main(){
   chk2lin = (int *)malloc(VOL*sizeof(int));
   initneighbor();
 
-  /* construct states */
+  /* construct states & time it */
+  std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
   conststates();
+  std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+  auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
+  std::cout << "Time needed " << elapsed.count() << " milliseconds." << std::endl;
+
   // for(i=0;i<NTOT;i++) printf("%d\n",(int)basis[i].size());
   // for(i=0;i<NTOT;i++) std::cout<<basis[i].size()<<std::endl;
   //printbasis();
   /* construct and diagonalize the matrix */
-  constH(evals, evecs);
+  //constH(evals, evecs);
   //if(basis[3][4]==true) printf("spin = 1\n");
   //else printf("spin = -1\n");
   /* real-time evolution of cartoon states and Locshmidt Echo */
-  evolve_cartoons(evals, evecs);
+  //evolve_cartoons(evals, evecs);
   //std::cout<<basis[2][3]<<std::endl;
   //std::cout<<basis[3][4]<<std::endl;
   /* calculate the expectation value of Oflip for every eigenstate */
-  calc_Oflip(evals,evecs);
+  //calc_Oflip(evals,evecs);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }
