@@ -19,7 +19,7 @@ void initneighbor(void)
       next[DIM-1][p] = y*LX + ((x-1+LX)%LX);
       next[DIM-2][p] = ((y-1+LY)%LY)*LX + x;
   }
- 
+
   /* checkerboard to linear and vice-versa */
   p=0;
   for(y=0;y<LY;y++){
@@ -39,20 +39,20 @@ void initneighbor(void)
        //printf("checkerboard site = %d(%d,%d); Lin site = %d\n",p,x,y,q);
        p++;
     }
-  }} 
+  }}
 
-  // nextCHK targets the neighboring sites in the string 
+  // nextCHK targets the neighboring sites in the string
   // representing the GL implementation on the even sites
   for(p=0;p<VOL;p++){
       lin = chk2lin[p];
       nextCHK[DIM][p]   = p;
       nextCHK[DIM+1][p] = lin2chk[next[DIM+1][lin]];
-      nextCHK[DIM-1][p] = lin2chk[next[DIM-1][lin]]; 
+      nextCHK[DIM-1][p] = lin2chk[next[DIM-1][lin]];
       nextCHK[DIM+2][p] = lin2chk[next[DIM+2][lin]];
       nextCHK[DIM-2][p] = lin2chk[next[DIM-2][lin]];
       //printf("checkerboard NN. site = %d (in chkrboard = %d)\n",lin,p);
       //printf("+x=%d,   -x=%d,   +y=%d,   -y=%d\n",nextCHK[DIM+1][p],
-      //nextCHK[DIM-1][p],nextCHK[DIM+2][p],nextCHK[DIM-2][p]); 
+      //nextCHK[DIM-1][p],nextCHK[DIM+2][p],nextCHK[DIM-2][p]);
    }
 }
 
@@ -68,6 +68,18 @@ void printconf(std::vector<bool> conf){
    else if(conf[2*p]==false)   printf("site (x,y)=(%d,%d); link-x=% d \n",x,y,-1);
    if(conf[2*p+1]==true)       printf("site (x,y)=(%d,%d); link-y=% d \n",x,y,1);
    else if(conf[2*p+1]==false) printf("site (x,y)=(%d,%d); link-y=% d \n",x,y,-1);
+  }
+}
+
+void print2file(int sector, int basis, FILE *fptr){
+  int p,d,x,y;
+  std::vector<bool> state(2*VOL);
+  state = Wind[sector].basisVec[basis];
+  if(Wind[sector].nflip[basis] == VOL/2){
+    for(p=0;p<2*VOL;p++){
+      fprintf(fptr,"%d ",(int)state[p]);
+    }
+  fprintf(fptr,"\n");
   }
 }
 
@@ -101,7 +113,7 @@ void FilePrintBasis(int sector){
       //p=chk2lin[j];
       p=j;
       p1=2*p; p2=2*next[DIM+1][p]+1; p3=2*next[DIM+2][p]; p4=2*p+1;
-      pxy=Wind[sector].basisVec[i][p1]; pyz=Wind[sector].basisVec[i][p2]; 
+      pxy=Wind[sector].basisVec[i][p1]; pyz=Wind[sector].basisVec[i][p2];
       pzw=Wind[sector].basisVec[i][p3]; pwx=Wind[sector].basisVec[i][p4];
       if((pxy==pyz)&&(pzw==pwx)&&(pwx!=pxy)) fprintf(fptr,"%d ", 1);
       else                                   fprintf(fptr,"%d ", 0);
@@ -195,5 +207,3 @@ void printvec(std::vector<double> &vec){
  }
  std::cout<<"Norm = "<<norm<<std::endl;
 }
-
-

@@ -19,7 +19,8 @@ void evolveH_ov3(int sector){
     double t;
     double betaR,betaI,betaM,betaTot;
     double EyProf[LX],dEyProf[LX];
-    double Cf1, Cf2;
+    double Cf0, Cf1;
+    double avgd1, avgd2, avgh1, avgh2, avgv1, avgv2;
     int sizet, nTot;
     FILE *fptr,*fptr1,*fptr2;
 
@@ -42,12 +43,14 @@ void evolveH_ov3(int sector){
     /* now compute the overlap in each sector */
     fptr = fopen("EyProf.dat","w");
     fptr1= fopen("dEyProf.dat","w");
-    fptr2= fopen("CorrEy.dat","w");
+    fptr2= fopen("CorrF.dat","w");
     for(t=Ti; t<Tf; t=t+dT){
 
       /* initialize Ey profile */
       for(k=0;k<LX;k++) { EyProf[k]=0.0; dEyProf[k]=0.0; }
-      Cf1=0.0; Cf2=0.0;
+      /* initialize the correlation functions */
+      Cf0=0.0; Cf1=0.0;
+      avgd1=0.0; avgd2=0.0; avgh1=0.0; avgh2=0.0; avgv1=0.0; avgv2=0.0;
 
       for(k=0; k<sizet; k++){
           betaR = 0.0; betaI = 0.0;
@@ -61,15 +64,19 @@ void evolveH_ov3(int sector){
 	  	      EyProf[r] += Wind[sector].Ey[k][r]*betaM;
             dEyProf[r]+= Wind[sector].dEy[k][r]*betaM;
 	        }
-          Cf1 += Wind[sector].CEy1[k]*betaM;
-          Cf2 += Wind[sector].CEy2[k]*betaM;
+          /* correlation functions */
+          Cf0   += Wind[sector].CEy0[k]*betaM;  Cf1  += Wind[sector].CEy1[k]*betaM;
+          avgd1 += Wind[sector].OOd1[k]*betaM; avgd2 += Wind[sector].OOd2[k]*betaM;
+          avgv1 += Wind[sector].OOv1[k]*betaM; avgv2 += Wind[sector].OOv2[k]*betaM;
+          avgh1 += Wind[sector].OOh1[k]*betaM; avgh2 += Wind[sector].OOh2[k]*betaM;
       } // close loop over basis states
       /* print the Ey profile at each times */
       fprintf(fptr,"%lf ",t);
       fprintf(fptr1,"%lf ",t);
       for(r=0;r<LX;r++){ fprintf(fptr,"%lf ",EyProf[r]); fprintf(fptr1,"%lf ",dEyProf[r]); }
       fprintf(fptr,"\n"); fprintf(fptr1,"\n");
-      fprintf(fptr2,"%.4lf %.12lf %.12lf\n",t,Cf1,Cf2);
+      fprintf(fptr2,"%.4lf %.12lf %.12lf %.12lf %.12lf %.12lf %.12lf %.12lf %.12lf\n",t,Cf0,Cf1,
+                avgd1,avgd2,avgv1,avgv2,avgh1,avgh2);
     }
     fclose(fptr);
     fclose(fptr1);

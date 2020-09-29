@@ -6,6 +6,8 @@
 #include<algorithm>
 #include<vector>
 #include<iterator>
+#include<chrono>
+#include<ctime>
 
 /* according to the rules of cpp, the variables are declared here
  * and also in the header file as extern such that they are avl to
@@ -98,7 +100,12 @@ int main(){
   lookup = allocateint2d(LX+1,LY+1);
 
   /* build basis states satisfying Gauss' Law */
+  std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
   conststates();
+  std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+  auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
+  std::cout << "Time needed " << elapsed.count() << " milliseconds." << std::endl;
+
 
   /* get number of winding number sectors */
   nWind = calc_WindNo(LX,LY);
@@ -127,7 +134,7 @@ int main(){
   //FilePrintBasis(sector);
 
   // Lochschmidt Echo
-  Lecho(sector);
+  //Lecho(sector);
 
   // real-time evolution of initial states (evolveH_ov2
   // has all the functionalities of evolveH_ov1 built in!)
@@ -136,7 +143,10 @@ int main(){
   //evolveH_ov3(sector);
 
   // Entanglement Entropy calculations
-  //evolve_Eent(sector);
+  evolve_Eent(sector);
+
+  // Investigate potential "scar" states
+  //studyEvecs(sector);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }

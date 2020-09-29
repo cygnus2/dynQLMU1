@@ -54,18 +54,19 @@ class WindNo{
     std::vector<double> evals;
     std::vector<double> evecs;
 
-    // information about correlation functions
-    //std::vector<std::vector<double>> cflip;
-
     // flip(x)=1 (anti-clockwise), -1 (clockwise), 0 (not-flippable)
     std::vector<std::vector<int>> xflip;
 
     // information about the Ey(x): Ey = sum, dEy = diff,
     std::vector<std::vector<int>> Ey;
     std::vector<std::vector<int>> dEy;
-    // CEy1,CEy2 = corrf of Ey for separations 1 and 2, summed over Lx
+    // CEy0,CEy1 = corrf of Ey in the y-direction
+    std::vector<int> CEy0;
     std::vector<int> CEy1;
-    std::vector<int> CEy2;
+    // OOd1, OOd2, OOv1, OOv2, OOh1, OOh2; see schematic diagram below
+    std::vector<int> OOd1, OOd2;
+    std::vector<int> OOv1, OOv2;
+    std::vector<int> OOh1, OOh2;
 
     // function to display variables
     void display(){
@@ -97,19 +98,15 @@ class WindNo{
     // Destructor
     ~WindNo(){
        basisVec.clear();
-       rows.clear();
-       cols.clear();
-       hamil.clear();
-       evals.clear();
-       evecs.clear();
-       hamil.clear();
-       //cflip.clear();
+       rows.clear(); cols.clear(); hamil.clear();
+       evals.clear(); evecs.clear();
        xflip.clear();
        nflip.clear();
-       Ey.clear();
-       dEy.clear();
-       CEy1.clear();
-       CEy2.clear();
+       Ey.clear();   dEy.clear();
+       CEy0.clear(); CEy1.clear();
+       OOd1.clear(); OOd2.clear();
+       OOv1.clear(); OOv2.clear();
+       OOh1.clear(); OOh2.clear();
      }
 };
 
@@ -153,5 +150,18 @@ void calc_Oflipt(int);
 void calc_Oflipt2(int);
 void calc_Okint(int);
 void evolve_corrf1(int);
+void studyEvecs(int);
 void FilePrintBasis(int);
+void print2file(int, int, FILE*);
 #endif
+
+/*  Schematic set-up of the diagonal correlators
+      |======|======|
+      |  p4  |  p3  |
+      |======|======|
+      |  p1  |  p2  |
+      |======|======|
+      OOd1 = < flip(p1) * flip(p3) >; OOd2 = < flip(p2) * flip(p4) >;
+      OOv1 = < flip(p1) * flip(p4) >; OOv2 = < flip(p2) * flip(p3) >;
+      OOh1 = < flip(p1) * flip(p2) >; OOh2 = < flip(p3) * flip(p4) >;
+*/
