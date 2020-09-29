@@ -171,6 +171,8 @@ void WindNo::flip_plaq(){
 void WindNo::computeEy(){
     int i,j,p,q,x,y,p1,p2;
     int xp1,xp2;
+    int y1,y2,q1,q2;
+    int evnEy1Ey2, oddEy1Ey2;
     std::vector<int> Eytot(LX);
     std::vector<int> diffEy(LX);
     bool pxy,pyz;
@@ -206,9 +208,21 @@ void WindNo::computeEy(){
       Eytot[x] /= 2;
       diffEy[x] /= 2;
       }
+      // compute the Ey cross correlators
+      // x=0
+      x=0; y1=0; y2=1; p1=y1*LX+x; p2=y2*LX+x; q1=2*p1+1; q2=2*p2+1;
+      if(basisVec[i][q1]==basisVec[i][q2]) evnEy1Ey2 = 1;
+      else                                 evnEy1Ey2 =-1;
+      // x=1
+      x=1; y1=0; y2=1; p1=y1*LX+x; p2=y2*LX+x; q1=2*p1+1; q2=2*p2+1;
+      if(basisVec[i][q1]==basisVec[i][q2]) oddEy1Ey2 = 1;
+      else                                 oddEy1Ey2 =-1;
+      //if(LY==4) printf("not all combinations not computed yet! \n");
       // push the values to original variables defined within the class
       Ey.push_back(Eytot);
       dEy.push_back(diffEy);
+      CEy0.push_back(evnEy1Ey2);
+      CEy1.push_back(oddEy1Ey2);
     } // close loop i over basis states
   Eytot.clear(); diffEy.clear();
 }

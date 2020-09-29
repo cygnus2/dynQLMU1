@@ -29,6 +29,11 @@ extern int NTOT;
 extern std::vector<std::vector<bool>> basis;
 extern std::vector<std::vector<bool>> basis_nonflip;
 extern std::vector<std::vector<bool>> basis_flip;
+/* list to store the bags which have a zero form factor */
+extern std::vector<int> listPiPi, listPi0, list0Pi;
+/* list the spurious eigenstates */
+extern std::vector<int> spurPiPi, spurPi0, spur0Pi;
+
 
 /* user defined classes */
 class WindNo{
@@ -61,6 +66,13 @@ class WindNo{
     // information about the Ey(x): Ey = sum, dEy = diff,
     std::vector<std::vector<int>> Ey;
     std::vector<std::vector<int>> dEy;
+    // CEy0,CEy1 = corrf of Ey in the y-direction
+    std::vector<int> CEy0;
+    std::vector<int> CEy1;
+    // OOd1, OOd2, OOv1, OOv2, OOh1, OOh2; see schematic diagram below
+    std::vector<int> OOd1, OOd2;
+    std::vector<int> OOv1, OOv2;
+    std::vector<int> OOh1, OOh2;
 
     // full Hamiltonian in the WindNo sector stored as sparse matrix
     std::vector<MKL_INT> rows,cols;
@@ -154,6 +166,10 @@ void winding_no_decompose(void);
 void trans_decompose(int);
 void trans_Hamil_INIT0(int);
 void trans_Hamil_INIT4(int);
+void checkCCpartners(int);
+void ChargeConjEval1(int, std::vector<int>&, std::vector<int>&);
+void ChargeConjEval2(int, std::vector<int>&, std::vector<int>&);
+void calcCCvalues(int);
 void diag_LAPACK(int, std::vector<std::vector<double>>&, std::vector<double>&, std::vector<double>&);
 void diag_LAPACK_RRR(int, std::vector<std::vector<double>>&, std::vector<double>&, std::vector<double>&);
 void calc_Oflip(int, std::vector<double>&);
@@ -162,9 +178,23 @@ void evolveH_ov2_INIT0(int);
 void evolveH_ov2_INIT4(int);
 void evolveH_ov3_INIT0(int);
 void evolveH_ov3_INIT4(int);
+void evolveH_ov4_INIT0(int);
+void evolveH_ov4_INIT4(int);
 void initState(int, int, int*);
 void entanglementEnt_INIT0(int);
 void entanglementEnt_INIT4(int);
 void Lecho_INIT0(int);
 void Lecho_INIT4(int);
+void detectSpuriousStates(int);
 #endif
+
+/*  Schematic set-up of the diagonal correlators
+      |======|======|
+      |  p4  |  p3  |
+      |======|======|
+      |  p1  |  p2  |
+      |======|======|
+      OOd1 = < flip(p1) * flip(p3) >; OOd2 = < flip(p2) * flip(p4) >;
+      OOv1 = < flip(p1) * flip(p4) >; OOv2 = < flip(p2) * flip(p3) >;
+      OOh1 = < flip(p1) * flip(p2) >; OOh2 = < flip(p3) * flip(p4) >;
+*/

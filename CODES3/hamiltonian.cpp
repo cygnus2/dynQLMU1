@@ -14,6 +14,10 @@ void constH(int sector){
    // workspace variables to construct the Hamiltonian
    int i,j,k,p,q;
    int p1,p2,p3,p4;
+   int q1,q2,q3,q4;
+   int x1,x2,x3,x4;
+   int y1,y2,y3,y4;
+   int ix,iy;
    int n_Flip;
    int stateq,curr_index;
    bool pxy,pyz,pzw,pwx;
@@ -30,6 +34,8 @@ void constH(int sector){
 
    // flip(x)=1 (anti-clockwise), -1 (clockwise), 0 (non-flippable) for the k-th basis state
    std::vector<int> xfl(VOL);
+   // variables for storing the correlation functions
+   int ood1, ood2, ooh1, ooh2, oov1, oov2;
 
    printf("Construct Hamiltonian in sector %d with basis states =%ld. \n",sector,Wind[sector].nBasis);
    curr_index=1;
@@ -92,6 +98,27 @@ void constH(int sector){
        if(rowscan[k]==i) Wind[sector].hamil.push_back(lam*n_Flip);
        else Wind[sector].hamil.push_back(-1.0);
      }
+
+    //compute the correlation functions, using the depicted scheme
+     /*  Schematic set-up of the diagonal correlators
+           |======|======|
+           |  p4  |  p3  |
+           |======|======|
+           |  p1  |  p2  |
+           |======|======|
+           OOd1 = < flip(p1) * flip(p3) >; OOd2 = < flip(p2) * flip(p4) >;
+           OOv1 = < flip(p1) * flip(p4) >; OOv2 = < flip(p2) * flip(p3) >;
+           OOh1 = < flip(p1) * flip(p2) >; OOh2 = < flip(p3) * flip(p4) >;
+     */
+     x1=0; y1=0; p1=y1*LX+x1;  x2=1; y2=0; p2=y2*LX+x2;
+     x3=1; y3=1; p3=y3*LX+x3;  x4=0; y4=1; p4=y4*LX+x4;
+     ood1=xfl[p1]*xfl[p3];  ood2=xfl[p2]*xfl[p4];
+     oov1=xfl[p1]*xfl[p4];  oov2=xfl[p2]*xfl[p3];
+     ooh1=xfl[p1]*xfl[p2];  ooh2=xfl[p3]*xfl[p4];
+     Wind[sector].OOd1.push_back(ood1); Wind[sector].OOd2.push_back(ood2);
+     Wind[sector].OOv1.push_back(oov1); Wind[sector].OOv2.push_back(oov2);
+     Wind[sector].OOh1.push_back(ooh1); Wind[sector].OOh2.push_back(ooh2);
+
    }
    // print the matrix for debugging
    //printf("size of rows = %d \n",(int)Wind[sector].rows.size());

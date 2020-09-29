@@ -9,6 +9,8 @@
 #include<chrono>
 
 void print_matrixTbasis(char *str, int, int);
+void print_eigsys(int size, std::vector<double>&,  std::vector<double>&);
+void check_eigsys(int);
 /* Decompose the Winding Number sector into states connected by translation flags */
 void trans_decompose(int sector){
    int i,flag,count;
@@ -62,6 +64,13 @@ void trans_decompose(int sector){
          Wind[sector].FPi0[q] = 1 - ((ix & 1) << 1);
          Wind[sector].F0Pi[q] = 1 - ((iy & 1) << 1);
          Wind[sector].FPiPi[q]= 1 - (((ix+iy) & 1)  << 1);
+         //checks
+         //if(Wind[sector].FPi0[q]!=1 && Wind[sector].FPi0[q]!=-1){
+         //  printf("ERROR! q=%d, FPi0=%d\n",q,Wind[sector].FPi0[q]); exit(0); }
+         //if(Wind[sector].F0Pi[q]!=1 && Wind[sector].F0Pi[q]!=-1){
+         //  printf("ERROR! q=%d, FPi0=%d\n",q,Wind[sector].F0Pi[q]); exit(0); }
+         //if(Wind[sector].FPiPi[q]!=1 && Wind[sector].FPiPi[q]!=-1){
+         //  printf("ERROR! q=%d, FPiPi=%d\n",q,Wind[sector].FPiPi[q]); exit(0); }
       }}
       flag++;
    }
@@ -98,12 +107,15 @@ void trans_decompose(int sector){
           }
         }}
         phaseSET[q-1]=true;
+        if(Wind[sector].momPiPi[q-1] == 0) listPiPi.push_back(q-1);
+        if(Wind[sector].momPi0[q-1] == 0)  listPi0.push_back(q-1);
+        if(Wind[sector].mom0Pi[q-1] == 0)  list0Pi.push_back(q-1);
      }
    }
 
    // print and display statement to check, debug etc
    std::cout<<"No of (kx,ky) sectors="<<Wind[sector].trans_sectors<<std::endl;
-   //Wind[sector].disp_Tprop();
+   Wind[sector].disp_Tprop();
    init.clear(); new1.clear(); new2.clear();
    phaseSET.clear();
 }
@@ -172,20 +184,41 @@ int WindNo::binscan2(std::vector<bool> &newstate){
      return m;
 }
 
-
 void WindNo::disp_Tprop(){
    int i;
+   int count00, countPiPi, countPi0, count0Pi;
    //for(i=0;i<nBasis;i++){
    // printf("flag[%d]=%ld; Deg=%d; phasePi0=% d, phase0Pi=% d, phasePiPi=% d\n",i,Tflag[i],Tdgen[i],FPi0[i],F0Pi[i],FPiPi[i]);
    //}
-   std::cout<<"Total number of translation-bags ="<<trans_sectors<<std::endl;
+   /*std::cout<<"Total number of translation-bags ="<<trans_sectors<<std::endl;
    for(i=0;i<trans_sectors;i++){
      std::cout<<"#-of-states in bag-"<<i+1<<"  ="<<Tbag[i]<<std::endl;
      std::cout<<"sum of phase factors for mom (0,0)   ="<< mom00[i]  <<std::endl;
      std::cout<<"sum of phase factors for mom (Pi,0)  ="<< momPi0[i] <<std::endl;
      std::cout<<"sum of phase factors for mom (0,Pi)  ="<< mom0Pi[i] <<std::endl;
      std::cout<<"sum of phase factors for mom (Pi,Pi) ="<< momPiPi[i]<<std::endl;
-   }
+   }*/
+   // Count and display which bags have zero form factors
+   /*
+   count00   = std::count(mom00.begin(), mom00.end(), 0);
+   countPiPi = std::count(momPiPi.begin(), momPiPi.end(), 0);
+   countPi0  = std::count(momPi0.begin(), momPi0.end(), 0);
+   count0Pi  = std::count(mom0Pi.begin(), mom0Pi.end(), 0);
+   std::cout<<"No of bags which do not contribute in sector (0,0)= "<<count00<<std::endl;
+   std::cout<<"No of bags which do not contribute in sector (Pi,Pi)= "<<countPiPi<<std::endl;
+   std::cout<<"No of bags which do not contribute in sector (Pi,0)= "<<countPi0<<std::endl;
+   std::cout<<"No of bags which do not contribute in sector (0,Pi)= "<<count0Pi<<std::endl;
+   */
+   // display the same information via the lists
+   std::cout<<"No of non-contributing bags in sector (Pi,Pi)="<<listPiPi.size()<<std::endl;
+   for(i=0; i<listPiPi.size(); i++) std::cout<< listPiPi.at(i) << ' ';
+   std::cout<<std::endl;
+   std::cout<<"No of non-contributing bags in sector (Pi,0)="<<listPi0.size()<<std::endl;
+   for(i=0; i<listPi0.size(); i++) std::cout<< listPi0.at(i) << ' ';
+   std::cout<<std::endl;
+   std::cout<<"No of non-contributing bags in sector (0,Pi)="<<list0Pi.size()<<std::endl;
+   for(i=0; i<list0Pi.size(); i++) std::cout<< list0Pi.at(i) << ' ';
+   std::cout<<std::endl;
 }
 
 void trans_Hamil_INIT0(int sector){
@@ -236,14 +269,6 @@ void trans_Hamil_INIT0(int sector){
       Wind[sector].hamil_KPiPi[k][k] += ele*Wind[sector].FPiPi[i]*Wind[sector].FPiPi[i]*norm;
   }
 
-  // printing the K00 matrix
-  /*for(std::size_t i=0; i<tsect; i++){
-    for(std::size_t j=0; j<tsect; j++){
-      printf("% .3lf  ", Wind[sector].hamil_K00[i][j]);
-    }
-    printf("\n");
-  }*/
-
   // Get ending timepoint
   auto stop = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop-start);
@@ -251,8 +276,6 @@ void trans_Hamil_INIT0(int sector){
 
   // print matrix in translation basis
   //print_matrixTbasis( "Hamiltonian for (0,0)   sector", sector, 1 );
-  //print_matrixTbasis( "Hamiltonian for (Pi,0)  sector", sector, 2 );
-  //print_matrixTbasis( "Hamiltonian for (0,Pi)  sector", sector, 3 );
   //print_matrixTbasis( "Hamiltonian for (Pi,Pi) sector", sector, 4 );
 
   // clear file
@@ -267,7 +290,6 @@ void trans_Hamil_INIT0(int sector){
   Wind[sector].cols.clear();
 
   // diagonalize the matrixes with a LAPACK routine
-
   diag_LAPACK_RRR(Wind[sector].trans_sectors,Wind[sector].hamil_K00,
     Wind[sector].evals_K00,Wind[sector].evecs_K00);
 
@@ -326,7 +348,7 @@ void trans_Hamil_INIT4(int sector){
    norm= Wind[sector].Tdgen[i]/((double)VOL);
    Wind[sector].hamil_K00[k][k] +=  ele*norm;
    if(Wind[sector].momPi0[k])
-      Wind[sector].hamil_KPi0[k][k] += ele*Wind[sector].FPi0[i]*Wind[sector].FPi0[i]*norm;
+    Wind[sector].hamil_KPi0[k][k] += ele*Wind[sector].FPi0[i]*Wind[sector].FPi0[i]*norm;
    if(Wind[sector].mom0Pi[k])
     Wind[sector].hamil_K0Pi[k][k] += ele*Wind[sector].F0Pi[i]*Wind[sector].F0Pi[i]*norm;
    if(Wind[sector].momPiPi[k])
@@ -365,7 +387,6 @@ void trans_Hamil_INIT4(int sector){
   duration = std::chrono::duration_cast<std::chrono::seconds>(stop-start);
   std::cout<<"Time to diag H in (0,0) sector="<<duration.count()<< " secs"<<std::endl;
 
-
   start = std::chrono::high_resolution_clock::now();
   diag_LAPACK_RRR(Wind[sector].trans_sectors,Wind[sector].hamil_KPi0,
     Wind[sector].evals_KPi0,Wind[sector].evecs_KPi0);
@@ -373,14 +394,12 @@ void trans_Hamil_INIT4(int sector){
   duration = std::chrono::duration_cast<std::chrono::seconds>(stop-start);
   std::cout<<"Time to diag H in (Pi,0) sector="<<duration.count()<< " secs"<<std::endl;
 
-
   start = std::chrono::high_resolution_clock::now();
   diag_LAPACK_RRR(Wind[sector].trans_sectors,Wind[sector].hamil_K0Pi,
     Wind[sector].evals_K0Pi,Wind[sector].evecs_K0Pi);
   stop = std::chrono::high_resolution_clock::now();
   duration = std::chrono::duration_cast<std::chrono::seconds>(stop-start);
   std::cout<<"Time to diag H in (0,Pi) sector="<<duration.count()<< " secs"<<std::endl;
-
 
   start = std::chrono::high_resolution_clock::now();
   diag_LAPACK_RRR(Wind[sector].trans_sectors,Wind[sector].hamil_KPiPi,
@@ -391,6 +410,17 @@ void trans_Hamil_INIT4(int sector){
 
   // deallocate space for hamil_Kxy
   Wind[sector].deallocate_Kxy(INIT);
+
+  // routine to print eigenvalues and eigenvectors
+  //printf("========= Sector (0,0) =======================================================\n");
+  //print_eigsys(Wind[sector].trans_sectors, Wind[sector].evals_K00, Wind[sector].evecs_K00);
+  //printf("========= Sector (Pi,Pi) =======================================================\n");
+  //print_eigsys(Wind[sector].trans_sectors, Wind[sector].evals_KPiPi, Wind[sector].evecs_KPiPi);
+  //printf("========= Sector (Pi,0) =======================================================\n");
+  //print_eigsys(Wind[sector].trans_sectors, Wind[sector].evals_KPi0, Wind[sector].evecs_KPi0);
+  //printf("========= Sector (0,Pi) =======================================================\n");
+  //print_eigsys(Wind[sector].trans_sectors, Wind[sector].evals_K0Pi, Wind[sector].evecs_K0Pi);
+  //check_eigsys(sector);
 }
 
 // print the Hamiltonian in the translation state basis
@@ -498,3 +528,42 @@ void WindNo::tbag_count(){
    sum = std::count(isRep.begin(), isRep.end(), 1);
    if(sum!=trans_sectors) std::cout<<"total #-of reference states don't match translation sectors"<<std::endl;
  }
+
+void print_eigsys(int size, std::vector<double>& evals,  std::vector<double>& evecs){
+  int i,j;
+  double norm;
+  for(i=0; i<size; i++){
+     printf("Eigenvalue = %lf\n",evals[i]);
+     norm = 0.0;
+     for(j=0; j<size; j++){
+       norm += evecs[size*i + j]*evecs[size*i + j];
+       printf(" %lf ",evecs[size*i + j]);
+     }
+     printf("\n ");
+     if(fabs(norm - 1.0) > 1e-8) printf("norm = %lf\n",norm);
+  }
+}
+
+// check if the physical eigenvectors have any components on the bags with zero FF
+void check_eigsys(int sector){
+  int i,j;
+  int sizet;
+  sizet = Wind[sector].trans_sectors;
+  // checking for sector (Pi,0)
+  std::cout<<"checking for sector (pi,0)"<<std::endl;
+  for(i=0; i<sizet; i++){
+     printf("Eigenvalue = %lf\n",Wind[sector].evals_KPi0[i]);
+     for(j=0; j<listPi0.size(); j++){
+        printf(" %lf ",Wind[sector].evecs_KPi0[sizet*i + listPi0[j]]);
+     }
+     printf("\n ");
+  }
+  std::cout<<"checking for sector (0,pi)"<<std::endl;
+  for(i=0; i<sizet; i++){
+     printf("Eigenvalue = %lf\n",Wind[sector].evals_K0Pi[i]);
+     for(j=0; j<list0Pi.size(); j++){
+        printf(" %lf ",Wind[sector].evecs_K0Pi[sizet*i + list0Pi[j]]);
+     }
+     printf("\n ");
+  }
+}

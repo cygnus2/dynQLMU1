@@ -39,8 +39,6 @@ void entanglementEnt_INIT0(int sector){
   std::vector<double> sel_evec00, sel_evecPiPi;
   // overlap with the initial state
   std::vector<double> alpha00, alphaPiPi;
-
-
   tsect = Wind[sector].trans_sectors;
   // this stores which subsystem states map to states of the full system
   std::vector<MKL_INT> sub2main;
@@ -93,13 +91,12 @@ void entanglementEnt_INIT0(int sector){
   fclose(outf1);
   fclose(outf2);
   // free memory from the spin basis
-  eA.clear();
-  eB.clear();
+  eA.clear(); eB.clear();
 }
 
 void entanglementEnt_INIT4(int sector){
-  int p,i;
-  int tsect;
+  int p,i,tsect;
+  int chkPi0, chk0Pi;
   FILE *outf1, *outf2, *outf3, *outf4;
   // eigenvector and eigenvalue to calculate EE
   double sel_eval00, sel_evalPiPi, sel_evalPi0, sel_eval0Pi;
@@ -108,7 +105,6 @@ void entanglementEnt_INIT4(int sector){
   // overlap with the initial state
   std::vector<double> alpha00, alphaPiPi;
   std::vector<double> alphaPi0, alpha0Pi;
-
   tsect = Wind[sector].trans_sectors;
   // this stores which subsystem states map to states of the full system
   std::vector<MKL_INT> sub2main;
@@ -125,7 +121,6 @@ void entanglementEnt_INIT4(int sector){
   auto stop = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop-start);
   std::cout<<"Time taken for lookup table="<<duration.count()<< " secs"<<std::endl;
-
 
   // < w_k | IN >; k-th eigenvector; IN=initial state; details about initial state
   for(p=0; p<tsect; p++){
@@ -148,6 +143,8 @@ void entanglementEnt_INIT4(int sector){
   fprintf(outf4,"# Entropy of Entanglement as a function of the eigenvalues for LA = %d\n",LEN_A);
   fprintf(outf4,"# Eigenvalues  Entanglement Entropy  Overlap_w_InitC\n");
 
+  // initialize variables needed to track the spurious eigenstates
+  chkPi0 = 0; chk0Pi = 0;
   // Get starting timepoint
   start = std::chrono::high_resolution_clock::now();
   // Calculate the EE for each of the eigenstates
@@ -173,10 +170,16 @@ void entanglementEnt_INIT4(int sector){
     fprintf(outf1,"%.12lf %.12lf %.12lf\n",sel_eval00,EE,alpha00[p]*alpha00[p]);
     EE = schmidtDecom(sel_evecPiPi,sector,sub2main,1);
     fprintf(outf2,"%.12lf %.12lf %.12lf\n",sel_evalPiPi,EE,alphaPiPi[p]*alphaPiPi[p]);
-    EE = schmidtDecom(sel_evecPi0,sector,sub2main,2);
-    fprintf(outf3,"%.12lf %.12lf %.12lf\n",sel_evalPi0,EE,alphaPi0[p]*alphaPi0[p]);
-    EE = schmidtDecom(sel_evec0Pi,sector,sub2main,3);
-    fprintf(outf4,"%.12lf %.12lf %.12lf\n",sel_eval0Pi,EE,alpha0Pi[p]*alpha0Pi[p]);
+    if(spurPi0[chkPi0] == p) chkPi0++;
+    else{
+     EE = schmidtDecom(sel_evecPi0,sector,sub2main,2);
+     fprintf(outf3,"%.12lf %.12lf %.12lf\n",sel_evalPi0,EE,alphaPi0[p]*alphaPi0[p]);
+    }
+    if(spur0Pi[chk0Pi] == p) chk0Pi++;
+    else{
+      EE = schmidtDecom(sel_evec0Pi,sector,sub2main,3);
+      fprintf(outf4,"%.12lf %.12lf %.12lf\n",sel_eval0Pi,EE,alpha0Pi[p]*alpha0Pi[p]);
+    }
   }
   // Get ending timepoint
   stop = std::chrono::high_resolution_clock::now();
@@ -188,9 +191,9 @@ void entanglementEnt_INIT4(int sector){
   fclose(outf3);
   fclose(outf4);
   // free memory from the spin basis
-  eA.clear();
-  eB.clear();
+  eA.clear();  eB.clear();
 }
+
 
 // calculate the (gauge-invariant) basis of sub-systems A and B
 void createBasis(int sector){

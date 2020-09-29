@@ -7,7 +7,6 @@
 #include<vector>
 #include<iterator>
 
-
 /* according to the rules of cpp, the variables are declared here
  * and also in the header file as extern such that they are avl to
  * the other functions.
@@ -27,6 +26,8 @@ int NTOT,NH;
 std::vector<std::vector<bool>> basis;
 std::vector<std::vector<bool>> basis_nonflip;
 std::vector<std::vector<bool>> basis_flip;
+std::vector<int> listPiPi, listPi0, list0Pi;
+std::vector<int> spurPiPi, spurPi0, spur0Pi;
 int CHKDIAG, STORE_SVD;
 int INIT, INITq, INITbag;
 int INITphasePi0, INITphase0Pi, INITphasePiPi;
@@ -111,6 +112,9 @@ int main(){
   if(INIT==0)      trans_Hamil_INIT0(sector);
   else if(INIT==4) trans_Hamil_INIT4(sector);
 
+  /* detect spurious states; useful only for INIT=4 */
+  if(INIT==4) detectSpuriousStates(sector);
+
   INITq = -1;
   // initialize the starting state (once and for all the routines)
   initState(sector, INIT, &INITq);
@@ -123,6 +127,9 @@ int main(){
   std::cout<<"Initial state belongs to bag ="<<INITbag<<std::endl;
   std::cout<<"Normalization ="<<inorm<<std::endl;
   std::cout<<"Phases: (Pi,0):"<<INITphasePi0<<";  (0,Pi):"<<INITphase0Pi<<"; (Pi,Pi):"<<INITphasePiPi<<std::endl;
+  std::cout<<"Momentum form factors of initial state bag "<<std::endl;
+  std::cout<<"FF(0,0)="<<Wind[sector].mom00[INITbag]<<"; FF(Pi,Pi)="<<Wind[sector].momPiPi[INITbag]
+    <<"; FF(Pi,0)="<<Wind[sector].momPi0[INITbag]<<"; FF(0,Pi)="<<Wind[sector].mom0Pi[INITbag]<<std::endl;
 
   // real time evolution of <PHI(t)| O_flip |PHI(t)>
   // starting from specified initial states in each sector (see notes)
@@ -152,11 +159,73 @@ int main(){
      else if(INIT==4) Lecho_INIT4(sector);
   }
 
+  // calculate the correlators of Ey and dEy
+  if(CALC==0 || CALC==6){
+    if(INIT==0)      evolveH_ov4_INIT0(sector);
+    else if(INIT==4) evolveH_ov4_INIT4(sector);
+  }
+
+  // calculate the charge conjugate values of the eigenstates
+  if(CALC==0 || CALC==7){
+    checkCCpartners(sector);
+    calcCCvalues(sector);
+  }
+
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }
   free(chk2lin); free(lin2chk);
   deallocateint2d(lookup,LX+1,LY+1);
+  listPiPi.clear(); listPi0.clear(); list0Pi.clear();
+  spurPiPi.clear(); spurPi0.clear(); spur0Pi.clear();
   Wind.clear();
 
   return 0;
+}
+
+/* Checks that spurious eigenstates do not contribute */
+void detectSpuriousStates(int sector){
+  int k,m,tsect;
+  double amp, prob;
+
+  /*
+  std::cout<<"Going to check for spurious eigenstates in sector (Pi,Pi)"<<std::endl;
+  tsect = Wind[sector].trans_sectors;
+  for(k=0; k<tsect; k++){
+    if( fabs(Wind[sector].evals_KPiPi[k] - 0.0) > 1e-10 ) continue;
+    std::cout<<"Checking eigenstate="<<k<<std::endl;
+    prob=0.0;
+    for(m=0; m<listPiPi.size(); m++){
+      amp  = Wind[sector].evecs_KPiPi[k*tsect + listPiPi[m]];
+      prob+= amp*amp;
+    }
+    if(fabs(prob - 1.0) < 1e-10) std::cout<<"Spurious eigenstate detected"<<std::endl;
+  }
+  */
+
+  //std::cout<<"Going to check for spurious eigenstates in sector (Pi,0)"<<std::endl;
+  tsect = Wind[sector].trans_sectors;
+  for(k=0; k<tsect; k++){
+    if( fabs(Wind[sector].evals_KPi0[k]) > 1e-10 ) continue;
+    //std::cout<<"Checking eigenstate="<<k<<std::endl;
+    prob=0.0;
+    for(m=0; m<listPi0.size(); m++){
+      amp  = Wind[sector].evecs_KPi0[k*tsect + listPi0[m]];
+      prob+= amp*amp;
+    }
+    if(fabs(prob - 1.0) < 1e-10) spurPi0.push_back(k);
+  }
+  std::cout<<"#-of spurious eigenstates for mom (pi,0) ="<<spurPi0.size()<<std::endl;
+
+  //std::cout<<"Going to check for spurious eigenstates in sector (0,Pi)"<<std::endl;
+  for(k=0; k<tsect; k++){
+    if( fabs(Wind[sector].evals_K0Pi[k]) > 1e-10 ) continue;
+    //std::cout<<"Checking eigenstate="<<k<<std::endl;
+    prob=0.0;
+    for(m=0; m<list0Pi.size(); m++){
+      amp  = Wind[sector].evecs_K0Pi[k*tsect + list0Pi[m]];
+      prob+= amp*amp;
+    }
+    if(fabs(prob - 1.0) < 1e-10) spur0Pi.push_back(k);
+  }
+  std::cout<<"#-of spurious eigenstates for mom (0,Pi) ="<<spur0Pi.size()<<std::endl;
 }
