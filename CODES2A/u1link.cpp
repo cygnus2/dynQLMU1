@@ -11,7 +11,7 @@
 #include <cstdlib>
 #include <ctime>
 
-/* according to the rules of cpp, the variables are declared here 
+/* according to the rules of cpp, the variables are declared here
  * and also in the header file as extern such that they are avl to
  * the other functions.
  */
@@ -25,7 +25,7 @@ int nWindSector;
 int **lookup;
 std::vector<WindNo> Wind;
 unsigned int nWind;
-double lam,range;
+double lam,alpha;
 int SEED;
 std::vector<double> lam_loc;
 int NTOT,NH;
@@ -47,7 +47,7 @@ int main(){
   extern int** allocateint2d(int, int);
   extern void deallocateint2d(int**,int,int);
   extern int calc_WindNo(int,int);
-  
+
   fptr = fopen("QUEUE","r");
   if(fptr == NULL){
       printf("could not open QUEUE FILE to open\n");
@@ -56,18 +56,18 @@ int main(){
   fscanf(fptr,"%s %d\n",string,&LX);
   fscanf(fptr,"%s %d\n",string,&LY);
   fscanf(fptr,"%s %lf\n",string,&lam);
-  fscanf(fptr,"%s %lf\n",string,&range);
+  fscanf(fptr,"%s %lf\n",string,&alpha);
   fscanf(fptr,"%s %d\n",string,&SEED);
   fclose(fptr);
   if(( LX%2 != 0 )||( LY%2 !=0 )) { printf("Code does not work with odd LX and/or LY. \n"); exit(0); }
   if(LX<LY) printf("Please make sure LX >= LY. Unforseen errors can occur otherwise. \n");
   VOL = LX*LY;
   VOL2 = VOL/2;
-   
-  // decide whether to check the results of the diagonalization 
-  CHKDIAG=2;
 
-  std::ofstream myfile; 
+  // decide whether to check the results of the diagonalization
+  CHKDIAG=0 ;
+
+  std::ofstream myfile;
   myfile.open("TIMELOG",std::ios::out);
   std::time_t result = std::time(nullptr);
   myfile << std::asctime(std::localtime(&result))<< std::endl;
@@ -78,7 +78,7 @@ int main(){
 
   /* Initialize nearest neighbours */
   for(i=0;i<=2*DIM;i++){
-    next[i] = (int *)malloc(VOL*sizeof(int)); 
+    next[i] = (int *)malloc(VOL*sizeof(int));
     nextCHK[i] = (int *)malloc(VOL*sizeof(int));
   }
 
@@ -86,24 +86,24 @@ int main(){
   lin2chk = (int *)malloc(VOL*sizeof(int));
   chk2lin = (int *)malloc(VOL*sizeof(int));
   initneighbor();
-  
+
   /* Winding number sectors */
   lookup = allocateint2d(LX+1,LY+1);
 
   /* build basis states satisfying Gauss' Law */
   conststates();
- 
+
   /* fill-in disorder */
   lam_loc.resize(VOL);
   for(q=0;q<VOL;q++){
     lloc = rand()/((double)RAND_MAX);
-    lam_loc[q] = (lloc - 0.5)*range + lam;
+    lam_loc[q] = (lloc - 0.5)*alpha*lam + lam;
     std::cout<<q<<" "<<lloc<<" "<<lam_loc[q]<<std::endl;
   }
- 
+
   /* get number of winding number sectors */
   nWind = calc_WindNo(LX,LY);
-  Wind.reserve(nWind); 
+  Wind.reserve(nWind);
   winding_no_decompose();
   // get the winding number sector (wx,wy)
   wx = 0; wy = 0;
@@ -112,8 +112,8 @@ int main(){
   constH(sector);
   // calculate the Hamiltonian in the charge conjugate basis
   // note that this is only possible in the (Wx,Wy)=(0,0) basis
-  chconj(sector); 
-  // calculate the expectation value of Oflip for every eigenstate 
+  chconj(sector);
+  // calculate the expectation value of Oflip for every eigenstate
   calc_Oflip(sector);
 
   /* Clear memory */

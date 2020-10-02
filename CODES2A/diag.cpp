@@ -14,13 +14,13 @@ extern void fileprint_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_I
 extern void eig_print(std::vector<double>&,std::vector<double>&,int);
 extern void check_eigvecs(MKL_INT, std::vector<double>&, std::vector<double>&, std::vector<double>&);
 
-void diag_LAPACK(int sector, std::vector<double>& matrix, std::vector<double>& evals, 
+void diag_LAPACK(int sector, std::vector<double>& matrix, std::vector<double>& evals,
  std::vector<double>& evecs){
     unsigned int i,j;
     // variabes to pass to LAPACK routine
     MKL_INT N, LDA, info;
     double *W, *A;
-    N=Wind[sector].nBasis; 
+    N=Wind[sector].nBasis;
     LDA=N;
     W = (double*)malloc(N*sizeof(double));
     A = (double*)malloc(N*LDA*sizeof(double));
@@ -51,7 +51,7 @@ void diag_LAPACK(int sector, std::vector<double>& matrix, std::vector<double>& e
     // check the allocation of the eigenvectors and eigenvalues (on small lattices)
     // print copied evals and evecs
     //eig_print(evals,evecs,N);
-    
+
     /* Print eigenvalues */
     //fileprint_matrix( "Eigenvalues.dat", 1, N, W, 1 );
     //print_matrix( "Eigenvalues", 1, N, W, 1 );
@@ -63,15 +63,15 @@ void diag_LAPACK(int sector, std::vector<double>& matrix, std::vector<double>& e
 
 void diag_LAPACK_RRR(MKL_INT N, MKL_INT NSQ, int sector, std::vector<double>& matrix, std::vector<double>& eval, std::vector<double>& evec){
 
-  MKL_INT LDZ, LDA, NSELECT, info;    
+  MKL_INT LDZ, LDA, NSELECT, info;
   MKL_INT il, iu, m;
   double abstol, vl, vu;
   std::vector<double> acopy;
   std::vector<double> w(N,0.0);
   std::vector<double> z(NSQ,0.0);
-  std::vector<MKL_INT> isuppz(2*N,0); 
+  std::vector<MKL_INT> isuppz(2*N,0);
 
-  if(CHKDIAG) acopy = matrix; 
+  if(CHKDIAG) acopy = matrix;
   /* set array sizes */
   LDZ = N;
   NSELECT = N;
@@ -96,11 +96,13 @@ void diag_LAPACK_RRR(MKL_INT N, MKL_INT NSQ, int sector, std::vector<double>& ma
   evec = z;
   w = std::vector<double>();
   z = std::vector<double>();
-  
+
 
   // check the eigenvectors. Be careful this requires an O(N^3) time
-  check_eigvecs(N, acopy, eval, evec); 
-  
+  if(CHKDIAG==1 || CHKDIAG==2){
+    check_eigvecs(N, acopy, eval, evec);
+  }
+
   // clear memory
   w.clear();
   z.clear();
@@ -167,7 +169,7 @@ extern void check_eigvecs(MKL_INT size, std::vector<double> &matrix, std::vector
   // check for any deviation
   if (CHKDIAG==1){
      outfile = fopen("eigencheck.dat","w");
-     for(i=0;i<size;i++){ 
+     for(i=0;i<size;i++){
        for(j=0;j<size;j++){ k = i*size + j; vec1.at(j) = evecs[k]; }
        // do matrix multiplication y = alpha*A*x + beta*y; incx=incy=1
        v1 = &vec1[0]; v2 = &vec2[0];
@@ -180,7 +182,7 @@ extern void check_eigvecs(MKL_INT size, std::vector<double> &matrix, std::vector
   }
   if(CHKDIAG==2){
      outfile = fopen("eigencheck.dat","w");
-     for(i=0;i<10;i++){ 
+     for(i=0;i<10;i++){
        tryvec = std::floor((rand()/((double)RAND_MAX))*size);
        for(j=0;j<size;j++){ k = tryvec*size + j; vec1.at(j) = evecs[k]; }
        // do matrix multiplication y = alpha*A*x + beta*y; incx=incy=1
@@ -194,7 +196,6 @@ extern void check_eigvecs(MKL_INT size, std::vector<double> &matrix, std::vector
   }
 
   vec1.clear();
-  vec2.clear();  
+  vec2.clear();
 
 }
-
