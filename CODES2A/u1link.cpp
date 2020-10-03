@@ -97,7 +97,8 @@ int main(){
   lam_loc.resize(VOL);
   for(q=0;q<VOL;q++){
     lloc = rand()/((double)RAND_MAX);
-    lam_loc[q] = (lloc - 0.5)*alpha*lam + lam;
+    if(fabs(lam) < 1e-6) lam_loc[q] = (lloc - 0.5)*alpha; 
+    else                 lam_loc[q] = (lloc - 0.5)*alpha*lam + lam;
     std::cout<<q<<" "<<lloc<<" "<<lam_loc[q]<<std::endl;
   }
 
