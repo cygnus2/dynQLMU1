@@ -144,13 +144,16 @@ void Lecho(int);
 void evolveH_ov1(int);
 void evolveH_ov2(int);
 void evolveH_ov3(int);
-void flipped_hist(int);
+void flipped_hist(int, int, int*);
 void evolve_Eent(int);
 void calc_Oflipt(int);
 void calc_Oflipt2(int);
 void calc_Okint(int);
 void evolve_corrf1(int);
 void studyEvecs(int);
+void studyEvecs2(int);
+void scarDiag(int);
+void collectBasis(int, int*, std::vector<std::vector<bool>>&);
 void FilePrintBasis(int);
 void print2file(int, int, FILE*);
 #endif

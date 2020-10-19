@@ -7,9 +7,9 @@
 #include "define.h"
 
 void print2file(int, int, FILE*);
-// This routine prints out diagnostics of eigenstates which are infinite energy
-// states in the spectrum and having low entropy. The aim is to study if "scars"
-// exist
+void diag_LAPACK_RRR2(int, std::vector<double>&, std::vector<double>&, std::vector<double>&);
+// This routine prints out diagnostics of eigenstates which are infinite temperature
+// states in the spectrum and having low entropy. The aim is to study if "scars" exist
 void studyEvecs(int sector){
    double targetEN;
    double cutoff, amp, prob;
@@ -20,7 +20,7 @@ void studyEvecs(int sector){
    int p,q,sizet;
    FILE *fptr1,*fptr2;
 
-   cutoff = 0.07;
+   cutoff = 0.001;
    sizet = Wind[sector].nBasis;
    // scan for states with the same energy density as INIT=4
    targetEN = lam*VOL/2.0;
@@ -46,6 +46,7 @@ void studyEvecs(int sector){
        check += prob;
        if(prob > cutoff){
           totbasisState++;
+	  printf("#-of flippable states in basis state=%d is %d\n",q,Wind[sector].nflip[q]);
           print2file(sector, q, fptr2);
        }
        fprintf(fptr1,"%.6le ",prob);
@@ -56,4 +57,47 @@ void studyEvecs(int sector){
    }
    fclose(fptr1);
    fclose(fptr2);
+}
+
+void studyEvecs2(int sector){
+  int i,j,p;
+  double cutoff;
+  double cI, cJ;
+  // nZero counts the zero modes of the oKin;
+  int nZero, nZero2, sizet;
+  std::vector<int> ev_list;
+  std::vector<double> Opot;
+  std::vector<double> evalPot, evecPot;
+
+  sizet = Wind[sector].nBasis;
+  cutoff = 1e-10;
+  // store the eigenvector labels whose eigenvalues are zero
+  nZero=0;
+  for(i=0; i<sizet; i++){
+    if(fabs(Wind[sector].evals[i]) < cutoff){
+       nZero++; ev_list.push_back(i);
+     }
+  }
+  std::cout<<"#-of zero modes ="<<nZero<<std::endl;
+  //for(i=0; i<nZero; i++) std::cout<<"identified state = "<<ev_list[i]<<std::endl;
+
+  // construct the Opot( nZero x nZero ) matrix
+  nZero2 = nZero*nZero;
+  for(i=0; i<nZero2; i++) Opot.push_back(0.0);
+
+  for(i=0; i<nZero; i++){
+    for(j=0; j<nZero; j++){
+      for(p=0; p<sizet; p++){
+        cI = Wind[sector].evecs[ev_list[i]*sizet + p];
+        cJ = Wind[sector].evecs[ev_list[j]*sizet + p];
+        Opot[i+j*nZero] += cI*cJ*Wind[sector].nflip[p];
+      }
+    }
+  }
+  // diagonalize Opot operator in the zero mode subspace
+  diag_LAPACK_RRR2(nZero, Opot, evalPot, evecPot);
+
+  // clear memory
+  Opot.clear(); evalPot.clear(); evecPot.clear();
+  ev_list.clear();
 }

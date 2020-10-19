@@ -255,3 +255,73 @@ extern void check_eigvecs(MKL_INT size, std::vector<double> &matrix, std::vector
   vec1.clear();
   vec2.clear();
 }
+
+// A second similar routine to diagonalize the Opot matrix for zero eigenvalues
+// at lam = 0. The lapack routine is the same, but since an array is passed, some
+// structures get simplified.
+void diag_LAPACK_RRR2(int nSize, std::vector<double>& mat, std::vector<double>& eval, std::vector<double>& evec){
+
+  MKL_INT i, j;
+  MKL_INT LDZ, LDA, NSELECT, info;
+  MKL_INT il, iu, m;
+  MKL_INT N,NSQ;
+  double abstol, vl, vu;
+  std::vector<double> acopy;
+  double *W, *Z, *A;
+  MKL_INT *ISUPPZ;
+
+  N = nSize;
+  LDA = N; LDZ = N; NSELECT = N;
+  NSQ = N*N;
+  W = (double*)malloc(N*sizeof(double));
+  Z = (double*)malloc(N*LDA*sizeof(double));
+  A = (double*)malloc(N*LDA*sizeof(double));
+  ISUPPZ = (MKL_INT*)malloc(2*N*sizeof(MKL_INT));
+
+  // the passed matrix IS in a long row, in the COLUMN_MAJOR_REPRESENTATION!
+  // the entries go as (1,1), (2,1), ..., (N,1), (1,2), (2,2), ...., (N,2)
+  for(i=0;i<N;i++){
+  for(j=0;j<N;j++){
+      A[i+j*N]=mat[i+j*N];
+  }}
+
+  /* print full matrix */
+  //print_matrix("Full matrix", N, N, A, LDA);
+
+  abstol = -1;
+  printf("Going to RRR routine. \n");
+  info = LAPACKE_dsyevr( LAPACK_COL_MAJOR, 'V', 'A', 'U', N, A, LDA,
+                       0., 0., 0, 0, abstol, &m, W, Z, LDZ, ISUPPZ );
+  /* Check for convergence */
+  if(info > 0){
+     printf( "The algorithm failed to compute eigenvalues.\n" );
+     exit(1);
+  }
+  printf("Back from the routine and working properly. Info = %ld. Eval[0]=%e\n",info,W[0]);
+  // copy eigenvalues and eigenvectors to main code
+  eval.insert(eval.begin(), W, W+N);
+  evec.insert(evec.begin(), Z, Z+N*N);
+
+  /* Print eigenvectors */
+  //eig_print2( eval, evec, N);
+
+  // see notes in the previous routine. Same applies here!
+  fileprint_matrix( "Eigenvalues.dat", 1, N, W, 1 );
+  //eig_print(eval,evec,N);
+
+  // check the eigenvectors by acting the Hamiltonian on them, and subtracting the
+  // eigenvalues. Be careful this requires an O(N^3) time
+  // check_eigvecs needs the full matrix
+  if(CHKDIAG){
+       acopy.resize(N*N);
+       for(i=0;i<N;i++){
+       for(j=0;j<N;j++){
+          acopy.at(i+N*j)=mat[i+j*N];
+       }}
+       check_eigvecs(N, acopy, eval, evec);
+       acopy.clear();
+  }
+
+  // clear memory
+  free(A); free(W); free(Z); free(ISUPPZ);
+ }

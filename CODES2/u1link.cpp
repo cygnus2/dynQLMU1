@@ -114,11 +114,11 @@ int main(){
 
   printf("Chosen (Wx,Wy) sector = (%d,%d)\n",WX,WY);
   sector = lookup[LX/2+WX][LY/2+WY];
-  constH(sector);
+  //constH(sector);
 
-  INITq = -1;
+  //INITq = -1;
   //set the starting state once (and for all!)
-  initState(sector, INIT, &INITq);
+  //initState(sector, INIT, &INITq);
 
   // calculate the <psi_n| O_flip |psi_n>, for every eigenstate psi_n
   //calc_Oflip(sector);
@@ -143,10 +143,14 @@ int main(){
   //evolveH_ov3(sector);
 
   // Entanglement Entropy calculations
-  evolve_Eent(sector);
+  //evolve_Eent(sector);
 
   // Investigate potential "scar" states
   //studyEvecs(sector);
+  //if(lam == 0.0) studyEvecs2(sector);
+
+  // Set up ED in the basis of states with flippable plaq = VOL/2
+  scarDiag(sector);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }
