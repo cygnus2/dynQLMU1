@@ -35,6 +35,7 @@ double inorm;
 int CALC;
 // if CALC=0 calculate everything
 // CALC==1,2,3,4 compute OflipT, state_Prof, Ey(dEy), EENT respectively
+double cutoff;
 
 int main(){
   FILE *fptr;
@@ -113,7 +114,10 @@ int main(){
   else if(INIT==4) trans_Hamil_INIT4(sector);
 
   /* detect spurious states; useful only for INIT=4 */
-  if(INIT==4) detectSpuriousStates(sector);
+  if(INIT==4){
+     detectSpuriousStates(sector);
+     detectSpuriousStates2(sector);
+  }
 
   INITq = -1;
   // initialize the starting state (once and for all the routines)
@@ -165,8 +169,28 @@ int main(){
     else if(INIT==4) evolveH_ov4_INIT4(sector);
   }
 
-  // calculate the charge conjugate values of the eigenstates
+  // study potential scar states
+  cutoff = 0.1;
   if(CALC==0 || CALC==7){
+    if(lam == 0.0){
+      printf("Going to go in \n");
+      studyEvecs2_K00(sector, cutoff);
+      studyEvecs2_KPiPi(sector, cutoff);
+    }
+    else{
+      studyEvecs00(sector, cutoff);
+      studyEvecsPiPi(sector, cutoff);
+      studyEvecsPi0(sector, cutoff);
+      studyEvecs0Pi(sector, cutoff);
+    }
+  }
+
+  // calculate the charge conjugate values of the eigenstates
+  if(CALC==0 || CALC==8){
+    printf("It seems that the charge conjugation operation does not commute with translation.");
+    printf("Thus the routines here need to be changed. I think this to be true since the states");
+    printf("related by charge conjugation are not contained in the same bags. \n");
+    exit(0);
     checkCCpartners(sector);
     calcCCvalues(sector);
   }
@@ -186,22 +210,6 @@ int main(){
 void detectSpuriousStates(int sector){
   int k,m,tsect;
   double amp, prob;
-
-  /*
-  std::cout<<"Going to check for spurious eigenstates in sector (Pi,Pi)"<<std::endl;
-  tsect = Wind[sector].trans_sectors;
-  for(k=0; k<tsect; k++){
-    if( fabs(Wind[sector].evals_KPiPi[k] - 0.0) > 1e-10 ) continue;
-    std::cout<<"Checking eigenstate="<<k<<std::endl;
-    prob=0.0;
-    for(m=0; m<listPiPi.size(); m++){
-      amp  = Wind[sector].evecs_KPiPi[k*tsect + listPiPi[m]];
-      prob+= amp*amp;
-    }
-    if(fabs(prob - 1.0) < 1e-10) std::cout<<"Spurious eigenstate detected"<<std::endl;
-  }
-  */
-
   //std::cout<<"Going to check for spurious eigenstates in sector (Pi,0)"<<std::endl;
   tsect = Wind[sector].trans_sectors;
   for(k=0; k<tsect; k++){
@@ -215,6 +223,10 @@ void detectSpuriousStates(int sector){
     if(fabs(prob - 1.0) < 1e-10) spurPi0.push_back(k);
   }
   std::cout<<"#-of spurious eigenstates for mom (pi,0) ="<<spurPi0.size()<<std::endl;
+  for(m=0; m<spurPi0.size(); m++){
+    std::cout<<spurPi0[m]<<" ";
+  }
+  std::cout<<std::endl;
 
   //std::cout<<"Going to check for spurious eigenstates in sector (0,Pi)"<<std::endl;
   for(k=0; k<tsect; k++){
@@ -228,4 +240,38 @@ void detectSpuriousStates(int sector){
     if(fabs(prob - 1.0) < 1e-10) spur0Pi.push_back(k);
   }
   std::cout<<"#-of spurious eigenstates for mom (0,Pi) ="<<spur0Pi.size()<<std::endl;
+  for(m=0; m<spur0Pi.size(); m++){
+    std::cout<<spur0Pi[m]<<" ";
+  }
+  std::cout<<std::endl;
+}
+
+/* A stricter check: checks that physical eigenstates do not have overlaps on the
+   translational bags with zero form factors */
+void detectSpuriousStates2(int sector){
+  int k,m,tsect;
+  int chkPi0, chk0Pi;
+  double amp;
+  printf("In detectSpuriousStates2. \n");
+  tsect = Wind[sector].trans_sectors;
+  /* check this overlap for states in (Pi,0) sector */
+  // initialize variables needed to track the spurious eigenstates
+  chkPi0 = 0;
+  for(k=0; k<tsect; k++){
+    if(spurPi0[chkPi0] == k) { chkPi0++; continue; }
+    for(m=0; m<listPi0.size(); m++){
+      amp  = Wind[sector].evecs_KPi0[k*tsect + listPi0[m]];
+      if(fabs(amp) > 1e-6) printf("Sector (Pi,0), state=%d, amplitude=%lf\n",k,amp);
+    }
+  }
+  /* check this overlap for states in (0,Pi) sector */
+  // initialize variables needed to track the spurious eigenstates
+  chk0Pi = 0;
+  for(k=0; k<tsect; k++){
+    if(spurPi0[chk0Pi] == k) { chk0Pi++; continue; }
+    for(m=0; m<list0Pi.size(); m++){
+      amp  = Wind[sector].evecs_K0Pi[k*tsect + list0Pi[m]];
+      if(fabs(amp) > 1e-6) printf("Sector (0,Pi), state=%d, amplitude=%lf\n",k,amp);
+    }
+  }
 }

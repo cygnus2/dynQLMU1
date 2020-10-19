@@ -7,11 +7,13 @@
 #include<cmath>
 #include "mkl_lapacke.h"
 #include "define.h"
+#include<chrono>
 
 /* Auxiliary routines prototypes */
 extern void print_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda );
 extern void fileprint_matrix( char* desc, MKL_INT m, MKL_INT n, double* a, MKL_INT lda );
 extern void eig_print(std::vector<double>&,std::vector<double>&,int);
+extern void eig_print2(std::vector<double>&,std::vector<double>&,int);
 extern void check_eigvecs(MKL_INT, std::vector<double>&, std::vector<double>&, std::vector<double>&);
 
 void diag_LAPACK(int size, std::vector<std::vector<double>>& matrix, std::vector<double>& evals,
@@ -76,6 +78,10 @@ void diag_LAPACK_RRR(int size, std::vector<std::vector<double>>& matrix, std::ve
   double *W, *Z, *A;
   MKL_INT *ISUPPZ;
 
+  printf("In Lapack RRR \n");
+  // Get starting timepoint
+  auto start = std::chrono::high_resolution_clock::now();
+
   N = size; LDA = N; LDZ = N;
   NSELECT = N;
   NSQ = N*N;
@@ -88,6 +94,11 @@ void diag_LAPACK_RRR(int size, std::vector<std::vector<double>>& matrix, std::ve
     A[i+j*N]=matrix[i][j];
     if(CHKDIAG) acopy[i+j*N]=matrix[i][j];
   }}
+
+  // Get ending timepoint
+  auto stop = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop-start);
+  std::cout<<"Memory allocation done in "<<duration.count()<< " secs"<<std::endl;
 
   abstol = -1;
   printf("Going to RRR routine. \n");
@@ -102,6 +113,9 @@ void diag_LAPACK_RRR(int size, std::vector<std::vector<double>>& matrix, std::ve
   // copy eigenvalues and eigenvectors to main code
   evals.insert(evals.begin(), W, W+N);
   evecs.insert(evecs.begin(), Z, Z+N*N);
+
+  /* Print eigenvectors */
+  //eig_print2( evals, evecs, N);
 
   // check the eigenvectors. Be careful this requires an O(N^3) time
   if(CHKDIAG) check_eigvecs(N, acopy, evals, evecs);
@@ -143,6 +157,24 @@ void eig_print(std::vector<double> &evals,std::vector<double> &evecs,int size){
     printf("\n");
    }
  }
+
+void eig_print2(std::vector<double> &evals,std::vector<double> &evecs,int size){
+   unsigned i,j;
+   FILE *fptr;
+   fptr = fopen("EvecComparison.txt","w");
+   fprintf(fptr, "Eigenvalues max and min\n");
+   fprintf(fptr, "% lf  % lf\n",evals[0],evals[size-1]);
+   fprintf(fptr, "\n");
+   fprintf(fptr,"Eigenvectors max and min\n");
+   i=0;
+   for(j=0;j<size;j++){ fprintf(fptr,"% lf ",evecs[i*size+j]); }
+   fprintf(fptr,"\n");
+   i=size-1;
+   for(j=0;j<size;j++){ fprintf(fptr,"% lf ",evecs[i*size+j]); }
+   fprintf(fptr,"\n");
+   fclose(fptr);
+ }
+
 
 void check_eigvecs(MKL_INT size, std::vector<double> &matrix, std::vector<double> &evals,
   std::vector<double> &evecs){

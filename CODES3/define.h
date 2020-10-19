@@ -33,7 +33,8 @@ extern std::vector<std::vector<bool>> basis_flip;
 extern std::vector<int> listPiPi, listPi0, list0Pi;
 /* list the spurious eigenstates */
 extern std::vector<int> spurPiPi, spurPi0, spur0Pi;
-
+/* a flag to track the number of significant ice states */
+extern double cutoff;
 
 /* user defined classes */
 class WindNo{
@@ -186,6 +187,13 @@ void entanglementEnt_INIT4(int);
 void Lecho_INIT0(int);
 void Lecho_INIT4(int);
 void detectSpuriousStates(int);
+void detectSpuriousStates2(int);
+void studyEvecs00(int, double);
+void studyEvecsPiPi(int, double);
+void studyEvecsPi0(int, double);
+void studyEvecs0Pi(int, double);
+void studyEvecs2_K00(int, double);
+void studyEvecs2_KPiPi(int, double);
 #endif
 
 /*  Schematic set-up of the diagonal correlators

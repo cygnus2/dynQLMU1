@@ -61,7 +61,7 @@ void calc_Oflipt(int sector){
  // compute the static expectation values
  // value in the Diagonal Ensemble NOT computed yet!
  // the calculation has to be separated depending on INIT
- //calc_Oflip(sector, oflip);
+ calc_Oflip(sector, oflip);
  // compute the time evolution
  outf = fopen("OflipT.dat","w");
  if(INIT==0){ // for initial condition = 0 with fully flippable plaquettes
@@ -168,6 +168,7 @@ else if(INIT==4){
 // <w_k| O_flip |w_k> = \sum_l |B_l|^2 <b_l| O_flip |b_l>
 void calc_Oflip(int sector, std::vector<double>& of){
   int k,l,p;
+  int chkindex;
   unsigned int sizet = Wind[sector].trans_sectors;
   double Oflip_avg;
   FILE *outf;
@@ -195,7 +196,11 @@ void calc_Oflip(int sector, std::vector<double>& of){
     fprintf(outf,"%lf %lf\n",Wind[sector].evals_KPiPi[k],Oflip_avg);
   }
   fprintf(outf,"\n\n# Results for (kx,ky)=(Pi,0) \n");
+  // we need this variable to check spurious eigenstates
+  chkindex=0;
   for(k=0;k<sizet;k++){
+    // if the eigenstate is spurious, then skip
+    if(spurPi0[chkindex] == k){ chkindex++; continue; }
     // calculate the expectation value in each eigenstate in translation basis
     Oflip_avg = 0.0;
     for(l=0;l<sizet;l++){
@@ -204,8 +209,16 @@ void calc_Oflip(int sector, std::vector<double>& of){
     Oflip_avg /= ((double)VOL);
     fprintf(outf,"%lf %lf\n",Wind[sector].evals_KPi0[k],Oflip_avg);
   }
+  // check that all spurious states have been counted
+  if(chkindex != spurPi0.size()){
+    printf("Numbers of spurious states don't add up. \n"); exit(0);
+  }
   fprintf(outf,"\n\n# Results for (kx,ky)=(0,Pi) \n");
+  // we need this variable to check spurious eigenstates
+  chkindex=0;
   for(k=0;k<sizet;k++){
+    // if the eigenstate is spurious, then skip
+    if(spur0Pi[chkindex] == k){ chkindex++; continue; }
     // calculate the expectation value in each eigenstate in translation basis
     Oflip_avg = 0.0;
     for(l=0;l<sizet;l++){
@@ -213,6 +226,10 @@ void calc_Oflip(int sector, std::vector<double>& of){
     }
     Oflip_avg /= ((double)VOL);
     fprintf(outf,"%lf %lf\n",Wind[sector].evals_K0Pi[k],Oflip_avg);
+  }
+  // check that all spurious states have been counted
+  if(chkindex != spur0Pi.size()){
+    printf("Numbers of spurious states don't add up. \n"); exit(0);
   }
  fclose(outf);
 }

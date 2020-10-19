@@ -49,6 +49,10 @@ void ChargeConjEval1(int sector, std::vector<double> &CCj00, std::vector<double>
     CCconj00[r][s]   += ele; // phases are all +1 for mom (0,0)
     CCconjPiPi[r][s] += ele*Wind[sector].FPiPi[p]*Wind[sector].FPiPi[q];
   }
+  /*for(p=0; p<sizet; p++){
+    q=sizet-1-p;
+
+  }*/
   // now compute the expectation values over eigenstates
   for(k=0; k<tsect; k++){
     CC00 = 0.0; CCPiPi = 0.0;
@@ -58,10 +62,11 @@ void ChargeConjEval1(int sector, std::vector<double> &CCj00, std::vector<double>
       CCPiPi += CCconjPiPi[p][q]*Wind[sector].evecs_KPiPi[k*tsect+p]*Wind[sector].evecs_KPiPi[k*tsect+q];
     }}
     //std::cout<<"Eigenstate ="<<k<<"; CConj evals = "<<CC00<<" , "<<CCPiPi<<std::endl;
-    if(fabs((fabs(CC00)-1.0)) > 1e-10) printf("Not a good C-eigenstate of (0,0) \n");
-    else CCj00.push_back(CC00);
-    if(fabs((fabs(CCPiPi)-1.0)) > 1e-10) printf("Not a good C-eigenstate of (Pi,Pi) \n");
-    else CCjPiPi.push_back(CCPiPi);
+    //if(fabs((fabs(CC00)-1.0)) > 1e-10) printf("Not a good C-eigenstate of (0,0) \n");
+    //else CCj00.push_back(CC00);
+    //if(fabs((fabs(CCPiPi)-1.0)) > 1e-10) printf("Not a good C-eigenstate of (Pi,Pi) \n");
+    //else CCjPiPi.push_back(CCPiPi);
+    CCj00.push_back(CC00); CCjPiPi.push_back(CCPiPi);
   }
   // clear memory
   CCconj00.clear(); CCconjPiPi.clear();

@@ -19,7 +19,7 @@ void initneighbor(void)
       next[DIM-1][p] = y*LX + ((x-1+LX)%LX);
       next[DIM-2][p] = ((y-1+LY)%LY)*LX + x;
   }
- 
+
   /* checkerboard to linear and vice-versa */
   p=0;
   for(y=0;y<LY;y++){
@@ -39,20 +39,20 @@ void initneighbor(void)
        //printf("checkerboard site = %d(%d,%d); Lin site = %d\n",p,x,y,q);
        p++;
     }
-  }} 
+  }}
 
-  // nextCHK targets the neighboring sites in the string 
+  // nextCHK targets the neighboring sites in the string
   // representing the GL implementation on the even sites
   for(p=0;p<VOL;p++){
       lin = chk2lin[p];
       nextCHK[DIM][p]   = p;
       nextCHK[DIM+1][p] = lin2chk[next[DIM+1][lin]];
-      nextCHK[DIM-1][p] = lin2chk[next[DIM-1][lin]]; 
+      nextCHK[DIM-1][p] = lin2chk[next[DIM-1][lin]];
       nextCHK[DIM+2][p] = lin2chk[next[DIM+2][lin]];
       nextCHK[DIM-2][p] = lin2chk[next[DIM-2][lin]];
       //printf("checkerboard NN. site = %d (in chkrboard = %d)\n",lin,p);
       //printf("+x=%d,   -x=%d,   +y=%d,   -y=%d\n",nextCHK[DIM+1][p],
-      //nextCHK[DIM-1][p],nextCHK[DIM+2][p],nextCHK[DIM-2][p]); 
+      //nextCHK[DIM-1][p],nextCHK[DIM+2][p],nextCHK[DIM-2][p]);
    }
 }
 
@@ -83,7 +83,7 @@ void printconf1(std::vector<bool> conf){
   }
 }
 
-/* Print the subsystem configuration 
+/* Print the subsystem configuration
  */
 void printconfA(std::vector<std::vector<bool>> cA){
   int p,i,t,ix,iy;
@@ -191,4 +191,22 @@ void deallocatedouble2d(double **mat, int row, int col){
  free(mat);
 }
 
+// print the representative state of the bag in the file
+void print2file(int sector, int tbag, FILE *fptr){
+  int p, i, tstate;
+  std::vector<bool> state(2*VOL);
 
+  // note that for printing the relevant basis state, remember that the Tflag labels
+  // start from 1.
+  for(i=0;i<Wind[sector].nBasis;i++){
+    if(Wind[sector].Tflag[i] == (tbag+1)){
+      state = Wind[sector].basisVec[i];
+      printf("#-of-flippable plaquettes = %d\n",Wind[sector].nflip[i]);
+      for(p=0;p<2*VOL;p++){
+        fprintf(fptr,"%d ",(int)state[p]);
+      }
+      fprintf(fptr,"\n");
+      return;
+    }
+  }
+}
