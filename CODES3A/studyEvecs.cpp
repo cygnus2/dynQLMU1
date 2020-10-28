@@ -93,38 +93,37 @@ void studyEvecsPiPi(int sector, double cutoff){
 }
 
 // Same routine, but deals with the momentum (Pi,0) sector
+// take into account that non-contributing bags are removed.
 void studyEvecsPi0(int sector, double cutoff){
    double targetEN, amp, prob;
-   double check, chkPi0;
+   double check;
    int num_Eigst;
    std::vector<int> ev_list;
    int totbasisState;
-   int p,q,sizet;
+   int p,q,qq,sizet;
    FILE *fptr1, *fptr2;
 
    sizet = Wind[sector].trans_sectors;
    // scan for states with the same energy density as INIT=4
    targetEN = lam*VOL/2.0;
    printf("Looking for eigenstates with energy = %.12lf\n",targetEN);
-   num_Eigst=0; chkPi0  = 0;
-   for(p=0; p<sizet; p++){
-     if(spurPi0[chkPi0] == p) chkPi0++;
-     else{   // skip spurious states
-        if(fabs(Wind[sector].evals_KPi0[p]-targetEN) < 1e-10){
+   num_Eigst=0;
+   for(p=0; p<nDimPi0; p++){
+      if(fabs(Wind[sector].evals_KPi0[p]-targetEN) < 1e-10){
           num_Eigst++;
           ev_list.push_back(p);
-        }
-     }
+      }
    }
    printf("#-of eigenstates found in momentum (Pi,0) = %d \n",num_Eigst);
    printf("#-of ice states above cutoffProb = %lf in each eigenstate: \n",cutoff);
    fptr1 = fopen("EvecListPi0.dat","w");
    fptr2 = fopen("BasisListPi0.dat","w");
    for(p=0; p<num_Eigst; p++){
-     totbasisState=0;
-     check=0.0;
+     totbasisState=0; check=0.0;
      for(q=0; q<sizet; q++){
-       amp    = Wind[sector].evecs_KPi0[ev_list[p]*sizet + q];
+       qq = labelPi0[q];
+       if(qq == -997) amp = 0.0;
+       else           amp = Wind[sector].evecs_KPi0[ev_list[p]*nDimPi0 + qq];
        prob   = amp*amp;
        if(prob > cutoff) { totbasisState++; print2file(sector, q, fptr2);  }
        fprintf(fptr1,"% .6le ",amp);
@@ -140,25 +139,22 @@ void studyEvecsPi0(int sector, double cutoff){
 // Same routine, but deals with the momentum (0,Pi) sector
 void studyEvecs0Pi(int sector, double cutoff){
    double targetEN, amp, prob;
-   double check, chk0Pi;
+   double check;
    int num_Eigst;
    std::vector<int> ev_list;
    int totbasisState;
-   int p,q,sizet;
+   int p,q,qq,sizet;
    FILE *fptr1,*fptr2;
 
    sizet = Wind[sector].trans_sectors;
    // scan for states with the same energy density as INIT=4
    targetEN = lam*VOL/2.0;
    printf("Looking for eigenstates with energy = %.12lf\n",targetEN);
-   num_Eigst=0; chk0Pi  = 0;
-   for(p=0; p<sizet; p++){
-     if(spur0Pi[chk0Pi] == p) chk0Pi++;
-     else{   // skip spurious states
-        if(fabs(Wind[sector].evals_K0Pi[p]-targetEN) < 1e-10){
-          num_Eigst++;
-          ev_list.push_back(p);
-        }
+   num_Eigst=0;
+   for(p=0; p<nDim0Pi; p++){
+     if(fabs(Wind[sector].evals_K0Pi[p]-targetEN) < 1e-10){
+        num_Eigst++;
+        ev_list.push_back(p);
      }
    }
    printf("#-of eigenstates found in momentum (0,Pi) = %d \n",num_Eigst);
@@ -166,10 +162,11 @@ void studyEvecs0Pi(int sector, double cutoff){
    fptr1 = fopen("EvecList0Pi.dat","w");
    fptr2 = fopen("BasisList0Pi.dat","w");
    for(p=0; p<num_Eigst; p++){
-     totbasisState=0;
-     check=0.0;
+     totbasisState=0; check=0.0;
      for(q=0; q<sizet; q++){
-       amp    = Wind[sector].evecs_K0Pi[ev_list[p]*sizet + q];
+       qq = label0Pi[q];
+       if(qq == -997 ) amp = 0.0;
+       else            amp = Wind[sector].evecs_K0Pi[ev_list[p]*nDim0Pi + qq];
        prob   = amp*amp;
        if(prob > cutoff){ totbasisState++; print2file(sector, q, fptr2);  }
        fprintf(fptr1,"% .6le ",amp);

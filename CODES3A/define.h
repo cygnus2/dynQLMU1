@@ -182,8 +182,6 @@ void calc_Oflip(int);
 void initState(int, int, int*);
 void entanglementEnt_INIT0(int);
 void entanglementEnt_INIT4(int);
-void detectSpuriousStates(int);
-void detectSpuriousStates2(int);
 void studyEvecs00(int, double);
 void studyEvecsPiPi(int, double);
 void studyEvecsPi0(int, double);
