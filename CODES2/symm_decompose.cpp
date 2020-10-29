@@ -190,7 +190,7 @@ void WindNo::flip_plaq(){
       //std::cout<<"Basis state "<<i<<" = "<<count_flip<<std::endl;
     }
 }
- 
+
 // calculates the local Ey
 void WindNo::computeEy(){
     int i,j,p,q,x,y,p1,p2;
@@ -198,8 +198,8 @@ void WindNo::computeEy(){
     std::vector<int> Eytot(LX);
     std::vector<int> diffEy(LX);
     bool pxy,pyz;
-    // Ey1*Ey2 for odd and even x. Ey1 and Ey2 are fluxes for y=0 and y=1
-    int evnEy1Ey2, oddEy1Ey2;
+    // corr Ey(i)*Ey(i+1);  Ey = Eytot at each Ey
+    double corrEy;
 
     // the lattice arrangement is as follows
     /*  z o----o----o----o----o
@@ -227,33 +227,24 @@ void WindNo::computeEy(){
               else               diffEy[x]++;
             }
           }
-    if(Eytot[x]%2){ printf("Error in Ey! LY != even, aborting \n"); exit(0); }
-    if(diffEy[x]%2){ printf("Error in dEy! LY != even, aborting \n"); exit(0); }
-    Eytot[x] /= 2;
-    diffEy[x] /= 2;
-    }
-    // compute the Ey cross correlators
-    if(LY==2){
-       // x=0
-       x=0; y1=0; y2=1; p1=y1*LX+x; p2=y2*LX+x; q1=2*p1+1; q2=2*p2+1;
-       if(basisVec[i][q1]==basisVec[i][q2]) evnEy1Ey2 = 1;
-       else                                 evnEy1Ey2 =-1;
-       // x=1
-       x=1; y1=0; y2=1; p1=y1*LX+x; p2=y2*LX+x; q1=2*p1+1; q2=2*p2+1;
-       if(basisVec[i][q1]==basisVec[i][q2]) oddEy1Ey2 = 1;
-       else                                 oddEy1Ey2 =-1;
-     }
-     else{
-       printf("This LY is not supported. Assigning zero to evenEy1Ey2 and oddEy1Ey2\n");
-       evnEy1Ey2 = 0; oddEy1Ey2 = 0;
-     };
-    // push the values to original variables defined within the class
-    Ey.push_back(Eytot);
-    dEy.push_back(diffEy);
-    CEy0.push_back(evnEy1Ey2);
-    CEy1.push_back(oddEy1Ey2);
-  } // close loop i over basis states
-  Eytot.clear(); diffEy.clear();
+          if(Eytot[x]%2){ printf("Error in Ey! LY != even, aborting \n"); exit(0); }
+          if(diffEy[x]%2){ printf("Error in dEy! LY != even, aborting \n"); exit(0); }
+          Eytot[x] /= 2;
+          diffEy[x] /= 2;
+      }
+      // compute the Ey correlators
+      corrEy = 0.0;
+      for(x=0; x<LX; x++){
+        corrEy += Eytot[x]*Eytot[(x+1)%LX];
+      }
+      corrEy = corrEy/(double(LX));
+
+      // push the values to original variables defined within the class
+      Ey.push_back(Eytot);
+      dEy.push_back(diffEy);
+      CEy1.push_back(corrEy);
+    } // close loop i over basis states
+    Eytot.clear(); diffEy.clear();
 }
 
 

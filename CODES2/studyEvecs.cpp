@@ -46,7 +46,7 @@ void studyEvecs(int sector){
        check += prob;
        if(prob > cutoff){
           totbasisState++;
-	  printf("#-of flippable states in basis state=%d is %d\n",q,Wind[sector].nflip[q]);
+	        printf("#-of flippable states in basis state=%d is %d\n",q,Wind[sector].nflip[q]);
           print2file(sector, q, fptr2);
        }
        fprintf(fptr1,"%.6le ",prob);

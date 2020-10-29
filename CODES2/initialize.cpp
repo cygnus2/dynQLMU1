@@ -56,7 +56,6 @@ void initState(int sector, int INIT, int *q){
       for(r=0; r<VOL; r++) std::cout<<r<<"  "<<Wind[sector].xflip[(*q)][r]<<std::endl;
       std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
       for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<" "<<Wind[sector].dEy[*q][r]<<std::endl;
-      std::cout<<"CEy0 ="<<Wind[sector].CEy0[*q]<<"; CEy1 ="<<Wind[sector].CEy1[*q]<<";"<<std::endl;
       return;
     } // close INIT=0
     else if(INIT==1){ // 1-plaquette flipped cartoon state
@@ -70,7 +69,6 @@ void initState(int sector, int INIT, int *q){
       for(r=0; r<VOL; r++) std::cout<<r<<"  "<<Wind[sector].xflip[(*q)][r]<<std::endl;
       std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
       for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<" "<<Wind[sector].dEy[*q][r]<<std::endl;
-      std::cout<<"CEy0 ="<<Wind[sector].CEy0[*q]<<"; CEy1 ="<<Wind[sector].CEy1[*q]<<";"<<std::endl;
 			return; }
                 cx1++;
             }
@@ -92,7 +90,6 @@ void initState(int sector, int INIT, int *q){
       for(r=0; r<VOL; r++) std::cout<<r<<"  "<<Wind[sector].xflip[(*q)][r]<<std::endl;
       std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
       for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<" "<<Wind[sector].dEy[*q][r]<<std::endl;
-      std::cout<<"CEy0 ="<<Wind[sector].CEy0[*q]<<"; CEy1 ="<<Wind[sector].CEy1[*q]<<";"<<std::endl;
 			return;}
             }
        }
@@ -113,7 +110,6 @@ void initState(int sector, int INIT, int *q){
       for(r=0; r<VOL; r++) std::cout<<r<<"  "<<Wind[sector].xflip[(*q)][r]<<std::endl;
       std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
       for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<" "<<Wind[sector].dEy[*q][r]<<std::endl;
-      std::cout<<"CEy0 ="<<Wind[sector].CEy0[*q]<<"; CEy1 ="<<Wind[sector].CEy1[*q]<<";"<<std::endl;
 		       return;}
             }
        }
@@ -140,7 +136,6 @@ void initState(int sector, int INIT, int *q){
        for(r=0; r<VOL; r++) std::cout<<r<<"  "<<Wind[sector].xflip[(*q)][r]<<std::endl;
        std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
        for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<" "<<Wind[sector].dEy[*q][r]<<std::endl;
-       std::cout<<"CEy0 ="<<Wind[sector].CEy0[*q]<<"; CEy1 ="<<Wind[sector].CEy1[*q]<<";"<<std::endl;
        return;
     } // close INIT=4
     else if(INIT==5){ // domain walls together, and anti-domain walls stacked together
@@ -169,7 +164,6 @@ void initState(int sector, int INIT, int *q){
        std::cout<<"#-of-flippable plaqs ="<<Wind[sector].nflip[(*q)]<<std::endl;
        std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
        for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<" "<<Wind[sector].dEy[*q][r]<<std::endl;
-       std::cout<<"CEy0 ="<<Wind[sector].CEy0[*q]<<"; CEy1 ="<<Wind[sector].CEy1[*q]<<";"<<std::endl;
        std::cout<<"Printing the flippability profile of initial state "<<std::endl;
        for(r=0; r<VOL; r++) std::cout<<r<<"  "<<Wind[sector].xflip[(*q)][r]<<std::endl;
        return;
@@ -210,7 +204,6 @@ void initState(int sector, int INIT, int *q){
        std::cout<<"#-of-flippable plaqs ="<<Wind[sector].nflip[(*q)]<<std::endl;
        std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
        for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<" "<<Wind[sector].dEy[*q][r]<<std::endl;
-       std::cout<<"CEy0 ="<<Wind[sector].CEy0[*q]<<"; CEy1 ="<<Wind[sector].CEy1[*q]<<";"<<std::endl;
        std::cout<<"Printing the flippability profile of initial state "<<std::endl;
        for(r=0; r<VOL; r++) std::cout<<r<<"  "<<Wind[sector].xflip[(*q)][r]<<std::endl;
        return;
@@ -281,8 +274,6 @@ void initState(int sector, int INIT, int *q){
   for(r=0; r<VOL; r++) std::cout<<r<<"  "<<Wind[sector].xflip[(*q)][r]<<std::endl;
   std::cout<<"Printing the Ey profile of the initial state:"<<std::endl;
   for(r=0;r<LX;r++) std::cout<<r<<"  "<<Wind[sector].Ey[*q][r]<<" "<<Wind[sector].dEy[*q][r]<<std::endl;
-  std::cout<<"CEy0 ="<<Wind[sector].CEy0[*q]<<"; CEy1 ="<<Wind[sector].CEy1[*q]<<";"<<std::endl;
-
 
   // sanity checks DELETE LATER!
   chk1=Wind[sector].scan(cart);

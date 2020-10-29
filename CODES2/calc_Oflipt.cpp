@@ -36,35 +36,29 @@ void calc_Oflipt(int sector){
      alpha.push_back(Wind[sector].evecs[p*sizet+q1]);
   }
 
-  // Compute <PSI_M| O_flip|PSI_M> & <PSI_M| C_flip |PSI_M> for all PSI_M
+  // Compute <PSI_M| O_flip|PSI_M>
   outf = fopen("Oflip.dat","w");
   fprintf(outf,"# Results of winding number sector (%d,%d) \n",Wind[sector].Wx,Wind[sector].Wy);
   Oflip_diag = 0.0;
-  //for(r=0;r<(LX/2);r++) CR_diag[r]=0.0;
   // scan through all the eigenvalues
   for(p=0;p<sizet;p++){
     // calculate the expectation value in each eigenstate
     Oflip_avg = 0.0;
-    //for(r=0;r<(LX/2);r++) temp[r]=0.0;
     for(q=0;q<sizet;q++){
       v_q = Wind[sector].evecs[p*sizet+q];
       O_q = Wind[sector].nflip[q];
       Oflip_avg += v_q*v_q*O_q;
-      //for(r=0;r<(LX/2);r++) temp[r] += v_q*v_q*Wind[sector].cflip[q][r];
     }
     Oflip_diag += Oflip_avg*alpha[p]*alpha[p];
     Oflip_avg = Oflip_avg/((double)VOL);
-    //for(r=0;r<(LX/2);r++) CR_diag[r] += temp[r]*alpha[p]*alpha[p];
     fprintf(outf,"%.12lf %.12lf\n",Wind[sector].evals[p],Oflip_avg);
   }
  fclose(outf);
 
  // diagonal ensemble results
- //for(r=0;r<(LX/2);r++) CR_diag[r] = CR_diag[r]/((double)VOL);
  Oflip_diag = Oflip_diag/((double)VOL);
  outf = fopen("OflipT.dat","w");
  fprintf(outf,"# value in the diagonal observable = %.12f ",Oflip_diag);
- //for(r=0;r<(LX/2);r++) fprintf(outf, " %lf ",CR_diag[r]);
  fprintf(outf,"\n");
 
  // the time-evolution
@@ -78,19 +72,14 @@ void calc_Oflipt(int sector){
          phiIM += alpha[m]*Wind[sector].evecs[sizet*m+k]*sin(-Wind[sector].evals[m]*t);
        }
        oflipt += (phiRE*phiRE + phiIM*phiIM)*Wind[sector].nflip[k];
-       //for(r=0;r<(LX/2);r++) CR[r] += (phiRE*phiRE +  phiIM*phiIM)*Wind[sector].cflip[k][r];
      }
      oflipt = oflipt/((double)VOL);
-     //for(r=0;r<(LX/2);r++) CR[r] = CR[r]/((double)VOL);
      fprintf(outf,"%.4lf %.12lf ",t,oflipt);
-     //for(r=0;r<(LX/2);r++) fprintf(outf," %.8lf ",CR[r]);
      fprintf(outf,"\n");
  }
  fclose(outf);
  /* clear memory */
  alpha.clear();
- //CR.clear(); CR_diag.clear(); temp.clear();
-
 }
 
 // This routine serves as a check of the calculation of the real-time

@@ -1,11 +1,11 @@
-Lx 4
-Ly 2
-lam -10.0
+Lx 4 
+Ly 4
+lam 0.0
 Ti 0.0
-Tf 10.0 
+Tf 0.0 
 dT 0.1
 LA 2
-WX -1
+WX 0
 WY 0
 LR 0
-INIT 11
+INIT 4

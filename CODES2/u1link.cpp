@@ -106,7 +106,6 @@ int main(){
   auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
   std::cout << "Time needed " << elapsed.count() << " milliseconds." << std::endl;
 
-
   /* get number of winding number sectors */
   nWind = calc_WindNo(LX,LY);
   Wind.reserve(nWind);
@@ -114,14 +113,14 @@ int main(){
 
   printf("Chosen (Wx,Wy) sector = (%d,%d)\n",WX,WY);
   sector = lookup[LX/2+WX][LY/2+WY];
-  //constH(sector);
+  constH(sector);
 
-  //INITq = -1;
+  INITq = -1;
   //set the starting state once (and for all!)
-  //initState(sector, INIT, &INITq);
+  initState(sector, INIT, &INITq);
 
-  // calculate the <psi_n| O_flip |psi_n>, for every eigenstate psi_n
-  //calc_Oflip(sector);
+  // calculate the <psi_n| O_flip |psi_n>, <psi_n|CEy1|psi_n> for every eigenstate psi_n
+  calc_Oflip(sector);
 
   // real time evolution of <PHI(t)| O_flip |PHI(t)> and <PHI(t)| Cflip |PHI(t)>
   // starting from specified initial states in each sector (see notes)
@@ -143,14 +142,14 @@ int main(){
   //evolveH_ov3(sector);
 
   // Entanglement Entropy calculations
-  //evolve_Eent(sector);
+  evolve_Eent(sector);
 
   // Investigate potential "scar" states
-  //studyEvecs(sector);
-  //if(lam == 0.0) studyEvecs2(sector);
+  if(lam == 0.0) studyEvecs2(sector);
+  else           studyEvecs(sector);
 
   // Set up ED in the basis of states with flippable plaq = VOL/2
-  scarDiag(sector);
+  //scarDiag(sector);
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }

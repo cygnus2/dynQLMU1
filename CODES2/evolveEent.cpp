@@ -245,7 +245,7 @@ void createLookupTable(int sector, MKL_INT DA, MKL_INT DB, std::vector<MKL_INT> 
       // I don't understand why this was initialized to 1, the loop should just continue
       // without doing anything
       //if(flagGI==0){ sub2main[i*DB+j]=-1; continue; }
-      if(flagGI==0) continue; 
+      if(flagGI==0) continue;
       // match with the corresponding basis state in the winding number sector
       // it is very important that binscan2() is used. binscan() seems to give
       // wrong results. Why?

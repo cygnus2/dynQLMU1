@@ -51,7 +51,6 @@ void constH(int sector){
    // scan through the basis vectors in this sector
    for(i=0;i<Wind[sector].nBasis;i++){
       newstate = Wind[sector].basisVec[i];
-
       /* act on the basis state with the Hamiltonian */
       /* a single plaquette is arranged as
                 pzw
@@ -78,11 +77,11 @@ void constH(int sector){
          //q=Wind[sector].scan(newstate);
          q=Wind[sector].binscan(newstate);
 
-	 // sanity checks DELETE LATER!
-	 //chk1=Wind[sector].scan(newstate);
-	 //chk2=Wind[sector].binscan2(newstate);
-	 //if(chk1!=q) std::cout<<"Mismatch binscan vs scan. q="<<q<<" chk1="<<chk1<<std::endl;
-	 //if(chk2!=q) std::cout<<"Mismatch binscan vs binscan2. q="<<q<<" chk2="<<chk2<<std::endl;
+	       // sanity checks DELETE LATER!
+	       //chk1=Wind[sector].scan(newstate);
+	       //chk2=Wind[sector].binscan2(newstate);
+	       //if(chk1!=q) std::cout<<"Mismatch binscan vs scan. q="<<q<<" chk1="<<chk1<<std::endl;
+	       //if(chk2!=q) std::cout<<"Mismatch binscan vs binscan2. q="<<q<<" chk2="<<chk2<<std::endl;
 
          // store the position matrix element (i,stateq)
          rowscan[stateq]=q; stateq++;
@@ -94,28 +93,28 @@ void constH(int sector){
          // reset flippability info
          if(pxy) xfl[p]= 1;
          else    xfl[p]=-1;
-       } // close if-statement
-     } // close for loop over p VOL
+        } // close if-statement
+      } // close for loop over p VOL
 
-     // store the info about the flippability of the basis state
-     Wind[sector].xflip.push_back(xfl);
+      // store the info about the flippability of the basis state
+      Wind[sector].xflip.push_back(xfl);
 
-     //store the diagonal location
-     rowscan[stateq]=i; stateq++;
-     // get the #-of-flippable plaquettes of the basis state-i
-     n_Flip=Wind[sector].nflip[i];
-     // check
-     if(stateq > (VOL+1)){ printf("Error in bound.\n"); }
-     // sort the matrix columns
-     std::sort (rowscan.begin(), rowscan.end());
-     // construct the matrix in CSC format
-     curr_index = curr_index + stateq;
-     Wind[sector].rows.push_back(curr_index);
-     for(k=0;k<stateq;k++){
-       Wind[sector].cols.push_back(rowscan[k]+1);
-       if(rowscan[k]==i) Wind[sector].hamil.push_back(lam*n_Flip);
-       else Wind[sector].hamil.push_back(-1.0);
-     }
+      //store the diagonal location
+      rowscan[stateq]=i; stateq++;
+      // get the #-of-flippable plaquettes of the basis state-i
+      n_Flip=Wind[sector].nflip[i];
+      // check
+      if(stateq > (VOL+1)){ printf("Error in bound.\n"); }
+      // sort the matrix columns
+      std::sort (rowscan.begin(), rowscan.end());
+      // construct the matrix in CSC format
+      curr_index = curr_index + stateq;
+      Wind[sector].rows.push_back(curr_index);
+      for(k=0;k<stateq;k++){
+        Wind[sector].cols.push_back(rowscan[k]+1);
+        if(rowscan[k]==i) Wind[sector].hamil.push_back(lam*n_Flip);
+        else Wind[sector].hamil.push_back(-1.0);
+      }
 
      //compute the correlation functions, using the depicted scheme
      /*  Schematic set-up of the diagonal correlators

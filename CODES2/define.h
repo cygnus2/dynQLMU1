@@ -60,9 +60,8 @@ class WindNo{
     // information about the Ey(x): Ey = sum, dEy = diff,
     std::vector<std::vector<int>> Ey;
     std::vector<std::vector<int>> dEy;
-    // CEy0,CEy1 = corrf of Ey in the y-direction
-    std::vector<int> CEy0;
-    std::vector<int> CEy1;
+    // CEy1 = corrf of Ey at r=1 = (1/Lx) \sum_{i=1}^Lx Ey(i) Ey(i+1)
+    std::vector<double> CEy1;
     // OOd1, OOd2, OOv1, OOv2, OOh1, OOh2; see schematic diagram below
     std::vector<int> OOd1, OOd2;
     std::vector<int> OOv1, OOv2;
@@ -103,7 +102,7 @@ class WindNo{
        xflip.clear();
        nflip.clear();
        Ey.clear();   dEy.clear();
-       CEy0.clear(); CEy1.clear();
+       CEy1.clear();
        OOd1.clear(); OOd2.clear();
        OOv1.clear(); OOv2.clear();
        OOh1.clear(); OOh2.clear();
