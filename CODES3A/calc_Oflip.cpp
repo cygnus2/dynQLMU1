@@ -28,6 +28,7 @@ void calc_Oflip(int sector){
   std::vector<double> cEy(sizet);
   double Oflip_avg, cEy_avg;
   FILE *outf;
+  double amp, shannonE, IPR;
 
   // initialize
   for(k=0;k<sizet;k++) { oflip.push_back(0.0); cEy.push_back(0.0); }
@@ -42,53 +43,69 @@ void calc_Oflip(int sector){
   outf = fopen("Oflip.dat","w");
   fprintf(outf,"# Results for (kx,ky)=(0,0) \n");
   for(k=0;k<sizet;k++){
+    shannonE=0.0; IPR=0.0;
     // calculate the expectation value in each eigenstate in translation basis
     Oflip_avg = 0.0; cEy_avg = 0.0;
     for(l=0;l<sizet;l++){
-     Oflip_avg += Wind[sector].evecs_K00[k*sizet+l]* Wind[sector].evecs_K00[k*sizet+l]*oflip[l];
-     cEy_avg   += Wind[sector].evecs_K00[k*sizet+l]* Wind[sector].evecs_K00[k*sizet+l]*cEy[l];
+     amp        = Wind[sector].evecs_K00[k*sizet+l];
+     Oflip_avg += amp*amp*oflip[l];
+     cEy_avg   += amp*amp*cEy[l];
+     if(fabs(amp) > 1e-10) shannonE  -= (amp*amp)*log(amp*amp);
+     IPR       += (amp*amp*amp*amp);
     }
     Oflip_avg /= ((double)VOL);   cEy_avg /= ((double)VOL);
-    fprintf(outf,"%.12lf %.12lf %.12lf\n",Wind[sector].evals_K00[k],Oflip_avg,cEy_avg);
+    fprintf(outf,"%.12lf %.12lf %.12lf %.12lf %.12lf\n",Wind[sector].evals_K00[k],Oflip_avg,cEy_avg,shannonE,IPR);
   }
   fprintf(outf,"\n\n# Results for (kx,ky)=(Pi,Pi) \n");
   for(k=0;k<sizet;k++){
+    shannonE=0.0; IPR=0.0;
     // calculate the expectation value in each eigenstate in translation basis
     Oflip_avg = 0.0; cEy_avg = 0.0;
     for(l=0;l<sizet;l++){
-     Oflip_avg += Wind[sector].evecs_KPiPi[k*sizet+l]* Wind[sector].evecs_KPiPi[k*sizet+l]*oflip[l];
-     cEy_avg   += Wind[sector].evecs_KPiPi[k*sizet+l]* Wind[sector].evecs_KPiPi[k*sizet+l]*cEy[l];
+     amp        = Wind[sector].evecs_KPiPi[k*sizet+l];
+     Oflip_avg += amp*amp*oflip[l];
+     cEy_avg   += amp*amp*cEy[l];
+     if(fabs(amp) > 1e-10) shannonE  -= (amp*amp)*log(amp*amp);
+     IPR       += (amp*amp*amp*amp);
     }
     Oflip_avg /= ((double)VOL);  cEy_avg /= ((double)VOL);
-    fprintf(outf,"%.12lf %.12lf %.12lf\n",Wind[sector].evals_KPiPi[k],Oflip_avg,cEy_avg);
+    fprintf(outf,"%.12lf %.12lf %.12lf %.12lf %.12lf\n",Wind[sector].evals_KPiPi[k],Oflip_avg,cEy_avg,shannonE,IPR);
   }
   fprintf(outf,"\n\n# Results for (kx,ky)=(Pi,0) \n");
   // this needs to look for correct labels to the translation basis
   for(k=0;k<sizet;k++){
+    shannonE=0.0; IPR=0.0;
     Oflip_avg = 0.0; cEy_avg = 0.0;
     // if this is not a physical bag then skip
     kk = labelPi0[k]; if(kk==-997) continue;
     for(l=0;l<sizet;l++){
       ll = labelPi0[l]; if(ll==-997) continue;
-      Oflip_avg += Wind[sector].evecs_KPi0[kk*nDimPi0+ll]* Wind[sector].evecs_KPi0[kk*nDimPi0+ll]*oflip[l];
-      cEy_avg   += Wind[sector].evecs_KPi0[kk*nDimPi0+ll]* Wind[sector].evecs_KPi0[kk*nDimPi0+ll]*cEy[l];
+      amp        = Wind[sector].evecs_KPi0[kk*nDimPi0+ll];
+      Oflip_avg += amp*amp*oflip[l];
+      cEy_avg   += amp*amp*cEy[l];
+      if(fabs(amp) > 1e-10) shannonE  -= (amp*amp)*log(amp*amp);
+      IPR       += (amp*amp*amp*amp);
     }
     Oflip_avg /= ((double)VOL); cEy_avg /= ((double)VOL);
-    fprintf(outf,"%.12lf %.12lf %.12lf\n",Wind[sector].evals_KPi0[kk],Oflip_avg,cEy_avg);
+    fprintf(outf,"%.12lf %.12lf %.12lf %.12lf %.12lf\n",Wind[sector].evals_KPi0[kk],Oflip_avg,cEy_avg,shannonE,IPR);
   }
   fprintf(outf,"\n\n# Results for (kx,ky)=(0,Pi) \n");
   // this needs to look for correct labels to the translation basis
   for(k=0;k<sizet;k++){
+    shannonE=0.0; IPR=0.0;
     Oflip_avg = 0.0; cEy_avg = 0.0;
     // if this is not a physical bag then skip
     kk = label0Pi[k]; if(kk==-997) continue;
     for(l=0;l<sizet;l++){
       ll = label0Pi[l]; if(ll==-997) continue;
-      Oflip_avg += Wind[sector].evecs_K0Pi[kk*nDim0Pi+ll]* Wind[sector].evecs_K0Pi[kk*nDim0Pi+ll]*oflip[l];
-      cEy_avg   += Wind[sector].evecs_K0Pi[kk*nDim0Pi+ll]* Wind[sector].evecs_K0Pi[kk*nDim0Pi+ll]*cEy[l];
+      amp        = Wind[sector].evecs_K0Pi[kk*nDim0Pi+ll];
+      Oflip_avg += amp*amp*oflip[l];
+      cEy_avg   += amp*amp*cEy[l];
+      if(fabs(amp) > 1e-10) shannonE  -= (amp*amp)*log(amp*amp);
+      IPR       += (amp*amp*amp*amp);
     }
     Oflip_avg /= ((double)VOL); cEy_avg /= ((double)VOL);
-    fprintf(outf,"%.12lf %.12lf %.12lf\n",Wind[sector].evals_K0Pi[kk],Oflip_avg,cEy_avg);
+    fprintf(outf,"%.12lf %.12lf %.12lf %.12lf %.12lf\n",Wind[sector].evals_K0Pi[kk],Oflip_avg,cEy_avg,shannonE,IPR);
   }
  fclose(outf);
 }
