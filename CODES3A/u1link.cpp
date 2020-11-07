@@ -113,31 +113,8 @@ int main(){
   /* construct and diagonalize the hamiltonians separately */
   trans_Hamil(sector);
 
-  //INITq = -1;
-  // initialize the starting state (once and for all the routines)
-  //initState(sector, INIT, &INITq);
-  // initalize the bag details for the initial state
-  //INITbag = Wind[sector].Tflag[INITq]-1;
-  //inorm = sqrt(Wind[sector].Tdgen[INITq]/(double)VOL);
-  //INITphasePi0 = Wind[sector].FPi0[INITq];
-  //INITphase0Pi = Wind[sector].F0Pi[INITq];
-  //INITphasePiPi= Wind[sector].FPiPi[INITq];
-  //std::cout<<"Initial state belongs to bag ="<<INITbag<<std::endl;
-  //std::cout<<"Normalization ="<<inorm<<std::endl;
-  //std::cout<<"Phases: (Pi,0):"<<INITphasePi0<<";  (0,Pi):"<<INITphase0Pi<<"; (Pi,Pi):"<<INITphasePiPi<<std::endl;
-  //std::cout<<"Momentum form factors of initial state bag "<<std::endl;
-  //std::cout<<"FF(0,0)="<<Wind[sector].mom00[INITbag]<<"; FF(Pi,Pi)="<<Wind[sector].momPiPi[INITbag]
-  //  <<"; FF(Pi,0)="<<Wind[sector].momPi0[INITbag]<<"; FF(0,Pi)="<<Wind[sector].mom0Pi[INITbag]<<std::endl;
-
   // expectation value of local operators
-  if(CALC==0 || CALC==1)  calc_Oflip(sector);
-
-  // calculate the Entanglement Entropy for the states
-  //if(CALC==0 || CALC==4){
-  //   if(INIT==0)      entanglementEnt_INIT0(sector);
-  //   else if(INIT==4) entanglementEnt_INIT4(sector);
-  //}
-
+  calc_Oflip(sector);
   // study potential scar states
   cutoff = 0.1/((double)(LX/2.0 + LY/2.0));
   if(lam == 0.0){
@@ -152,18 +129,6 @@ int main(){
       studyEvecsPi0(sector, cutoff);
       studyEvecs0Pi(sector, cutoff);
   }
-
-
-  // calculate the charge conjugate values of the eigenstates
-  //if(CALC==0 || CALC==8){
-  //  printf("It seems that the charge conjugation operation does not commute with translation.");
-  //  printf("Thus the routines here need to be changed. I think this to be true since the states");
-  //  printf("related by charge conjugation are not contained in the same bags. \n");
-  //  printf("Maybe this does not work.");
-  //  exit(0);
-  //  checkCCpartners(sector);
-  //  calcCCvalues(sector);
-  //}
 
   /* Clear memory */
   for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }

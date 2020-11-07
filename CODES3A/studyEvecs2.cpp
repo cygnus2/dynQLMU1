@@ -57,6 +57,16 @@ void studyEvecs2_K00(int sector, double cutoff){
   // diagonalize Opot operator in the zero mode subspace
   diag_LAPACK_RRR(nZero, Opot, evalPot, evecPot);
 
+  // print eigenvectors
+  //fptr = fopen("ZeroMode00EigenF.dat","w");
+  //for(i=0; i<nZero; i++){
+  //  for(j=0; j<nZero; j++){
+  //    fprintf(fptr,"%.12lf ",Wind[sector].evecs_K00[i*tsect + j]);
+  //  }
+  //  fprintf(fptr,"\n");
+  //}
+  //fclose(fptr);
+
   // fileprint eigenvalues; and locate scar states
   targetEN = VOL/2.0; num_Eigst=0;
   printf("Looking for eigenstates with energy = %.12lf\n",targetEN);

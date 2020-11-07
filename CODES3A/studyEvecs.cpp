@@ -14,6 +14,7 @@ void studyEvecs00(int sector, double cutoff){
    double check;
    int num_Eigst;
    std::vector<int> ev_list;
+   std::vector<int> ScarBags;
    int totbasisState;
    int p,q,sizet;
    FILE *fptr1,*fptr2;
@@ -39,7 +40,7 @@ void studyEvecs00(int sector, double cutoff){
      for(q=0; q<sizet; q++){
        amp    = Wind[sector].evecs_K00[ev_list[p]*sizet + q];
        prob   = amp*amp;
-       if(prob > cutoff) { totbasisState++; print2file(sector, q, fptr2);  }
+       if(prob > cutoff) { totbasisState++; print2file(sector, q, fptr2);  ScarBags.push_back(q);}
        fprintf(fptr1,"% .6le ",amp);
        check += prob;
      }
@@ -48,6 +49,9 @@ void studyEvecs00(int sector, double cutoff){
      printf("Eigenstate = %d, #-of ice states= %d\n",ev_list[p],totbasisState);
    }
    fclose(fptr1); fclose(fptr2);
+   calc_diagEy(sector, ScarBags);
+   // clear memory
+   ev_list.clear(); ScarBags.clear();
 }
 
 // Same routine, but deals with the momentum (Pi,Pi) sector
@@ -90,6 +94,7 @@ void studyEvecsPiPi(int sector, double cutoff){
      printf("Eigenstate = %d, #-of ice states= %d\n",ev_list[p],totbasisState);
    }
    fclose(fptr1); fclose(fptr2);
+   ev_list.clear();
 }
 
 // Same routine, but deals with the momentum (Pi,0) sector
@@ -134,6 +139,7 @@ void studyEvecsPi0(int sector, double cutoff){
      printf("Eigenstate = %d, #-of ice states= %d\n",ev_list[p],totbasisState);
    }
    fclose(fptr1); fclose(fptr2);
+   ev_list.clear();
 }
 
 // Same routine, but deals with the momentum (0,Pi) sector
@@ -177,4 +183,5 @@ void studyEvecs0Pi(int sector, double cutoff){
      printf("Eigenstate = %d, #-of ice states= %d\n",ev_list[p],totbasisState);
    }
    fclose(fptr1); fclose(fptr2);
+   ev_list.clear();
 }

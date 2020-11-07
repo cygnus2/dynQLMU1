@@ -201,7 +201,7 @@ void print2file(int sector, int tbag, FILE *fptr){
   for(i=0;i<Wind[sector].nBasis;i++){
     if(Wind[sector].Tflag[i] == (tbag+1)){
       state = Wind[sector].basisVec[i];
-      printf("#-of-flippable plaquettes = %d\n",Wind[sector].nflip[i]);
+      printf("#-of-flippable plaquettes = %d in bag=%d\n",Wind[sector].nflip[i],tbag);
       for(p=0;p<2*VOL;p++){
         fprintf(fptr,"%d ",(int)state[p]);
       }

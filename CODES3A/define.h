@@ -190,6 +190,7 @@ void studyEvecs2_K00(int, double);
 void studyEvecs2_KPiPi(int, double);
 void studyEvecs2_KPi0(int, double);
 void studyEvecs2_K0Pi(int, double);
+void calc_diagEy(int, std::vector<int>&);
 #endif
 
 /*  Schematic set-up of the diagonal correlators

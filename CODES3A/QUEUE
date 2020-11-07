@@ -1,9 +1,9 @@
-Lx 10
+Lx 12
 Ly 2
 lam -1.0
 Ti 0.0
-Tf 1.0
+Tf 10.0
 dT 0.1
-LA 5
+LA 6
 INIT 4
 CALC 1

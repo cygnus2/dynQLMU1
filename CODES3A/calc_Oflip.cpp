@@ -1,5 +1,6 @@
 /* calculate Oflip in the chosen winding sector for the different momenta  */
 /* Oflip = (1/VOL) \sum_{xy, plaq} (1=flippable plaq, 0 otherwise)         */
+/* Also compute the EyEy correlator                                        */
 #include<stdio.h>
 #include<stdlib.h>
 #include<iostream>
