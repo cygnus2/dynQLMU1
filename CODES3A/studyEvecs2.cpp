@@ -13,7 +13,7 @@ void studyEvecs2_K00(int sector, double cutoff){
   int num_Eigst, totbasisState;
   int i,j,p,q;
   double cI, cJ;
-  FILE *fptr, *fptr1, *fptr2;
+  FILE *fptr, *fptr1, *fptr2, *fptr3;
   // nZero counts the zero modes of the oKin in the momenta (0,0) basis;
   int nZero, nZero2, tsect, sizet;
   sizet = Wind[sector].nBasis;
@@ -79,6 +79,18 @@ void studyEvecs2_K00(int sector, double cutoff){
     }
   }
   fclose(fptr);
+
+  // print the eigenvector of the scars
+  fptr3 = fopen("ZeroModeSuper00.dat","w");
+  for(i=0; i<nZero; i++){
+    if(fabs(evalPot[i]-targetEN) < 1e-10){ //this is a scar state
+      for(j=0; j<nZero; j++){
+        fprintf(fptr3, "% .6le ",evecPot[i*nZero + j]);
+      }
+      fprintf(fptr3, "\n");
+    }
+  }
+  fclose(fptr3);
 
   // obtain and print the scar eigenstates
   printf("#-of eigenstates found in momentum (0,0)= %d \n",num_Eigst);
