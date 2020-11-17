@@ -17,6 +17,7 @@ void calc_Oflip(int sector){
   MKL_INT p,q,sizet;
   double v_q, O_q, E_q;
   double Oflip_avg, CorrEy1_avg;
+  double amp, shannonE, IPR;
   FILE *outf;
 
   sizet = Wind[sector].nBasis;
@@ -24,6 +25,7 @@ void calc_Oflip(int sector){
   fprintf(outf,"# Results of winding number sector (%d,%d) \n",Wind[sector].Wx,Wind[sector].Wy);
   // scan through all the eigenvalues
   for(p=0;p<sizet;p++){
+    shannonE=0.0; IPR=0.0;
     // calculate the expectation value in each eigenstate
     Oflip_avg = 0.0; CorrEy1_avg = 0.0;
     for(q=0;q<sizet;q++){
@@ -32,9 +34,11 @@ void calc_Oflip(int sector){
       E_q = Wind[sector].CEy1[q];
       Oflip_avg   += v_q*v_q*O_q;
       CorrEy1_avg += v_q*v_q*E_q;
+      if(fabs(v_q) > 1e-10) shannonE -= (v_q*v_q)*log(v_q*v_q);
+      IPR += v_q*v_q*v_q*v_q;
     }
     Oflip_avg   = Oflip_avg/((double)VOL);
-    fprintf(outf,"%.12lf %.12lf %.12lf\n",Wind[sector].evals[p],Oflip_avg, CorrEy1_avg);
+    fprintf(outf,"%.12lf %.12lf %.12lf %.12lf %.12lf\n",Wind[sector].evals[p],Oflip_avg, CorrEy1_avg,shannonE,IPR);
   }
   fclose(outf);
 }

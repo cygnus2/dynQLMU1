@@ -142,7 +142,7 @@ int main(){
   //evolveH_ov3(sector);
 
   // Entanglement Entropy calculations
-  evolve_Eent(sector);
+  //evolve_Eent(sector);
 
   // Investigate potential "scar" states
   if(lam == 0.0) studyEvecs2(sector);

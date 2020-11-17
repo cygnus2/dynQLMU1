@@ -33,7 +33,7 @@ void studyEvecs(int sector){
      }
    }
    printf("#-of eigenstates found = %d \n",num_Eigst);
-   printf("#-of ice states above cutoffProb = %lf in each eigenstate: \n",cutoff);
+   //printf("#-of ice states above cutoffProb = %lf in each eigenstate: \n",cutoff);
    fptr1 = fopen("EvecList.dat","w");
    fptr2 = fopen("BasisList.dat","w");
    for(p=0; p<num_Eigst; p++){
@@ -46,7 +46,7 @@ void studyEvecs(int sector){
        check += prob;
        if(prob > cutoff){
           totbasisState++;
-	        printf("#-of flippable states in basis state=%d is %d\n",q,Wind[sector].nflip[q]);
+	        //printf("#-of flippable states in basis state=%d is %d\n",q,Wind[sector].nflip[q]);
           print2file(sector, q, fptr2);
        }
        fprintf(fptr1,"%.6le ",prob);
