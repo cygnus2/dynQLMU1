@@ -122,6 +122,9 @@ int main(){
   // calculate the <psi_n| O_flip |psi_n>, <psi_n|CEy1|psi_n> for every eigenstate psi_n
   calc_Oflip(sector);
 
+  // computes the correlators in the lowest 10 eigenstates
+  //calc_CorrF(sector);
+
   // real time evolution of <PHI(t)| O_flip |PHI(t)> and <PHI(t)| Cflip |PHI(t)>
   // starting from specified initial states in each sector (see notes)
   // note that recalculates the same as the previous routine, so don't use both!
@@ -146,7 +149,9 @@ int main(){
 
   // Investigate potential "scar" states
   if(lam == 0.0) studyEvecs2(sector);
-  else           studyEvecs(sector);
+  else{          studyEvecs(sector);
+    if(LY==4)    studyEvecsLy4(sector);
+  }
 
   // Set up ED in the basis of states with flippable plaq = VOL/2
   //scarDiag(sector);
