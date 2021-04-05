@@ -181,3 +181,56 @@ void studyEvecs2(int sector){
   Opot.clear(); evalPot.clear(); evecPot.clear();
   ev_list.clear();
 }
+
+void studyEvecs2_6x4(int sector){
+  int i,j,p;
+  double cutoff;
+  double cI, cJ;
+  // (nZero, nTwo) counts the (zero,+/-2) modes of the oKin;
+  int nZero, nTwo, sizet;
+  int nTot, nTot2;
+  std::vector<int> ev_list;
+  std::vector<double> Opot;
+  std::vector<double> evalPot, evecPot;
+
+  sizet = Wind[sector].nBasis;
+  cutoff = 1e-10;
+  // store the eigenvector labels whose eigenvalues are zero
+  nZero=0;
+  for(i=0; i<sizet; i++){
+    if(fabs(Wind[sector].evals[i]) < cutoff){
+       nZero++; ev_list.push_back(i);
+     }
+  }
+  std::cout<<"#-of zero modes ="<<nZero<<std::endl;
+  // store the eigenvector labels whose eigenvalues are +2 and -2
+  nTwo=0;
+  for(i=0; i<sizet; i++){
+    if( (fabs(Wind[sector].evals[i])-2.0) < cutoff){
+       nTwo++; ev_list.push_back(i);
+     }
+  }
+  std::cout<<"#-of two modes ="<<nTwo<<std::endl;
+  //for(i=0; i<nZero; i++) std::cout<<"identified state = "<<ev_list[i]<<std::endl;
+
+  // construct the Opot( nTot x nTot ) matrix
+  nTot  = nZero + nTwo;
+  nTot2 = nTot*nTot;
+  for(i=0; i<nTot2; i++) Opot.push_back(0.0);
+
+  for(i=0; i<nTot; i++){
+    for(j=0; j<nTot; j++){
+      for(p=0; p<sizet; p++){
+        cI = Wind[sector].evecs[ev_list[i]*sizet + p];
+        cJ = Wind[sector].evecs[ev_list[j]*sizet + p];
+        Opot[i+j*nZero] += cI*cJ*Wind[sector].nflip[p];
+      }
+    }
+  }
+  // diagonalize Opot operator in the zero+two mode subspace
+  diag_LAPACK_RRR2(nTot, Opot, evalPot, evecPot);
+
+  // clear memory
+  Opot.clear(); evalPot.clear(); evecPot.clear();
+  ev_list.clear();
+}

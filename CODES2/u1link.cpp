@@ -114,7 +114,6 @@ int main(){
   printf("Chosen (Wx,Wy) sector = (%d,%d)\n",WX,WY);
   sector = lookup[LX/2+WX][LY/2+WY];
   constH(sector);
-
   INITq = -1;
   //set the starting state once (and for all!)
   initState(sector, INIT, &INITq);
@@ -148,7 +147,10 @@ int main(){
   //evolve_Eent(sector);
 
   // Investigate potential "scar" states
-  if(lam == 0.0) studyEvecs2(sector);
+  if(lam == 0.0){
+      if( (LX==6) && (LY==4) ){ studyEvecs2_6x4(sector); }
+      else                    { studyEvecs2(sector);     }
+  }
   else{          studyEvecs(sector);
     if(LY==4)    studyEvecsLy4(sector);
   }
