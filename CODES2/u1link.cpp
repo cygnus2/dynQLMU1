@@ -148,7 +148,7 @@ int main(){
 
   // Investigate potential "scar" states
   if(lam == 0.0){
-      if( (LX==6) && (LY==4) ){ studyEvecs2_6x4(sector); }
+      if( (LX==4) && (LY==4) ){ studyEvecs2_6x4(sector); }
       else                    { studyEvecs2(sector);     }
   }
   else{          studyEvecs(sector);

@@ -206,9 +206,9 @@ void studyEvecs2_6x4(int sector){
   // store the eigenvector labels whose eigenvalues are +2 and -2
   nTwo=0;
   for(i=0; i<sizet; i++){
-    if( (fabs(Wind[sector].evals[i])-2.0) < cutoff){
+    if( fabs((fabs(Wind[sector].evals[i])-2.0000)) < cutoff){
        nTwo++; ev_list.push_back(i);
-     }
+    }
   }
   std::cout<<"#-of two modes ="<<nTwo<<std::endl;
   //for(i=0; i<nZero; i++) std::cout<<"identified state = "<<ev_list[i]<<std::endl;
@@ -223,7 +223,7 @@ void studyEvecs2_6x4(int sector){
       for(p=0; p<sizet; p++){
         cI = Wind[sector].evecs[ev_list[i]*sizet + p];
         cJ = Wind[sector].evecs[ev_list[j]*sizet + p];
-        Opot[i+j*nZero] += cI*cJ*Wind[sector].nflip[p];
+        Opot[i+j*nTot] += cI*cJ*Wind[sector].nflip[p];
       }
     }
   }
