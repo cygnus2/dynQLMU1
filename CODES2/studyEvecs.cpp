@@ -13,11 +13,11 @@ void diag_LAPACK_RRR2(int, std::vector<double>&, std::vector<double>&, std::vect
 void studyEvecs(int sector){
    double targetEN, NF;
    double cutoff, amp, prob;
-   double check,ele;
+   double check,ele,vio;
    int num_Eigst;
    std::vector<int> ev_list;
    int totbasisState;
-   int p,q,sizet;
+   int p,q,r,sizet;
    FILE *fptr1,*fptr2;
 
    cutoff = 0.001;
@@ -69,27 +69,32 @@ void studyEvecs(int sector){
         check  += amp*amp;
      }
      printf("norm || Opot|psi> - NF|psi> || = %.12le \n",check);
-     // check if they are eigenstates of Okin
-     check=0.0;
-     for(q=0; q<sizet; q++){
-       amp = Wind[sector].evecs[ev_list[p]*sizet + q];
-       ele = Wind[sector].getH(ev_list[p],q);
-       if(ev_list[p] == q) continue;
-       check += amp*ele;
+     // check if they are eigenstates of Okin:
+     // [Okin]_rq [psi^i]_q = amp_r;  vio = sum_r (amp_r^2)
+     vio=0.0;
+     for(r=0; r<sizet; r++){
+       check=0.0;
+       for(q=0; q<sizet; q++){
+         if(r==q) continue;
+         amp = Wind[sector].evecs[ev_list[p]*sizet + q];
+         ele = Wind[sector].getH(r,q);
+         //if(ev_list[p] == q) continue;
+         check += amp*ele;
+       }
+       vio += check*check;
      }
-     printf("Okin |psi> = %.12le\n", check);
+     printf("norm || Okin |psi> || = %.12le\n", vio);
    }
-
 }
 
 void studyEvecsLy4(int sector){
    double targetEN,NF;
    double cutoff, amp, prob;
-   double check,ele;
+   double check,ele,vio;
    int num_Eigst;
    std::vector<int> ev_list;
    int totbasisState;
-   int p,q,sizet;
+   int p,q,r,sizet;
    FILE *fptr1,*fptr2;
 
    cutoff = 0.001;
@@ -148,15 +153,19 @@ void studyEvecsLy4(int sector){
      }
      printf("norm || Opot|psi> - NF|psi> || = %.12le \n",check);
      // check if they are eigenstates of Okin
-     // check if they are eigenstates of Okin
-     check=0.0;
-     for(q=0; q<sizet; q++){
-       amp = Wind[sector].evecs[ev_list[p]*sizet + q];
-       ele = Wind[sector].getH(ev_list[p],q);
-       if(ev_list[p] == q) continue;
-       check += amp*ele;
+     // [Okin]_rq [psi^i]_q = amp^i_r;  vio[i] = sum_r (amp^i_r^2)
+     vio=0.0;
+     for(r=0; r<sizet; r++){
+       check=0.0;
+       for(q=0; q<sizet; q++){
+         if(r==q) continue;
+         amp = Wind[sector].evecs[ev_list[p]*sizet + q];
+         ele = Wind[sector].getH(r,q);
+         check += amp*ele;
+       }
+       vio += check*check;
      }
-     printf("Okin |psi> = %.12le\n", check);
+     printf("norm || Okin |psi> || = %.12le\n", vio);
    }
 }
 
