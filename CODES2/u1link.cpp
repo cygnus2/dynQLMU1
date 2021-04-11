@@ -83,7 +83,7 @@ int main(){
   }
 
   // decide whether to check the results of the diagonalization
-  CHKDIAG=0;
+  CHKDIAG=1;
 
   /* Initialize nearest neighbours */
   for(i=0;i<=2*DIM;i++){
@@ -148,8 +148,9 @@ int main(){
 
   // Investigate potential "scar" states
   if(lam == 0.0){
-      if( (LX==4) && (LY==4) ){ studyEvecs2_6x4(sector); }
-      else                    { studyEvecs2(sector);     }
+      studyEvecs2_Ly4(sector);
+      //if( (LX==4) && (LY==4) ){ studyEvecs2_Ly4(sector); }
+      //else                    { studyEvecs2(sector);     }
   }
   else{          studyEvecs(sector);
     if(LY==4)    studyEvecsLy4(sector);

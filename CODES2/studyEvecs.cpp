@@ -11,9 +11,9 @@ void diag_LAPACK_RRR2(int, std::vector<double>&, std::vector<double>&, std::vect
 // This routine prints out diagnostics of eigenstates which are infinite temperature
 // states in the spectrum and having low entropy. The aim is to study if "scars" exist
 void studyEvecs(int sector){
-   double targetEN,NF;
+   double targetEN, NF;
    double cutoff, amp, prob;
-   double check;
+   double check,ele;
    int num_Eigst;
    std::vector<int> ev_list;
    int totbasisState;
@@ -59,8 +59,9 @@ void studyEvecs(int sector){
    }
    fclose(fptr1);
    fclose(fptr2);
-   // check if these eigenstates are eigenstates of the Okin and Opot separately
+   // check if these eigenstates are eigenstates of the Opot separately
    for(p=0; p<num_Eigst; p++){
+     printf("Scar state %d = ",p);
      check=0.0;
      for(q=0; q<sizet; q++){
         amp    = Wind[sector].evecs[ev_list[p]*sizet + q];
@@ -68,13 +69,23 @@ void studyEvecs(int sector){
         check  += amp*amp;
      }
      printf("norm || Opot|psi> - NF|psi> || = %.12le \n",check);
+     // check if they are eigenstates of Okin
+     check=0.0;
+     for(q=0; q<sizet; q++){
+       amp = Wind[sector].evecs[ev_list[p]*sizet + q];
+       ele = Wind[sector].getH(ev_list[p],q);
+       if(ev_list[p] == q) continue;
+       check += amp*ele;
+     }
+     printf("Okin |psi> = %.12le\n", check);
    }
+
 }
 
 void studyEvecsLy4(int sector){
    double targetEN,NF;
    double cutoff, amp, prob;
-   double check;
+   double check,ele;
    int num_Eigst;
    std::vector<int> ev_list;
    int totbasisState;
@@ -127,15 +138,25 @@ void studyEvecsLy4(int sector){
    }
    fclose(fptr1);
    fclose(fptr2);
-   // check if these eigenstates are eigenstates of the Okin and Opot separately
+   // check if these eigenstates are eigenstates of the Opot
    for(p=0; p<num_Eigst; p++){
      check=0.0;
      for(q=0; q<sizet; q++){
         amp    = Wind[sector].evecs[ev_list[p]*sizet + q];
         amp    = amp*(Wind[sector].nflip[q] - NF);
-        check  += amp*amp;
+        check += amp*amp;
      }
      printf("norm || Opot|psi> - NF|psi> || = %.12le \n",check);
+     // check if they are eigenstates of Okin
+     // check if they are eigenstates of Okin
+     check=0.0;
+     for(q=0; q<sizet; q++){
+       amp = Wind[sector].evecs[ev_list[p]*sizet + q];
+       ele = Wind[sector].getH(ev_list[p],q);
+       if(ev_list[p] == q) continue;
+       check += amp*ele;
+     }
+     printf("Okin |psi> = %.12le\n", check);
    }
 }
 
@@ -156,7 +177,7 @@ void studyEvecs2(int sector){
   for(i=0; i<sizet; i++){
     if(fabs(Wind[sector].evals[i]) < cutoff){
        nZero++; ev_list.push_back(i);
-     }
+    }
   }
   std::cout<<"#-of zero modes ="<<nZero<<std::endl;
   //for(i=0; i<nZero; i++) std::cout<<"identified state = "<<ev_list[i]<<std::endl;
@@ -182,16 +203,20 @@ void studyEvecs2(int sector){
   ev_list.clear();
 }
 
-void studyEvecs2_6x4(int sector){
-  int i,j,p;
+// this routine does all the big bad checks needed to recognize scars as
+// eigenvectors in the Okin = 0 manifold
+void studyEvecs2_Ly4(int sector){
+  int i,j,k,p;
   double cutoff;
   double cI, cJ;
   // (nZero, nTwo) counts the (zero,+/-2) modes of the oKin;
   int nZero, nTwo, sizet;
   int nTot, nTot2;
+  double NF1, NF2;
   std::vector<int> ev_list;
   std::vector<double> Opot;
   std::vector<double> evalPot, evecPot;
+  nTwo=0;
 
   sizet = Wind[sector].nBasis;
   cutoff = 1e-10;
@@ -204,13 +229,13 @@ void studyEvecs2_6x4(int sector){
   }
   std::cout<<"#-of zero modes ="<<nZero<<std::endl;
   // store the eigenvector labels whose eigenvalues are +2 and -2
-  nTwo=0;
-  for(i=0; i<sizet; i++){
-    if( fabs((fabs(Wind[sector].evals[i])-2.0000)) < cutoff){
-       nTwo++; ev_list.push_back(i);
-    }
-  }
-  std::cout<<"#-of two modes ="<<nTwo<<std::endl;
+  //nTwo=0;
+  //for(i=0; i<sizet; i++){
+  //  if( fabs((fabs(Wind[sector].evals[i])-2.0000)) < cutoff){
+  //     nTwo++; ev_list.push_back(i);
+  //  }
+  //}
+  //std::cout<<"#-of two modes ="<<nTwo<<std::endl;
   //for(i=0; i<nZero; i++) std::cout<<"identified state = "<<ev_list[i]<<std::endl;
 
   // construct the Opot( nTot x nTot ) matrix
@@ -229,6 +254,65 @@ void studyEvecs2_6x4(int sector){
   }
   // diagonalize Opot operator in the zero+two mode subspace
   diag_LAPACK_RRR2(nTot, Opot, evalPot, evecPot);
+
+  // Some basic sanity checks: normalization, eigenvalue equations
+  double norm, ovl, vio, avgOp;
+  std::vector<double> tvec(nTot, 0.0);
+  int m,n;
+  vio=0.0;
+  // check orthornormality
+  for(i=0; i<nTot; i++){
+    norm=0.0;
+    for(j=0; j<nTot; j++) norm += evecPot[i*nTot + j]*evecPot[i*nTot + j];
+    if(fabs(norm-1.0) > 1e-10) printf("norm = %.12lf\n",norm);
+  }
+  for(i=0; i<nTot; i++){
+    for(j=i+1; j<nTot; j++){
+      ovl=0.0;
+      for(k=0; k<nTot; k++){
+        ovl += evecPot[i*nTot+k]*evecPot[j*nTot+k];
+      }
+      if(fabs(ovl) > 1e-10 ) printf("%d %d %lf\n",i,j,ovl);
+    }
+  }
+  // eigenvalue equation
+  for(i=0; i<nTot; i++){
+    vio=0.0;
+    for(m=0; m<nTot; m++){
+      tvec[m]=0.0;
+      for(n=0; n<nTot; n++) tvec[m] += Opot[m + n*nTot]*evecPot[i*nTot + n];
+      ovl = tvec[m] - evalPot[i]*evecPot[i*nTot + m];
+      vio += ovl*ovl;
+    }
+    if(vio > 1e-6) printf("eigenvector %d =%lf\n", i, vio);
+  }
+
+  // Express the scars in the electric flux basis; Nz=zero mode basis
+  /* |Scar_i> = \sum_{k=1,..,Nz} c^i_k |z_k>
+              = \sum_{k=i,..,Nz} c^i_k (\sum_{j=1,..,N} a^k_j |E_j>)
+              = \sum_{j=1,..,N}  cJ |E_j>,
+               where c_J = \sum_{i=1,..,Nz} c^i_k * a^k_j
+   */
+  NF1=VOL/2;
+  int nS=0;
+  for(i=0; i<nTot; i++){
+    if(fabs(evalPot[i]-NF1) > cutoff) continue;
+    printf("Scar state=%d with (Okin, Opot)=(0,%lf) \n",i, evalPot[i]);
+    nS++;
+    //check the contributing ice basis states in each scar
+    norm=0.0; avgOp=0.0;
+    for(j=0; j<sizet; j++){
+       cJ=0.0;
+       for(k=0; k<nTot; k++){
+         cJ += evecPot[i*nTot + k]*Wind[sector].evecs[ev_list[k]*sizet + j];
+       }
+       norm += cJ*cJ;
+       avgOp += cJ*cJ*Wind[sector].nflip[j];
+       //if( (cJ*cJ) > 0.001) printf("basis state=%d, nFlip=%d, cJ=%lf\n",j,Wind[sector].nflip[j],cJ);
+    }
+    printf("Norm=%.12lf, <Opot>=%.12lf\n",norm,avgOp);
+  }
+  printf("#-of-scars=%d\n",nS);
 
   // clear memory
   Opot.clear(); evalPot.clear(); evecPot.clear();

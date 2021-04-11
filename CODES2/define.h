@@ -153,7 +153,7 @@ void evolve_corrf1(int);
 void studyEvecs(int);
 void studyEvecsLy4(int);
 void studyEvecs2(int);
-void studyEvecs2_6x4(int);
+void studyEvecs2_Ly4(int);
 void scarDiag(int);
 void collectBasis(int, int*, std::vector<std::vector<bool>>&);
 void FilePrintBasis(int);
