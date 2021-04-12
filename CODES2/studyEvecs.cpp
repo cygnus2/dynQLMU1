@@ -302,8 +302,10 @@ void studyEvecs2_Ly4(int sector){
               = \sum_{j=1,..,N}  cJ |E_j>,
                where c_J = \sum_{i=1,..,Nz} c^i_k * a^k_j
    */
+  // scars at Nplaq/2 is present for all lattices
   NF1=VOL/2;
   int nS=0;
+  printf("==== Scars with Nflip = %f =======\n",NF1);
   for(i=0; i<nTot; i++){
     if(fabs(evalPot[i]-NF1) > cutoff) continue;
     printf("Scar state=%d with (Okin, Opot)=(0,%lf) \n",i, evalPot[i]);
@@ -317,11 +319,40 @@ void studyEvecs2_Ly4(int sector){
        }
        norm += cJ*cJ;
        avgOp += cJ*cJ*Wind[sector].nflip[j];
-       //if( (cJ*cJ) > 0.001) printf("basis state=%d, nFlip=%d, cJ=%lf\n",j,Wind[sector].nflip[j],cJ);
+       if( ((cJ*cJ) > 0.001) && (Wind[sector].nflip[j] != (int)(NF1)) )
+         printf("basis state=%d, nFlip=%d, cJ=%lf\n",j,Wind[sector].nflip[j],cJ);
     }
     printf("Norm=%.12lf, <Opot>=%.12lf\n",norm,avgOp);
   }
   printf("#-of-scars=%d\n",nS);
+
+  // scars at other values are present for Ly=4 lattices
+  if(LY==4){
+    if(LX==4)       NF2=3.0*VOL/8.0;
+    else if(LX==6)  NF2=5.0*VOL/12.0;
+    else {printf("Not a valid lattice \n"); return; }
+    nS=0;
+    printf("==== Scars with Nflip = %f =======\n",NF2);
+    for(i=0; i<nTot; i++){
+      if(fabs(evalPot[i]-NF2) > cutoff) continue;
+      printf("Scar state=%d with (Okin, Opot)=(0,%lf) \n",i, evalPot[i]);
+      nS++;
+      //check the contributing ice basis states in each scar
+      norm=0.0; avgOp=0.0;
+      for(j=0; j<sizet; j++){
+         cJ=0.0;
+         for(k=0; k<nTot; k++){
+           cJ += evecPot[i*nTot + k]*Wind[sector].evecs[ev_list[k]*sizet + j];
+         }
+         norm += cJ*cJ;
+         avgOp += cJ*cJ*Wind[sector].nflip[j];
+         if( ((cJ*cJ) > 0.001) && (Wind[sector].nflip[j] != (int)(NF2)) )
+           printf("basis state=%d, nFlip=%d, cJ=%lf\n",j,Wind[sector].nflip[j],cJ);
+      }
+      printf("Norm=%.12lf, <Opot>=%.12lf\n",norm,avgOp);
+    }
+    printf("#-of-scars=%d\n",nS);
+  }
 
   // clear memory
   Opot.clear(); evalPot.clear(); evecPot.clear();

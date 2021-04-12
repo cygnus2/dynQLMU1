@@ -83,7 +83,7 @@ int main(){
   }
 
   // decide whether to check the results of the diagonalization
-  CHKDIAG=1;
+  CHKDIAG=0;
 
   /* Initialize nearest neighbours */
   for(i=0;i<=2*DIM;i++){
@@ -147,10 +147,9 @@ int main(){
   //evolve_Eent(sector);
 
   // Investigate potential "scar" states
-  if(lam == 0.0){
-      studyEvecs2_Ly4(sector);
-      //if( (LX==4) && (LY==4) ){ studyEvecs2_Ly4(sector); }
-      //else                    { studyEvecs2(sector);     }
+  if(lam == 0.0){    studyEvecs2_Ly4(sector);
+    //if(LY==4)      studyEvecs2_Ly4(sector);  //Ly=4 scars with two integer Opot
+    //else           studyEvecs2(sector);      //Ly=2 scars with single integer Opot
   }
   else{          studyEvecs(sector);
     if(LY==4)    studyEvecsLy4(sector);
