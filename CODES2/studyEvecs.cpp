@@ -35,21 +35,21 @@ void studyEvecs(int sector){
      }
    }
    printf("#-of eigenstates found = %d \n",num_Eigst);
-   //printf("#-of ice states above cutoffProb = %lf in each eigenstate: \n",cutoff);
+   printf("#-of ice states above cutoffProb = %.4lf in each eigenstate: \n",cutoff);
    fptr1 = fopen("EvecList.dat","w");
-   fptr2 = fopen("BasisList.dat","w");
+   //fptr2 = fopen("BasisList.dat","w");
    for(p=0; p<num_Eigst; p++){
      totbasisState=0;
      check=0.0;
-     fprintf(fptr2,"Important Basis States of eigenvector %d\n",ev_list[p]);
+     //fprintf(fptr2,"Important Basis States of eigenvector %d\n",ev_list[p]);
      for(q=0; q<sizet; q++){
        amp    = Wind[sector].evecs[ev_list[p]*sizet + q];
        prob   = amp*amp;
        check += prob;
        if(prob > cutoff){
           totbasisState++;
-          if(Wind[sector].nflip[q] != NF) printf("(%d, %d) \n",q,Wind[sector].nflip[q]);
-          print2file(sector, q, fptr2);
+          //if(Wind[sector].nflip[q] != NF) printf("EigSt=%d, (%d, %d) \n",p,q,Wind[sector].nflip[q]);
+          //print2file(sector, q, fptr2);
        }
        fprintf(fptr1,"%.6le ",prob);
      }
@@ -58,7 +58,7 @@ void studyEvecs(int sector){
      printf("Eigenstate = %d, #-of ice states= %d\n",ev_list[p],totbasisState);
    }
    fclose(fptr1);
-   fclose(fptr2);
+   //fclose(fptr2);
    // check if these eigenstates are eigenstates of the Opot separately
    for(p=0; p<num_Eigst; p++){
      printf("Scar state %d = ",p);
@@ -95,6 +95,7 @@ void studyEvecsLy4(int sector){
    std::vector<int> ev_list;
    int totbasisState;
    int p,q,r,sizet;
+   int flag;
    FILE *fptr1,*fptr2;
 
    cutoff = 0.001;
@@ -125,20 +126,25 @@ void studyEvecsLy4(int sector){
    for(p=0; p<num_Eigst; p++){
      totbasisState=0;
      check=0.0;
-     fprintf(fptr2,"Important Basis States of eigenvector %d\n",ev_list[p]);
+     //fprintf(fptr1,"Eigenvector %d\n",ev_list[p]);
+     //fprintf(fptr2,"Eigenvector %d\n",ev_list[p]);
      for(q=0; q<sizet; q++){
        amp    = Wind[sector].evecs[ev_list[p]*sizet + q];
        prob   = amp*amp;
        check += prob;
        if(prob > cutoff){
           totbasisState++;
-          if(Wind[sector].nflip[q] != NF) printf("(%d, %d) \n",q,Wind[sector].nflip[q]);
-          print2file(sector, q, fptr2);
+          //if(Wind[sector].nflip[q] != NF) printf("EigSt=%d, (%d, %d) \n",p,q,Wind[sector].nflip[q]);
+          printf("EigSt=%d, (%d, %d) ",p,q,Wind[sector].nflip[q]);
+          //print2file(sector, q, fptr2);
        }
        fprintf(fptr1,"%.6le ",prob);
+       fprintf(fptr2,"%d ",Wind[sector].nflip[q]);
      }
+     printf("\n");
      if( fabs(check-1.0) > 1e-10) printf("Normalization of evector %d is %.12lf\n",ev_list[p],check);
      fprintf(fptr1,"\n");
+     fprintf(fptr2,"\n");
      printf("Eigenstate = %d, #-of ice states= %d\n",ev_list[p],totbasisState);
    }
    fclose(fptr1);
@@ -167,6 +173,23 @@ void studyEvecsLy4(int sector){
      }
      printf("norm || Okin |psi> || = %.12le\n", vio);
    }
+
+   // print a non-scar state from the surrounding
+   cutoff = 0.05;
+   flag=0;
+   fptr1 = fopen("EvecNonScar.dat","w");
+   for(p=0;p<sizet;p++){
+     if( (Wind[sector].evals[p]-targetEN) > cutoff ){
+       printf("Storing a non-scar eigenstate with energy = %.12lf\n",Wind[sector].evals[p]);
+       for(q=0; q<sizet; q++){
+         amp    = Wind[sector].evecs[ev_list[p]*sizet + q];
+         fprintf(fptr1,"% .6le ",amp);
+       }
+       flag=1;
+     }
+     if(flag==1) break;
+   }
+   fclose(fptr1);
 }
 
 void studyEvecs2(int sector){
