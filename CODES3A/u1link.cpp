@@ -78,7 +78,7 @@ int main(){
   std::cout<<"lambda ="<<lam<<std::endl;
 
   // decide whether to check the results of the diagonalization
-  CHKDIAG=0;
+  CHKDIAG=1;
 
   /* Initialize nearest neighbours */
   for(i=0;i<=2*DIM;i++){
