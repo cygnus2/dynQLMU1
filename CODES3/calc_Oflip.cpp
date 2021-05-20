@@ -9,6 +9,9 @@
 #include<algorithm>
 #include "define.h"
 
+// Note that this routine is already included in "calc_oflipt.cpp"
+// There is no point in running this code here.
+
 // Notation: The eigenvectors in of the translation matrix is denoted as |w_k>.
 // |w_k> = \sum_l B_l |b_l>, where b_l are the "bag states", ie, states which
 // are labelled with the translation flag. We calculate:
@@ -28,7 +31,6 @@ void calc_Oflip(int sector){
 
   // initialize
   for(k=0;k<sizet;k++) oflip.push_back(0.0);
-
   // Calculate: < b_l | O_flip | b_l >; The expression below is correct for the momenta:
   // (pi,0), (0,pi) and (pi,pi); since the phase factors cancel out.
   for(p=0;p<Wind[sector].nBasis;p++){
@@ -44,7 +46,7 @@ void calc_Oflip(int sector){
      Oflip_avg += Wind[sector].evecs_K00[k*sizet+l]* Wind[sector].evecs_K00[k*sizet+l]*oflip[l];
     }
     Oflip_avg /= ((double)VOL);
-    fprintf(outf,"%lf %lf\n",Wind[sector].evals_K00[k],Oflip_avg);
+    fprintf(outf,"%.12lf %.12lf\n",Wind[sector].evals_K00[k],Oflip_avg);
   }
   fprintf(outf,"\n\n# Results for (kx,ky)=(Pi,Pi) \n");
   for(k=0;k<sizet;k++){
@@ -54,7 +56,7 @@ void calc_Oflip(int sector){
      Oflip_avg += Wind[sector].evecs_KPiPi[k*sizet+l]* Wind[sector].evecs_KPiPi[k*sizet+l]*oflip[l];
     }
     Oflip_avg /= ((double)VOL);
-    fprintf(outf,"%lf %lf\n",Wind[sector].evals_KPiPi[k],Oflip_avg);
+    fprintf(outf,"%.12lf %.12lf\n",Wind[sector].evals_KPiPi[k],Oflip_avg);
   }
   fprintf(outf,"\n\n# Results for (kx,ky)=(Pi,0) \n");
   for(k=0;k<sizet;k++){
@@ -64,7 +66,7 @@ void calc_Oflip(int sector){
      Oflip_avg += Wind[sector].evecs_KPi0[k*sizet+l]* Wind[sector].evecs_KPi0[k*sizet+l]*oflip[l];
     }
     Oflip_avg /= ((double)VOL);
-    fprintf(outf,"%lf %lf\n",Wind[sector].evals_KPi0[k],Oflip_avg);
+    fprintf(outf,"%.12lf %.12lf\n",Wind[sector].evals_KPi0[k],Oflip_avg);
   }
   fprintf(outf,"\n\n# Results for (kx,ky)=(0,Pi) \n");
   for(k=0;k<sizet;k++){
@@ -74,7 +76,7 @@ void calc_Oflip(int sector){
      Oflip_avg += Wind[sector].evecs_K0Pi[k*sizet+l]* Wind[sector].evecs_K0Pi[k*sizet+l]*oflip[l];
     }
     Oflip_avg /= ((double)VOL);
-    fprintf(outf,"%lf %lf\n",Wind[sector].evals_K0Pi[k],Oflip_avg);
+    fprintf(outf,"%.12lf %.12lf\n",Wind[sector].evals_K0Pi[k],Oflip_avg);
   }
  fclose(outf);
 }

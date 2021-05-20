@@ -125,6 +125,7 @@ void constH(int sector){
    //for(k=0;k<Wind[sector].rows.size();k++) printf("row[%d] = %d \n",k,Wind[sector].rows[k]);
    //printf("size of cols = %d \n",(int)Wind[sector].cols.size());
    //for(k=0;k<Wind[sector].cols.size();k++) printf("col[%d] = %d \n",k,Wind[sector].cols[k]);
+   printf("Construction of full Hamiltonian done.\n");
 }
 
 int WindNo::scan(std::vector<bool> &newstate){

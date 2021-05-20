@@ -44,7 +44,6 @@ int main(){
   int x,y;
   int wx,wy;
   int sector;
-  //WindNo SectorZero;
   extern void initneighbor(void);
   extern void conststates(void);
   extern void printbasis(void);
@@ -113,11 +112,9 @@ int main(){
   if(INIT==0)      trans_Hamil_INIT0(sector);
   else if(INIT==4) trans_Hamil_INIT4(sector);
 
-  /* detect spurious states; useful only for INIT=4 */
-  if(INIT==4){
-     detectSpuriousStates(sector);
-     detectSpuriousStates2(sector);
-  }
+  /* detect spurious states */
+  detectSpuriousStates(sector);
+  detectSpuriousStates2(sector);
 
   INITq = -1;
   // initialize the starting state (once and for all the routines)
@@ -171,11 +168,13 @@ int main(){
 
   // study potential scar states
   cutoff = 0.1;
-  if(CALC==0 || CALC==7){
+  if(CALC==7){
+
     if(lam == 0.0){
-      printf("Going to go in \n");
       studyEvecs2_K00(sector, cutoff);
       studyEvecs2_KPiPi(sector, cutoff);
+      studyEvecs2_KPi0(sector, cutoff);
+      studyEvecs2_K0Pi(sector, cutoff);
     }
     else{
       studyEvecs00(sector, cutoff);
@@ -190,6 +189,7 @@ int main(){
     printf("It seems that the charge conjugation operation does not commute with translation.");
     printf("Thus the routines here need to be changed. I think this to be true since the states");
     printf("related by charge conjugation are not contained in the same bags. \n");
+    printf("Maybe this does not work.");
     exit(0);
     checkCCpartners(sector);
     calcCCvalues(sector);
@@ -256,9 +256,12 @@ void detectSpuriousStates2(int sector){
   tsect = Wind[sector].trans_sectors;
   /* check this overlap for states in (Pi,0) sector */
   // initialize variables needed to track the spurious eigenstates
+  //printf("Doing Sector (Pi,0) \n");
   chkPi0 = 0;
   for(k=0; k<tsect; k++){
     if(spurPi0[chkPi0] == k) { chkPi0++; continue; }
+      //printf("Eigenvalue for spurious state = %lf\n",Wind[sector].evals_KPi0[k]);
+    //printf("Checking for state which has eigenvalue = %lf\n",Wind[sector].evals_KPi0[k]);
     for(m=0; m<listPi0.size(); m++){
       amp  = Wind[sector].evecs_KPi0[k*tsect + listPi0[m]];
       if(fabs(amp) > 1e-6) printf("Sector (Pi,0), state=%d, amplitude=%lf\n",k,amp);
@@ -266,9 +269,12 @@ void detectSpuriousStates2(int sector){
   }
   /* check this overlap for states in (0,Pi) sector */
   // initialize variables needed to track the spurious eigenstates
+  //printf("Doing Sector (0,Pi) \n");
   chk0Pi = 0;
   for(k=0; k<tsect; k++){
     if(spurPi0[chk0Pi] == k) { chk0Pi++; continue; }
+    //printf("Eigenvalue for spurious state = %lf\n",Wind[sector].evals_K0Pi[k]);
+    //printf("Checking for state which has eigenvalue = %lf\n",Wind[sector].evals_K0Pi[k]);
     for(m=0; m<list0Pi.size(); m++){
       amp  = Wind[sector].evecs_K0Pi[k*tsect + list0Pi[m]];
       if(fabs(amp) > 1e-6) printf("Sector (0,Pi), state=%d, amplitude=%lf\n",k,amp);

@@ -68,9 +68,9 @@ void trans_decompose(int sector){
          //if(Wind[sector].FPi0[q]!=1 && Wind[sector].FPi0[q]!=-1){
          //  printf("ERROR! q=%d, FPi0=%d\n",q,Wind[sector].FPi0[q]); exit(0); }
          //if(Wind[sector].F0Pi[q]!=1 && Wind[sector].F0Pi[q]!=-1){
-         //  printf("ERROR! q=%d, FPi0=%d\n",q,Wind[sector].F0Pi[q]); exit(0); }
+         // printf("ERROR! q=%d, FPi0=%d\n",q,Wind[sector].F0Pi[q]); exit(0); }
          //if(Wind[sector].FPiPi[q]!=1 && Wind[sector].FPiPi[q]!=-1){
-         //  printf("ERROR! q=%d, FPiPi=%d\n",q,Wind[sector].FPiPi[q]); exit(0); }
+         // printf("ERROR! q=%d, FPiPi=%d\n",q,Wind[sector].FPiPi[q]); exit(0); }
       }}
       flag++;
    }
@@ -190,14 +190,14 @@ void WindNo::disp_Tprop(){
    //for(i=0;i<nBasis;i++){
    // printf("flag[%d]=%ld; Deg=%d; phasePi0=% d, phase0Pi=% d, phasePiPi=% d\n",i,Tflag[i],Tdgen[i],FPi0[i],F0Pi[i],FPiPi[i]);
    //}
-   /*std::cout<<"Total number of translation-bags ="<<trans_sectors<<std::endl;
-   for(i=0;i<trans_sectors;i++){
-     std::cout<<"#-of-states in bag-"<<i+1<<"  ="<<Tbag[i]<<std::endl;
-     std::cout<<"sum of phase factors for mom (0,0)   ="<< mom00[i]  <<std::endl;
-     std::cout<<"sum of phase factors for mom (Pi,0)  ="<< momPi0[i] <<std::endl;
-     std::cout<<"sum of phase factors for mom (0,Pi)  ="<< mom0Pi[i] <<std::endl;
-     std::cout<<"sum of phase factors for mom (Pi,Pi) ="<< momPiPi[i]<<std::endl;
-   }*/
+   //std::cout<<"Total number of translation-bags ="<<trans_sectors<<std::endl;
+   //for(i=0;i<trans_sectors;i++){
+   //  std::cout<<"#-of-states in bag-"<<i+1<<"  ="<<Tbag[i]<<std::endl;
+   //  std::cout<<"sum of phase factors for mom (0,0)   ="<< mom00[i]  <<std::endl;
+   //  std::cout<<"sum of phase factors for mom (Pi,0)  ="<< momPi0[i] <<std::endl;
+   //  std::cout<<"sum of phase factors for mom (0,Pi)  ="<< mom0Pi[i] <<std::endl;
+   //  std::cout<<"sum of phase factors for mom (Pi,Pi) ="<< momPiPi[i]<<std::endl;
+   //}
    // Count and display which bags have zero form factors
    /*
    count00   = std::count(mom00.begin(), mom00.end(), 0);
@@ -247,7 +247,10 @@ void trans_Hamil_INIT0(int sector){
   // Get starting timepoint
   auto start = std::chrono::high_resolution_clock::now();
 
+  // It seems like the trick of used below only works for Ly=2
+  // For Ly=4, we use the brute force approach
   // construct the hamil_kxy matrix
+  if(LY==2){
   for(std::size_t i=0;i<sizet;i++){
      k=Wind[sector].Tflag[i]-1;
      // off-diagonal elements
@@ -260,14 +263,30 @@ void trans_Hamil_INIT0(int sector){
        if((Wind[sector].momPiPi[k]) && (Wind[sector].momPiPi[l]))
         Wind[sector].hamil_KPiPi[k][l] += 2*ele*Wind[sector].FPiPi[i]*Wind[sector].FPiPi[j]*norm;
      }
-    // diagonal elements
-    ele = Wind[sector].getH(i,i);
-    if(ele == 0) continue;
-    norm= Wind[sector].Tdgen[i]/((double)VOL);
-    Wind[sector].hamil_K00[k][k] +=  ele*norm;
-    if(Wind[sector].momPiPi[k])
-      Wind[sector].hamil_KPiPi[k][k] += ele*Wind[sector].FPiPi[i]*Wind[sector].FPiPi[i]*norm;
+     // diagonal elements
+     ele = Wind[sector].getH(i,i);
+     if(ele == 0) continue;
+     norm= Wind[sector].Tdgen[i]/((double)VOL);
+     Wind[sector].hamil_K00[k][k] +=  ele*norm;
+     if(Wind[sector].momPiPi[k])
+       Wind[sector].hamil_KPiPi[k][k] += ele*Wind[sector].FPiPi[i]*Wind[sector].FPiPi[i]*norm;
   }
+  } // close if(LY==2)
+  else if(LY==4){
+   // construct the hamil_kxy matrix brute force
+   for(std::size_t i=0;i<sizet;i++){
+     k=Wind[sector].Tflag[i]-1;
+     for(std::size_t j=0;j<sizet;j++){
+       ele = Wind[sector].getH(i,j);
+       if(ele == 0) continue;
+       l = Wind[sector].Tflag[j]-1;
+       norm = sqrt(Wind[sector].Tdgen[i]*Wind[sector].Tdgen[j])/((double)VOL);
+       Wind[sector].hamil_K00[k][l] += ele*norm;
+       if((Wind[sector].momPiPi[k]) && (Wind[sector].momPiPi[l]))
+             Wind[sector].hamil_KPiPi[k][l] += ele*Wind[sector].FPiPi[i]*Wind[sector].FPiPi[j]*norm;
+     }
+   }
+ } // close if(LY==4)
 
   // Get ending timepoint
   auto stop = std::chrono::high_resolution_clock::now();
@@ -322,38 +341,60 @@ void trans_Hamil_INIT4(int sector){
   // Get starting timepoint
   auto start = std::chrono::high_resolution_clock::now();
 
+  // It seems like the trick of used below only works for Ly=2
+  // For Ly=4, we use the brute force approach
   // construct the hamil_kxy matrix
-  for(std::size_t i=0;i<Wind[sector].nBasis;i++){
-     k=Wind[sector].Tflag[i]-1;
-     // though the flags start from 1; the indices start from 0
-     //for(j=0;j<Wind[sector].nBasis;j++){
-     // off-diagonal elements
-     for(std::size_t j=i+1;j<Wind[sector].nBasis;j++){
-       ele = Wind[sector].getH(i,j);
+  if(LY==2){
+    for(std::size_t i=0;i<Wind[sector].nBasis;i++){
+       k=Wind[sector].Tflag[i]-1;
+       // though the flags start from 1; the indices start from 0
+       // off-diagonal elements
+       for(std::size_t j=i+1;j<Wind[sector].nBasis;j++){
+         ele = Wind[sector].getH(i,j);
+         if(ele == 0) continue;
+         l   = Wind[sector].Tflag[j]-1;
+         norm= sqrt(Wind[sector].Tdgen[i]*Wind[sector].Tdgen[j])/((double)VOL);
+         Wind[sector].hamil_K00[k][l] +=  2*ele*norm;
+         if((Wind[sector].momPi0[k]) && (Wind[sector].momPi0[l]))
+          Wind[sector].hamil_KPi0[k][l] += 2*ele*Wind[sector].FPi0[i]*Wind[sector].FPi0[j]*norm;
+         if((Wind[sector].mom0Pi[k]) && (Wind[sector].mom0Pi[l]))
+          Wind[sector].hamil_K0Pi[k][l] += 2*ele*Wind[sector].F0Pi[i]*Wind[sector].F0Pi[j]*norm;
+         if((Wind[sector].momPiPi[k]) && (Wind[sector].momPiPi[l]))
+          Wind[sector].hamil_KPiPi[k][l] += 2*ele*Wind[sector].FPiPi[i]*Wind[sector].FPiPi[j]*norm;
+       }
+       // diagonal elements
+       ele = Wind[sector].getH(i,i);
        if(ele == 0) continue;
-       //if(ele==0.0) continue;
-       l   = Wind[sector].Tflag[j]-1;
-       norm= sqrt(Wind[sector].Tdgen[i]*Wind[sector].Tdgen[j])/((double)VOL);
-       Wind[sector].hamil_K00[k][l] +=  2*ele*norm;
-       if((Wind[sector].momPi0[k]) && (Wind[sector].momPi0[l]))
-        Wind[sector].hamil_KPi0[k][l] += 2*ele*Wind[sector].FPi0[i]*Wind[sector].FPi0[j]*norm;
-       if((Wind[sector].mom0Pi[k]) && (Wind[sector].mom0Pi[l]))
-        Wind[sector].hamil_K0Pi[k][l] += 2*ele*Wind[sector].F0Pi[i]*Wind[sector].F0Pi[j]*norm;
-       if((Wind[sector].momPiPi[k]) && (Wind[sector].momPiPi[l]))
-        Wind[sector].hamil_KPiPi[k][l] += 2*ele*Wind[sector].FPiPi[i]*Wind[sector].FPiPi[j]*norm;
-   }
-   // diagonal elements
-   ele = Wind[sector].getH(i,i);
-   if(ele == 0) continue;
-   norm= Wind[sector].Tdgen[i]/((double)VOL);
-   Wind[sector].hamil_K00[k][k] +=  ele*norm;
-   if(Wind[sector].momPi0[k])
-    Wind[sector].hamil_KPi0[k][k] += ele*Wind[sector].FPi0[i]*Wind[sector].FPi0[i]*norm;
-   if(Wind[sector].mom0Pi[k])
-    Wind[sector].hamil_K0Pi[k][k] += ele*Wind[sector].F0Pi[i]*Wind[sector].F0Pi[i]*norm;
-   if(Wind[sector].momPiPi[k])
-    Wind[sector].hamil_KPiPi[k][k] += ele*Wind[sector].FPiPi[i]*Wind[sector].FPiPi[i]*norm;
-  }
+       norm= Wind[sector].Tdgen[i]/((double)VOL);
+       Wind[sector].hamil_K00[k][k] +=  ele*norm;
+       if(Wind[sector].momPi0[k])
+         Wind[sector].hamil_KPi0[k][k] += ele*Wind[sector].FPi0[i]*Wind[sector].FPi0[i]*norm;
+       if(Wind[sector].mom0Pi[k])
+         Wind[sector].hamil_K0Pi[k][k] += ele*Wind[sector].F0Pi[i]*Wind[sector].F0Pi[i]*norm;
+       if(Wind[sector].momPiPi[k])
+         Wind[sector].hamil_KPiPi[k][k] += ele*Wind[sector].FPiPi[i]*Wind[sector].FPiPi[i]*norm;
+    }
+  } //close if(LY==2)
+  else if(LY==4){
+    // construct the hamil_kxy matrix brute force
+    for(std::size_t i=0;i<Wind[sector].nBasis;i++){
+      k=Wind[sector].Tflag[i]-1;
+      for(std::size_t j=0;j<Wind[sector].nBasis;j++){
+        ele = Wind[sector].getH(i,j);
+        if(ele == 0) continue;
+        l = Wind[sector].Tflag[j]-1;
+        norm = sqrt(Wind[sector].Tdgen[i]*Wind[sector].Tdgen[j])/((double)VOL);
+        Wind[sector].hamil_K00[k][l] += ele*norm;
+        if((Wind[sector].momPi0[k]) && (Wind[sector].momPi0[l]))
+         Wind[sector].hamil_KPi0[k][l] += ele*Wind[sector].FPi0[i]*Wind[sector].FPi0[j]*norm;
+        if((Wind[sector].mom0Pi[k]) && (Wind[sector].mom0Pi[l]))
+         Wind[sector].hamil_K0Pi[k][l] += ele*Wind[sector].F0Pi[i]*Wind[sector].F0Pi[j]*norm;
+        if((Wind[sector].momPiPi[k]) && (Wind[sector].momPiPi[l]))
+              Wind[sector].hamil_KPiPi[k][l] += ele*Wind[sector].FPiPi[i]*Wind[sector].FPiPi[j]*norm;
+      }
+    }
+  }// close if(LY==4)
+
 
   // Get ending timepoint
   auto stop = std::chrono::high_resolution_clock::now();
