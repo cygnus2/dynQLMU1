@@ -8,8 +8,9 @@
 #include<iterator>
 #include<ctime>
 #include<chrono>
+#include<mkl.h>
 
-/* according to the rules of cpp, the variables are declared here 
+/* according to the rules of cpp, the variables are declared here
  * and also in the header file as extern such that they are avl to
  * the other functions.
  */
@@ -23,6 +24,7 @@ std::vector<std::vector<bool>> basis;
 std::vector<std::vector<bool>> basis_nonflip;
 std::vector<std::vector<bool>> basis_flip;
 std::vector<int> Oflip;
+int alignment;
 
 int main(){
   FILE *fptr;
@@ -52,15 +54,17 @@ int main(){
   VOL = LX*LY;
   VOL2 = VOL/2;
 
+  alignment = 64;
+
   /* Initialize nearest neighbours */
   for(i=0;i<=2*DIM;i++){
-    next[i] = (int *)malloc(VOL*sizeof(int)); 
-    nextCHK[i] = (int *)malloc(VOL*sizeof(int));
+    next[i] = (int *)mkl_malloc(VOL*sizeof(int), alignment);
+    nextCHK[i] = (int *)mkl_malloc(VOL*sizeof(int), alignment);
   }
 
   /* Initialize checkerboard co-ordinates */
-  lin2chk = (int *)malloc(VOL*sizeof(int));
-  chk2lin = (int *)malloc(VOL*sizeof(int));
+  lin2chk = (int *)mkl_malloc(VOL*sizeof(int), alignment);
+  chk2lin = (int *)mkl_malloc(VOL*sizeof(int), alignment);
   initneighbor();
 
   /* construct states & time it */
@@ -70,11 +74,12 @@ int main(){
   auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
   std::cout << "Time needed " << elapsed.count() << " milliseconds." << std::endl;
 
-  // for(i=0;i<NTOT;i++) printf("%d\n",(int)basis[i].size());
-  // for(i=0;i<NTOT;i++) std::cout<<basis[i].size()<<std::endl;
-  //printbasis();
+  //for(i=0;i<NTOT;i++) printf("%d\n",(int)basis[i].size());
+  //for(i=0;i<NTOT;i++) std::cout<<basis[i].size()<<std::endl;
   /* construct and diagonalize the matrix */
-  //constH(evals, evecs);
+  constH(evals, evecs);
+
+  printbasis();
   //if(basis[3][4]==true) printf("spin = 1\n");
   //else printf("spin = -1\n");
   /* real-time evolution of cartoon states and Locshmidt Echo */
@@ -85,7 +90,7 @@ int main(){
   //calc_Oflip(evals,evecs);
 
   /* Clear memory */
-  for(i=0;i<=2*DIM;i++){  free(next[i]); free(nextCHK[i]); }
-  free(chk2lin); free(lin2chk);
+  for(i=0;i<=2*DIM;i++){  mkl_free(next[i]); mkl_free(nextCHK[i]); }
+  mkl_free(chk2lin); mkl_free(lin2chk);
   return 0;
 }

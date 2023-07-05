@@ -13,6 +13,7 @@ extern double lam,Ti,Tf,dT;
 /* NTOT = total no of basis states 
  * NH   = states not killed by H  */
 extern int NTOT,NH;
+extern int alignment;
 
 extern std::vector<std::vector<bool>> basis;
 extern std::vector<std::vector<bool>> basis_nonflip;

@@ -2,6 +2,7 @@
 #include<math.h>
 #include<stdlib.h>
 #include "define.h"
+#include<mkl.h>
 
 void initneighbor(void)
 {
@@ -19,7 +20,7 @@ void initneighbor(void)
       next[DIM-1][p] = y*LX + ((x-1+LX)%LX);
       next[DIM-2][p] = ((y-1+LY)%LY)*LX + x;
   }
- 
+
   /* checkerboard to linear and vice-versa */
   p=0;
   for(y=0;y<LY;y++){
@@ -39,20 +40,20 @@ void initneighbor(void)
        printf("checkerboard site = %d(%d,%d); Lin site = %d\n",p,x,y,q);
        p++;
     }
-  }} 
+  }}
 
-  // nextCHK targets the neighboring sites in the string 
+  // nextCHK targets the neighboring sites in the string
   // representing the GL implementation on the even sites
   for(p=0;p<VOL;p++){
       lin = chk2lin[p];
       nextCHK[DIM][p]   = p;
       nextCHK[DIM+1][p] = lin2chk[next[DIM+1][lin]];
-      nextCHK[DIM-1][p] = lin2chk[next[DIM-1][lin]]; 
+      nextCHK[DIM-1][p] = lin2chk[next[DIM-1][lin]];
       nextCHK[DIM+2][p] = lin2chk[next[DIM+2][lin]];
       nextCHK[DIM-2][p] = lin2chk[next[DIM-2][lin]];
       //printf("checkerboard NN. site = %d (in chkrboard = %d)\n",lin,p);
       //printf("+x=%d,   -x=%d,   +y=%d,   -y=%d\n",nextCHK[DIM+1][p],
-      //nextCHK[DIM-1][p],nextCHK[DIM+2][p],nextCHK[DIM-2][p]); 
+      //nextCHK[DIM-1][p],nextCHK[DIM+2][p],nextCHK[DIM-2][p]);
    }
 }
 
@@ -90,11 +91,11 @@ void printbasis(){
 double **allocatedouble2d(int row, int col){
   int i,j;
   double **mat;
-  mat = (double **)malloc(row*sizeof(double*));
+  mat = (double **)mkl_malloc(row*sizeof(double*), alignment);
   if(mat==NULL) {printf("Out of memory\n"); exit(0);}
 
   for(i=0;i<row;i++){
-   mat[i]=(double *)malloc(col*sizeof(double));
+   mat[i]=(double *)mkl_malloc(col*sizeof(double), alignment);
    if(mat[i]==NULL)  {printf("Out of memory\n"); exit(0);}
   }
 
@@ -108,9 +109,7 @@ double **allocatedouble2d(int row, int col){
 void deallocate2d(int **mat, int row, int col){
   int i;
   for(i=0;i<row;i++)
-   free(mat[i]);
+   mkl_free(mat[i]);
 
- free(mat);
+ mkl_free(mat);
 }
-
-

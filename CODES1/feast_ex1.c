@@ -91,8 +91,10 @@
 #include <stdlib.h>
 #include <math.h>
 #include "mkl_solvers_ee.h"
+#include "mkl.h"
 
 #define max(a, b) (a) < (b) ? (b): (a)
+
 
 int main()
 {
@@ -178,7 +180,7 @@ int main()
     MKL_INT      info;          /* Errors */
     //double       Eig[11];       /* Eig - array for storing exact eigenvalues */
     //double       R[11];         /* R = |E-Eig| */
-    double        Y[6][6];     /* Y=(X')*X-I */
+    double        Y[36];     /* Y=(X')*X-I */
 
     char         DGEMMC = 'T';  /* Character for GEMM routine, transposed case */
     char         DGEMMN = 'N';  /* Character for GEMM routine, non-transposed case */
@@ -294,9 +296,9 @@ int main()
         );
 
     /* Compute Y = Y - I */
-    for (i=0; i<M; i++)
+    for (i=0; i<N; i++)
     {
-        Y[i][i] -= 1.0;
+        Y[i*N+i] -= 1.0;
     }
 
     printf("*************************************************\n");
@@ -322,7 +324,7 @@ int main()
     {
         for (j=0; j<M; j++)
         {
-            smax = max(smax, fabs(Y[i][j]));
+            smax = max(smax, fabs(Y[i*M+j]));
         }
     }
     printf( "Max(X' * X - I) = %.15e \n", smax);

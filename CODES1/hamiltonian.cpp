@@ -199,9 +199,9 @@ void constH(std::vector<double> &evals, std::vector<std::vector<double>> &evecs)
      double   *E;         /* Eigenvalues */
      double   *X;       /* Eigenvectors */
      double   *res;       /* Residual */
-     E = (double*)(calloc(N,sizeof(double)));
-     X = (double*)(calloc(N*N,sizeof(double)));
-     res = (double*)(calloc(N,sizeof(double)));
+     E = (double*)(mkl_calloc(N,sizeof(double), alignment));
+     X = (double*)(mkl_calloc(N*N,sizeof(double), alignment));
+     res = (double*)(mkl_calloc(N,sizeof(double), alignment));
 
      /* Declaration of local variables */
      MKL_INT  info;          /* Errors */
@@ -280,7 +280,7 @@ void constH(std::vector<double> &evals, std::vector<std::vector<double>> &evecs)
       for(j=0;j<M;j++) temp_vec.push_back(X[i*M+j]);
       evecs.push_back(temp_vec);
     }
-    free(E); free(X); free(res);
+    mkl_free(E); mkl_free(X); mkl_free(res);
 }
 
  void eigcheck(std::vector<double> &evals, std::vector<std::vector<double>> &evecs){
@@ -298,8 +298,8 @@ void constH(std::vector<double> &evals, std::vector<std::vector<double>> &evecs)
 
   char DGEMMC = 'T';
   char DGEMMN = 'N';
-  Y = (double*)(calloc(NH*NH,sizeof(double)));
-  X = (double*)(calloc(NH*NH,sizeof(double)));
+  Y = (double*)(mkl_calloc(NH*NH,sizeof(double),alignment));
+  X = (double*)(mkl_calloc(NH*NH,sizeof(double),alignment));
   for(i=0;i<NH;i++)
   for(j=0;j<NH;j++)
     X[i*NH+j] = evecs[i][j];
@@ -325,6 +325,6 @@ void constH(std::vector<double> &evals, std::vector<std::vector<double>> &evecs)
   for (j=0; j<NH; j++)
      smax = (smax > fabs(Y[i*NH+j])? smax:fabs(Y[i*NH+j]));
   printf( "Max(X' * X - I) = %.15e \n", smax);
-  free(Y);
+  mkl_free(Y); mkl_free(X);
 
  }
