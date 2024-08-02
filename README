@@ -6,7 +6,7 @@
            b) Fast gauge-invariant state counting, which can avoid a single jam point. 
               This works easily for 6x6, but becomes slow for 8x6.
            c) Filters basis states which have no flippable plaquettes. 
-           d) The whole Hamiltonian matrix (for abritrary lambda) is constructed without regard to 
+           d) The whole Hamiltonian matrix (for arbitrary lambda) is constructed without regard to 
               symmetry.
            e) In terms of diagonalization, it can work fast till ~32 spins using the Intel FEAST 
               routine.
